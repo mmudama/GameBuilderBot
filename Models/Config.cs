@@ -14,13 +14,24 @@ namespace DiscordOregonTrail.Models
             var json = System.IO.File.ReadAllText(fileName);
             choices = JsonSerializer.Deserialize<Choice[]>(json);
 
-            Console.Out.WriteLine("Break Here");
-
             foreach (Choice c in choices)
             {
                 c.Complete();
                 choiceMap[c.Name.ToLower()] = c;
             }
+
+            foreach (Choice c in choices)
+            {
+                foreach (Outcome o in c.Outcomes)
+                {
+                    if (o.Choice != null)
+                    {
+                        o._choice = choiceMap[o.Choice.ToLower()];
+                    }
+                }
+            }
+
+            Console.WriteLine("BREAK");
 
         }
 

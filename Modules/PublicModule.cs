@@ -25,9 +25,9 @@ namespace DiscordOregonTrail.Modules
         public Task PingAsync()
             => ReplyAsync("pong!");
 
-        //[Command("help")]
-        //public Task Help()
-        //    => ReplyAsync(HelpMe());
+        [Command("help")]
+        public Task Help()
+            => ReplyAsync(HelpMe());
 
         private string HelpMe()
         {
@@ -82,6 +82,9 @@ namespace DiscordOregonTrail.Modules
 
         private string GetResponse(string choice)
         {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(string.Format("> Rolling for {0}", choice));
+
             if (_config.choiceMap.ContainsKey(choice.ToLower()))
             {
                 Choice c = _config.choiceMap[choice.ToLower()];
@@ -91,13 +94,30 @@ namespace DiscordOregonTrail.Modules
                     int max = c.indexes.Count;
                     int roll = r.Next(0, max);
 
-                    string outcome = c.outcomeMap[c.indexes[roll]].Text;
+                    Outcome o = c.outcomeMap[c.indexes[roll]];
 
-                    return String.Format("Rolled 1d{0} and got {1}: {2}", max, roll+ 1, outcome);
+                    string outcome = o.Text;
+
+                    if (o.Roll > 0)
+                    {
+                        int count = r.Next(1, o.Roll + 1);
+                        outcome = String.Format(outcome, count);
+                    }
+
+                    sb.AppendLine(string.Format("Rolled 1d{0} and got {1}: {2}", max, roll+ 1, outcome));
+
+                    if (o._choice != null)
+                    {
+                        sb.AppendLine(GetResponse(o._choice.Name));
+                    }
                 }
             }
 
-            return "oops";
+            if (sb.Length == 0)
+            {
+                sb.AppendLine("Something went wrong");
+            }
+            return sb.ToString();
 
             
         }
