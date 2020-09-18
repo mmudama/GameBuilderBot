@@ -11,8 +11,10 @@ namespace DiscordOregonTrail.Models
 
         public Config(string fileName)
         {
-            var json = System.IO.File.ReadAllText(fileName);
-            choices = JsonSerializer.Deserialize<Choice[]>(json);
+            var fileContents = System.IO.File.ReadAllText(fileName);
+
+            var deserializer = new YamlDotNet.Serialization.Deserializer();
+            choices = deserializer.Deserialize<Choice[]>(fileContents);
 
             foreach (Choice c in choices)
             {

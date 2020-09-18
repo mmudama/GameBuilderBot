@@ -9,8 +9,6 @@
 
 
 #monique#
-*.vcproj
-*.vsproj
  Properties/launchSettings.json
 #monique#
 
