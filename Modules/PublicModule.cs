@@ -91,10 +91,10 @@ namespace DiscordOregonTrail.Modules
 
                 if (c.Distribution.Equals("Weighted"))
                 {
-                    int max = c.indexes.Count;
+                    int max = c.outcomeNameList.Count;
                     int roll = r.Next(0, max);
 
-                    Outcome o = c.outcomeMap[c.indexes[roll]];
+                    Outcome o = c.outcomeMap[c.outcomeNameList[roll]];
 
                     string outcome = o.Text;
 

@@ -12,13 +12,18 @@ namespace DiscordOregonTrail.Models
         public Outcome[] Outcomes { get; set; }
         public Dictionary<string, Outcome> outcomeMap;
 
-        public List<string> indexes = new List<string>();        
+        public List<string> outcomeNameList = new List<string>();        
 
         public Choice() {         
         }
 
         public void Complete()
         {
+            if (Text == null)
+            {
+                Text = Name;
+            }
+
             outcomeMap = new Dictionary<string, Outcome>();
 
             Console.WriteLine("Loading Choices");
@@ -28,13 +33,18 @@ namespace DiscordOregonTrail.Models
                 int count = o.Weight;
                 for (int i = 0; i < count; i++)
                 {
-                    indexes.Add(o.Name);
+                    outcomeNameList.Add(o.Name);
+                }
+
+                if (o.Text == null)
+                {
+                    o.Text = o.Name;
                 }
 
                 outcomeMap[o.Name] = o;
             }
 
-            Console.WriteLine(String.Format("{0}:\t{1}", Name, indexes.Count));
+            Console.WriteLine(String.Format("{0}:\t{1}", Name, outcomeNameList.Count));
 
         }
 
