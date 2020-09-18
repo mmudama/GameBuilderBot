@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
+﻿using System.Collections.Generic;
 
 namespace DiscordOregonTrail.Models
 {
     public class Config
     {
-        protected Choice[] choices { get; set; }
+        protected Choice[] Choices { get; set; }
         public Dictionary<string, Choice> choiceMap = new Dictionary<string, Choice>();
 
         public Config(string fileName)
@@ -14,27 +12,24 @@ namespace DiscordOregonTrail.Models
             var fileContents = System.IO.File.ReadAllText(fileName);
 
             var deserializer = new YamlDotNet.Serialization.Deserializer();
-            choices = deserializer.Deserialize<Choice[]>(fileContents);
+            Choices = deserializer.Deserialize<Choice[]>(fileContents);
 
-            foreach (Choice c in choices)
+            foreach (Choice c in Choices)
             {
                 c.Complete();
                 choiceMap[c.Name.ToLower()] = c;
             }
 
-            foreach (Choice c in choices)
+            foreach (Choice c in Choices)
             {
                 foreach (Outcome o in c.Outcomes)
                 {
                     if (o.Choice != null)
                     {
-                        o._choice = choiceMap[o.Choice.ToLower()];
+                        o.ChildChoice = choiceMap[o.Choice.ToLower()];
                     }
                 }
             }
-
-            Console.WriteLine("BREAK");
-
         }
 
     }
