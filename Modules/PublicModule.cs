@@ -28,7 +28,7 @@ namespace DiscordOregonTrail.Modules
 
 
 
-        [Command("trail")]
+        [Command("game")]
         public Task TrailAsync(params string[] objects)
         => ReplyAsync(ResponseService.RollEvents(objects));
 
