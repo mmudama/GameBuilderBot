@@ -9,6 +9,8 @@ namespace DiscordOregonTrail.Models
         public string Name { get; set; }
         public string Distribution { get; set; }
         public string Text { get; set; }
+        public bool IsPrimary { get; set; }
+        public string Description { get; set; }
 
         public Outcome[] Outcomes { get; set; }
         protected Dictionary<string, Outcome> outcomeMap;
@@ -53,8 +55,15 @@ namespace DiscordOregonTrail.Models
 
                 if (o.Text == null) o.Text = o.Name;
 
-                outcomeMap[o.Name] = o;
-                Console.WriteLine(String.Format("*\tOutcome \"{0}\":\tWeight {1}", o.Name, o.Weight));
+                if (o.Name == null)
+                {
+                    Console.WriteLine(String.Format("**** WARNING: Malformed option in Choice \"{0}\"; skipping", Name));
+                }
+                else
+                {
+                    outcomeMap[o.Name] = o;
+                    Console.WriteLine(String.Format("*\tOutcome \"{0}\":\tWeight {1}", o.Name, o.Weight));
+                }
             }
 
             Console.WriteLine(String.Format("Will roll 1D{1} for \"{0}\"", Name, PossibleOutcomes.Length));
