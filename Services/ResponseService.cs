@@ -18,10 +18,19 @@ namespace DiscordOregonTrail.Services
 
         public string Help()
         {
-            return new StringBuilder()
-                .AppendLine("> !trail\n**Available arguments:**")
-                .AppendJoin('\n', Config.choiceMap.Keys)
-                .ToString();
+            var sb = new StringBuilder()
+                .AppendLine("> **Help:**");
+
+            foreach (string k in Config.choiceMap.Keys)
+            {
+                Choice c = Config.choiceMap[k];
+                if (c.IsPrimary)
+                {                    
+                    sb.AppendLine(String.Format("`!trail {0}`: {1}", k, c.Description));
+                }
+            }
+
+            return sb.ToString();
         }
 
         public string Dump()
@@ -54,8 +63,6 @@ namespace DiscordOregonTrail.Services
 
             return response;
         }
-
-
 
         public string GetResponse(string choice)
         {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DiscordOregonTrail.Models
 {
@@ -26,7 +27,17 @@ namespace DiscordOregonTrail.Models
                 {
                     if (o.Choice != null)
                     {
-                        o.ChildChoice = choiceMap[o.Choice.ToLower()];
+                        string key = o.Choice.ToLower();
+                        if (choiceMap.ContainsKey(key))
+                        {
+                            o.ChildChoice = choiceMap[o.Choice.ToLower()];
+                        } else
+                        {
+
+                            Console.WriteLine(
+                                String.Format("**** WARNING: Outcome \"{0}\" of Choice \"{1}\" specifies child choice \"{2}\"," +
+                                " but \"{2}\" is not defined ****", o.Name, c.Name, o.Choice));
+                        }
                     }
                 }
             }
