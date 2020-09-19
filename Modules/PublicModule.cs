@@ -10,13 +10,11 @@ namespace DiscordOregonTrail.Modules
     public class PublicModule : ModuleBase<SocketCommandContext>
     {
         protected Random r = new Random();
-        // Config Config { get; set; }
         ResponseService ResponseService { get; set; }
 
         public PublicModule(ResponseService responseService)
         {
             ResponseService = responseService;
-
         }
 
 
@@ -37,6 +35,10 @@ namespace DiscordOregonTrail.Modules
 
         [Command("state")]
         public Task StateAsync() => ReplyAsync(ResponseService.Dump());
+
+        [Command("list")]
+        public Task ListAsync() => ReplyAsync(ResponseService.GetAllChoices());
+
 
     }
 

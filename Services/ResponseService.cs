@@ -1,5 +1,8 @@
 ﻿using DiscordOregonTrail.Models;
 using System;
+using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.Linq;
 using System.Text;
 
 namespace DiscordOregonTrail.Services
@@ -67,34 +70,25 @@ namespace DiscordOregonTrail.Services
         public string GetResponse(string choice)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(string.Format("> Rolling for {0}", choice));
+            sb.AppendLine(string.Format("> Rolling for **{0}**", choice));
 
             if (Config.choiceMap.ContainsKey(choice.ToLower()))
             {
                 Choice c = Config.choiceMap[choice.ToLower()];
 
-                if (c.Distribution.Equals("Weighted"))
+                switch (c.Distribution)
                 {
-                    int max = c.PossibleOutcomes.Length;
-                    int roll = r.Next(0, max);
-
-                    Outcome o = c.GetOutcome(c.PossibleOutcomes[roll]);
-
-                    string outcome = o.Text;
-
-                    if (o.Roll > 0)
-                    {
-                        int count = r.Next(1, o.Roll + 1);
-                        outcome = String.Format(outcome, count);
-                    }
-
-                    sb.AppendLine(string.Format("Rolled 1d{0} and got {1}: **{2}**", max, roll + 1, outcome));
-
-                    if (o.ChildChoice != null)
-                    {
-                        sb.AppendLine(GetResponse(o.ChildChoice.Name));
-                    }
+                    case "Weighted":
+                        sb.Append(GetWeightedResponse(c));
+                        break;
+                    case "All":
+                        sb.Append(GetAllResponse(c));
+                        break;
+                    default:
+                        sb.AppendLine(String.Format("\"{0}\" has an invalid Distribution", choice));
+                        break;
                 }
+
             }
 
             if (sb.Length == 0)
@@ -106,8 +100,63 @@ namespace DiscordOregonTrail.Services
 
         }
 
+        private StringBuilder GetAllResponse(Choice c)
+        {
+            StringBuilder sb = new StringBuilder();
 
+            foreach (Outcome o in c.Outcomes)
+            {
+                if (o.ChildChoice != null)
+                {
+                    sb.AppendLine(GetResponse(o.ChildChoice.Name));
+                }
+            }
 
+            return sb;
+        }
+
+        private StringBuilder GetWeightedResponse(Choice c)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            int max = c.PossibleOutcomes.Length;
+            int roll = r.Next(0, max);
+
+            Outcome o = c.GetOutcome(c.PossibleOutcomes[roll]);
+
+            string outcome = o.Text;
+
+            if (o.Roll > 0)
+            {
+                int count = r.Next(1, o.Roll + 1);
+                outcome = String.Format(outcome, count);
+            }
+
+            sb.AppendLine(string.Format("Rolled 1d{0} and got {1}: **{2}**", max, roll + 1, outcome));
+
+            if (o.ChildChoice != null)
+            {
+                sb.AppendLine(GetResponse(o.ChildChoice.Name));
+            }
+
+            return sb;
+        }
+
+        public string GetAllChoices()
+        {
+            StringBuilder sb = new StringBuilder()
+            .AppendLine("> List all possible `!trail` arguments");
+
+            var list = Config.choiceMap.Keys.ToList();
+            list.Sort();
+
+            foreach (string choice in list)
+            {
+                sb.AppendLine(String.Format("`{0}`", choice));
+            }
+
+            return sb.ToString();
+        }
 
     }
 }

@@ -51,8 +51,6 @@ namespace DiscordOregonTrail.Models
                     possibleOutcomes.Add(o.Name);
                 }
 
-                PossibleOutcomes = possibleOutcomes.ToArray();
-
                 if (o.Text == null) o.Text = o.Name;
 
                 if (o.Name == null)
@@ -65,6 +63,8 @@ namespace DiscordOregonTrail.Models
                     Console.WriteLine(String.Format("*\tOutcome \"{0}\":\tWeight {1}", o.Name, o.Weight));
                 }
             }
+
+            PossibleOutcomes = possibleOutcomes.ToArray();
 
             Console.WriteLine(String.Format("Will roll 1D{1} for \"{0}\"", Name, PossibleOutcomes.Length));
             Console.WriteLine();
