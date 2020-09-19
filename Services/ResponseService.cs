@@ -106,6 +106,8 @@ namespace DiscordOregonTrail.Services
 
             foreach (Outcome o in c.Outcomes)
             {
+                sb.Append(GetOutcomeResponse(o));
+
                 if (o.ChildChoice != null)
                 {
                     sb.AppendLine(GetResponse(o.ChildChoice.Name));
@@ -113,6 +115,20 @@ namespace DiscordOregonTrail.Services
             }
 
             return sb;
+        }
+
+        private string GetOutcomeResponse(Outcome o)
+        {
+            if (o.Roll > 0)
+            {
+                int count = r.Next(1, o.Roll + 1);
+                return String.Format(o.Text + "\n", count);
+            }
+            else
+            {
+                return o.Text;
+            }
+
         }
 
         private StringBuilder GetWeightedResponse(Choice c)
@@ -124,13 +140,7 @@ namespace DiscordOregonTrail.Services
 
             Outcome o = c.GetOutcome(c.PossibleOutcomes[roll]);
 
-            string outcome = o.Text;
-
-            if (o.Roll > 0)
-            {
-                int count = r.Next(1, o.Roll + 1);
-                outcome = String.Format(outcome, count);
-            }
+            string outcome = GetOutcomeResponse(o);
 
             sb.AppendLine(string.Format("Rolled 1d{0} and got {1}: **{2}**", max, roll + 1, outcome));
 

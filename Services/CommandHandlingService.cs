@@ -35,6 +35,10 @@ namespace DiscordOregonTrail.Services
 
         public async Task MessageReceivedAsync(SocketMessage rawMessage)
         {
+            // Console.WriteLine("BREAK");
+            // rawMessage has an attachments component
+
+
             // Ignore system messages, or messages from other bots
             if (!(rawMessage is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
