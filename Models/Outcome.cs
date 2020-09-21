@@ -7,7 +7,7 @@
         public int Weight { get; private set; }
         public string Text { get; set; }
         public string Choice { get; private set; }
-        public int Roll { get; private set; }
+        public int[] Rolls { get; private set; }
 
         public Choice ChildChoice;
 

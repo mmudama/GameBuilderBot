@@ -1,7 +1,6 @@
 ﻿using DiscordOregonTrail.Models;
 using System;
-using System.ComponentModel;
-using System.ComponentModel.Design;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -129,15 +128,33 @@ namespace DiscordOregonTrail.Services
 
         private string GetOutcomeResponse(Outcome o)
         {
-            if (o.Roll > 0)
+
+            string response;
+
+            if (o.Rolls != null && o.Rolls.Length > 0)
             {
-                int count = r.Next(1, o.Roll + 1);
-                return String.Format(o.Text, count);
+                var rolls = new List<int>();
+                foreach (int dieSides in o.Rolls)
+                {
+                    rolls.Add(r.Next(1, dieSides + 1));
+                }
+
+                try
+                {
+                    response = String.Format(o.Text, rolls.Select(x => x.ToString()).ToArray());
+                    response = String.Format("**{0}**", response);
+                }
+                catch (FormatException e)
+                {
+                    response = "**!! Number of rolls specified does not match string format. Check your config file.!!**";
+                }
             }
             else
             {
-                return o.Text;
+                response = o.Text;
             }
+
+            return response;
 
         }
 
