@@ -58,7 +58,7 @@ namespace DiscordOregonTrail.Services
         {
             string response = Help();
 
-            if (objects.Length == 0) return response;
+            if (objects.Length == 0 || objects[0].ToLower().Equals("help")) return response;
 
             string choice = objects[0];
 
