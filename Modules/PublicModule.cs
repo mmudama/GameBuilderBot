@@ -30,7 +30,7 @@ namespace DiscordOregonTrail.Modules
         => ReplyAsync(ResponseService.RollEvents(objects));
 
 
-        [Command("config")]
+        [Command("state")]
         public Task StateAsync() => ReplyAsync(ResponseService.State());
 
         [Command("list")]

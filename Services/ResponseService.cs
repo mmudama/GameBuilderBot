@@ -37,20 +37,7 @@ namespace DiscordOregonTrail.Services
 
         public string State()
         {
-            StringBuilder retval = new StringBuilder("> State:\n");
-
-            foreach (string choice in Config.choiceMap.Keys)
-            {
-                retval.AppendLine(choice);
-                foreach (string c in Config.choiceMap[choice].GetOutcomesAsKeys())
-                {
-                    retval.AppendFormat("\t{0}:\t{1}\n", c, Config.choiceMap[choice].GetOutcome(c).Weight);
-                }
-
-            }
-
-
-            return retval.ToString();
+            return "> State:\n" + Config.State;
         }
 
         public string RollEvents(params string[] objects)
