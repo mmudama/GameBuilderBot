@@ -1,6 +1,5 @@
 ﻿using Discord.Commands;
 using DiscordOregonTrail.Services;
-using System;
 using System.Threading.Tasks;
 
 namespace DiscordOregonTrail.Modules
@@ -31,8 +30,8 @@ namespace DiscordOregonTrail.Modules
         => ReplyAsync(ResponseService.RollEvents(objects));
 
 
-        [Command("state")]
-        public Task StateAsync() => ReplyAsync(ResponseService.Dump());
+        [Command("config")]
+        public Task StateAsync() => ReplyAsync(ResponseService.State());
 
         [Command("list")]
         public Task ListAsync() => ReplyAsync(ResponseService.GetAllChoices());

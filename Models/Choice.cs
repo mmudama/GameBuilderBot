@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using static System.Collections.Generic.Dictionary<string, DiscordOregonTrail.Models.Outcome>;
 
 namespace DiscordOregonTrail.Models
@@ -31,8 +32,11 @@ namespace DiscordOregonTrail.Models
             return outcomeMap.Keys;
         }
 
-        public void Complete()
+        public string Complete()
         {
+
+            StringBuilder sb = new StringBuilder();
+
             if (Text == null)
             {
                 Text = Name;
@@ -41,7 +45,7 @@ namespace DiscordOregonTrail.Models
             outcomeMap = new Dictionary<string, Outcome>();
             List<string> possibleOutcomes = new List<string>();
 
-            Console.WriteLine(String.Format("Loading choice \"{0}\"", Name));
+            sb.AppendLine(string.Format("Loading choice \"{0}\"", Name));
 
             foreach (Outcome o in Outcomes)
             {
@@ -55,19 +59,21 @@ namespace DiscordOregonTrail.Models
 
                 if (o.Name == null)
                 {
-                    Console.WriteLine(String.Format("**** WARNING: Malformed option in Choice \"{0}\"; skipping", Name));
+                    sb.AppendLine(String.Format("**** WARNING: Malformed option in Choice \"{0}\"; skipping", Name));
                 }
                 else
                 {
                     outcomeMap[o.Name] = o;
-                    Console.WriteLine(String.Format("*\tOutcome \"{0}\":\tWeight {1}", o.Name, o.Weight));
+                    sb.AppendLine(String.Format("*\tOutcome \"{0}\":\tWeight {1}", o.Name, o.Weight));
                 }
             }
 
             PossibleOutcomes = possibleOutcomes.ToArray();
 
-            Console.WriteLine(String.Format("Will roll 1D{1} for \"{0}\"", Name, PossibleOutcomes.Length));
-            Console.WriteLine();
+            sb.AppendLine(String.Format("Will roll 1D{1} for \"{0}\"", Name, PossibleOutcomes.Length));
+            sb.AppendLine();
+
+            return sb.ToString();
 
         }
 

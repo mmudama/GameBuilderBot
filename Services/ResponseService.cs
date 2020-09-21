@@ -27,7 +27,7 @@ namespace DiscordOregonTrail.Services
             {
                 Choice c = Config.choiceMap[k];
                 if (c.IsPrimary)
-                {                    
+                {
                     sb.AppendLine(String.Format("`!game {0}`: {1}", k, c.Description));
                 }
             }
@@ -35,7 +35,7 @@ namespace DiscordOregonTrail.Services
             return sb.ToString();
         }
 
-        public string Dump()
+        public string State()
         {
             StringBuilder retval = new StringBuilder("> State:\n");
 
@@ -95,7 +95,8 @@ namespace DiscordOregonTrail.Services
                         break;
                 }
 
-            } else
+            }
+            else
             {
                 sb.AppendLine(String.Format("unrecognized parameter **`{0}`**", choice));
             }
@@ -144,7 +145,7 @@ namespace DiscordOregonTrail.Services
                     response = String.Format(o.Text, rolls.Select(x => x.ToString()).ToArray());
                     response = String.Format("**{0}**", response);
                 }
-                catch (FormatException e)
+                catch (FormatException)
                 {
                     response = "**!! Number of rolls specified does not match string format. Check your config file.!!**";
                 }
