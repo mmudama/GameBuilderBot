@@ -70,10 +70,10 @@ namespace DiscordOregonTrail.Services
         public string GetResponse(string choice)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine().AppendLine((string.Format("> Rolling for **{0}**", choice)));
 
             if (Config.choiceMap.ContainsKey(choice.ToLower()))
             {
+                sb.AppendLine().AppendLine((string.Format("> Rolling for **{0}**", choice)));
                 Choice c = Config.choiceMap[choice.ToLower()];
 
                 switch (c.Distribution)
@@ -89,6 +89,9 @@ namespace DiscordOregonTrail.Services
                         break;
                 }
 
+            } else
+            {
+                sb.AppendLine(String.Format("unrecognized parameter **`{0}`**", choice));
             }
 
             if (sb.Length == 0)
