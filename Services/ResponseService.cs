@@ -62,7 +62,7 @@ namespace DiscordOregonTrail.Services
 
             string choice = objects[0];
 
-            response = "\n" + GetResponse(choice);
+            response = "\n" + GetResponse(choice, 0);
 
             return response;
         }
