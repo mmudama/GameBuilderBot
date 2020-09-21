@@ -145,7 +145,12 @@ namespace DiscordOregonTrail.Services
 
             string outcome = GetOutcomeResponse(o);
 
-            sb.AppendLine(string.Format("Rolled 1d{0} and got {1}: **{2}**", max, roll + 1, outcome));
+            if (max <= 1)
+            {
+                sb.AppendLine(outcome);
+            }
+            else if (max == 2)
+            {
 
             if (o.ChildChoice != null)
             {
