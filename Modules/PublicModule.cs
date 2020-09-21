@@ -16,7 +16,6 @@ namespace DiscordOregonTrail.Modules
             ResponseService = responseService;
         }
 
-
         [Command("ping")]
         public Task PingAsync()
             => ReplyAsync("pong!");

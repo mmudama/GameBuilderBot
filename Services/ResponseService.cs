@@ -67,8 +67,15 @@ namespace DiscordOregonTrail.Services
             return response;
         }
 
-        public string GetResponse(string choice)
+        public string GetResponse(string choice, int depth)
         {
+            depth++;
+
+            if (depth > 20)
+            {
+                return "Too much nesting detected. Check your config file. Aborting!";
+            }
+
             StringBuilder sb = new StringBuilder();
 
             if (Config.choiceMap.ContainsKey(choice.ToLower()))
@@ -79,10 +86,10 @@ namespace DiscordOregonTrail.Services
                 switch (c.Distribution)
                 {
                     case "Weighted":
-                        sb.Append(GetWeightedResponse(c));
+                        sb.Append(GetWeightedResponse(c, depth));
                         break;
                     case "All":
-                        sb.Append(GetAllResponse(c));
+                        sb.Append(GetAllResponse(c, depth));
                         break;
                     default:
                         sb.AppendLine(String.Format("\"{0}\" has an invalid Distribution", choice));
@@ -103,17 +110,17 @@ namespace DiscordOregonTrail.Services
 
         }
 
-        private StringBuilder GetAllResponse(Choice c)
+        private StringBuilder GetAllResponse(Choice c, int depth)
         {
             StringBuilder sb = new StringBuilder();
 
             foreach (Outcome o in c.Outcomes)
             {
-                sb.Append(GetOutcomeResponse(o));
+                sb.AppendLine(GetOutcomeResponse(o));
 
                 if (o.ChildChoice != null)
                 {
-                    sb.Append(GetResponse(o.ChildChoice.Name));
+                    sb.Append(GetResponse(o.ChildChoice.Name, depth));
                 }
             }
 
@@ -134,7 +141,7 @@ namespace DiscordOregonTrail.Services
 
         }
 
-        private StringBuilder GetWeightedResponse(Choice c)
+        private StringBuilder GetWeightedResponse(Choice c, int depth)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -151,10 +158,16 @@ namespace DiscordOregonTrail.Services
             }
             else if (max == 2)
             {
+                sb.AppendLine(string.Format("Flipped a coin and got: **{0}**", outcome));
+            }
+            else
+            {
+                sb.AppendLine(string.Format("Rolled 1d{0} and got {1}: **{2}**", max, roll + 1, outcome));
+            }
 
             if (o.ChildChoice != null)
             {
-                sb.Append(GetResponse(o.ChildChoice.Name));
+                sb.Append(GetResponse(o.ChildChoice.Name, depth));
             }
 
             return sb;
