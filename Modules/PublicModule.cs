@@ -9,7 +9,6 @@ namespace DiscordOregonTrail.Modules
     // Modules must be public and inherit from an IModuleBase
     public class PublicModule : ModuleBase<SocketCommandContext>
     {
-        protected Random r = new Random();
         ResponseService ResponseService { get; set; }
 
         public PublicModule(ResponseService responseService)

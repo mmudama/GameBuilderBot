@@ -29,7 +29,7 @@ namespace DiscordOregonTrail.Services
                 Choice c = Config.choiceMap[k];
                 if (c.IsPrimary)
                 {                    
-                    sb.AppendLine(String.Format("`!trail {0}`: {1}", k, c.Description));
+                    sb.AppendLine(String.Format("`!game {0}`: {1}", k, c.Description));
                 }
             }
 
@@ -62,7 +62,7 @@ namespace DiscordOregonTrail.Services
 
             string choice = objects[0];
 
-            response = GetResponse(choice);
+            response = "\n" + GetResponse(choice);
 
             return response;
         }
@@ -70,7 +70,7 @@ namespace DiscordOregonTrail.Services
         public string GetResponse(string choice)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(string.Format("> Rolling for **{0}**", choice));
+            sb.AppendLine().AppendLine((string.Format("> Rolling for **{0}**", choice)));
 
             if (Config.choiceMap.ContainsKey(choice.ToLower()))
             {
@@ -110,7 +110,7 @@ namespace DiscordOregonTrail.Services
 
                 if (o.ChildChoice != null)
                 {
-                    sb.AppendLine(GetResponse(o.ChildChoice.Name));
+                    sb.Append(GetResponse(o.ChildChoice.Name));
                 }
             }
 
@@ -122,7 +122,7 @@ namespace DiscordOregonTrail.Services
             if (o.Roll > 0)
             {
                 int count = r.Next(1, o.Roll + 1);
-                return String.Format(o.Text + "\n", count);
+                return String.Format(o.Text, count);
             }
             else
             {
@@ -146,7 +146,7 @@ namespace DiscordOregonTrail.Services
 
             if (o.ChildChoice != null)
             {
-                sb.AppendLine(GetResponse(o.ChildChoice.Name));
+                sb.Append(GetResponse(o.ChildChoice.Name));
             }
 
             return sb;
