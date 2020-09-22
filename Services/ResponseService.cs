@@ -176,7 +176,7 @@ namespace DiscordOregonTrail.Services
             }
             else
             {
-                sb.AppendLine(string.Format("Rolled 1d{0} and got {1}: **{2}**", max, roll + 1, outcome));
+                sb.AppendLine(string.Format("[1d{0}: {1}] **{2}**", max, roll + 1, outcome));
             }
 
             if (o.ChildChoice != null)
