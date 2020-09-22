@@ -54,7 +54,7 @@ namespace DiscordOregonTrail.Services
 
             string choice = objects[0];
 
-            response = "\n" + GetResponse(choice, 0);
+            response = "> " + GetResponse(choice, 0);
 
             return response;
         }
@@ -72,7 +72,7 @@ namespace DiscordOregonTrail.Services
 
             if (_config.choiceMap.ContainsKey(choice.ToLower()))
             {
-                sb.AppendLine().AppendLine((string.Format("> Rolling for **{0}**", choice)));
+                sb.AppendLine((string.Format("**{0}**", choice)));
                 Choice c = _config.choiceMap[choice.ToLower()];
 
                 switch (c.Distribution)
@@ -109,9 +109,12 @@ namespace DiscordOregonTrail.Services
 
             foreach (Outcome o in c.Outcomes)
             {
-                sb.AppendLine(GetOutcomeResponse(o));
 
-                if (o.ChildChoice != null)
+                if (o.ChildChoice == null)
+                {
+                    sb.AppendLine("\t" + GetOutcomeResponse(o));
+                }
+                else 
                 {
                     sb.Append(GetResponse(o.ChildChoice.Name, depth));
                 }
