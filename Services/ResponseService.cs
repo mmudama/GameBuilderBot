@@ -1,8 +1,11 @@
-﻿using DiscordOregonTrail.Models;
+﻿using Discord.Commands;
+using DiscordOregonTrail.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DiscordOregonTrail.Services
 {
@@ -35,9 +38,15 @@ namespace DiscordOregonTrail.Services
             return sb.ToString();
         }
 
-        public string State()
+        public Task State(SocketCommandContext context)
         {
-            return "> State:\n" + Config.State;
+
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(Config.State);
+            writer.Flush();
+            stream.Position = 0;
+            return context.Channel.SendFileAsync(stream, "state.txt", "Here's what's loaded into memory");
         }
 
         public string RollEvents(params string[] objects)

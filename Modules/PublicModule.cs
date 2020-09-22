@@ -31,7 +31,7 @@ namespace DiscordOregonTrail.Modules
 
 
         [Command("state")]
-        public Task StateAsync() => ReplyAsync(ResponseService.State());
+        public Task StateAsync() => ResponseService.State(this.Context);
 
         [Command("list")]
         public Task ListAsync() => ReplyAsync(ResponseService.GetAllChoices());
