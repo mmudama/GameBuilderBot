@@ -70,7 +70,7 @@ namespace DiscordOregonTrail
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<HttpClient>()
                 .AddSingleton(c => config)
-                .AddSingleton(c => new ResponseService(config))
+                .AddSingleton<ResponseService>()
                 .BuildServiceProvider();
         }
     }

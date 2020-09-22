@@ -11,14 +11,11 @@ namespace DiscordOregonTrail.Services
 {
     public class ResponseService
     {
-
-        protected Random r = new Random();
-        Config Config { get; set; }
+        private readonly Config _config;
 
         public ResponseService(Config config)
         {
-            Config = config;
-
+            _config = config;
         }
 
         public string Help()
@@ -26,9 +23,9 @@ namespace DiscordOregonTrail.Services
             var sb = new StringBuilder()
                 .AppendLine("> **Help:**");
 
-            foreach (string k in Config.choiceMap.Keys)
+            foreach (string k in _config.choiceMap.Keys)
             {
-                Choice c = Config.choiceMap[k];
+                Choice c = _config.choiceMap[k];
                 if (c.IsPrimary)
                 {
                     sb.AppendLine(String.Format("`!game {0}`: {1}", k, c.Description));
@@ -43,7 +40,7 @@ namespace DiscordOregonTrail.Services
 
             var stream = new MemoryStream();
             var writer = new StreamWriter(stream);
-            writer.Write(Config.State);
+            writer.Write(_config.State);
             writer.Flush();
             stream.Position = 0;
             return context.Channel.SendFileAsync(stream, "state.txt", "Here's what's loaded into memory");
@@ -73,10 +70,10 @@ namespace DiscordOregonTrail.Services
 
             StringBuilder sb = new StringBuilder();
 
-            if (Config.choiceMap.ContainsKey(choice.ToLower()))
+            if (_config.choiceMap.ContainsKey(choice.ToLower()))
             {
                 sb.AppendLine().AppendLine((string.Format("> Rolling for **{0}**", choice)));
-                Choice c = Config.choiceMap[choice.ToLower()];
+                Choice c = _config.choiceMap[choice.ToLower()];
 
                 switch (c.Distribution)
                 {
@@ -131,9 +128,9 @@ namespace DiscordOregonTrail.Services
             if (o.Rolls != null && o.Rolls.Length > 0)
             {
                 var rolls = new List<int>();
-                foreach (int dieSides in o.Rolls)
+                foreach (string expression in o.Rolls)
                 {
-                    rolls.Add(r.Next(1, dieSides + 1));
+                    rolls.Add(DiceRollService.Roll(expression));
                 }
 
                 try
@@ -160,7 +157,7 @@ namespace DiscordOregonTrail.Services
             StringBuilder sb = new StringBuilder();
 
             int max = c.PossibleOutcomes.Length;
-            int roll = r.Next(0, max);
+            int roll = DiceRollService.Roll(max) - 1;
 
             Outcome o = c.GetOutcome(c.PossibleOutcomes[roll]);
 
@@ -192,7 +189,7 @@ namespace DiscordOregonTrail.Services
             StringBuilder sb = new StringBuilder()
             .AppendLine("> List all possible `!trail` arguments");
 
-            var list = Config.choiceMap.Keys.ToList();
+            var list = _config.choiceMap.Keys.ToList();
             list.Sort();
 
             foreach (string choice in list)
