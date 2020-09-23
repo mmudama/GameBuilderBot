@@ -1,5 +1,4 @@
 ﻿using Dice;
-using System;
 
 namespace DiscordOregonTrail.Services
 {

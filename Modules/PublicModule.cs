@@ -30,8 +30,8 @@ namespace DiscordOregonTrail.Modules
         => ReplyAsync(ResponseService.RollEvents(objects));
 
 
-        [Command("state")]
-        public Task StateAsync() => ResponseService.State(this.Context);
+        [Command("export")]
+        public Task ExportAsync([Remainder] string format) => ResponseService.Export(this.Context, format);
 
         [Command("list")]
         public Task ListAsync() => ReplyAsync(ResponseService.GetAllChoices());
