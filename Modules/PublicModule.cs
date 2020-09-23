@@ -31,7 +31,10 @@ namespace DiscordOregonTrail.Modules
 
 
         [Command("export")]
-        public Task ExportAsync([Remainder] string format) => ResponseService.Export(this.Context, format);
+        public Task ExportAsync(params string[] objects) => ResponseService.Export(this.Context, objects[0]);
+
+        [Command("summary")]
+        public Task SummarizeAsync() => ResponseService.Summarize(this.Context);
 
         [Command("list")]
         public Task ListAsync() => ReplyAsync(ResponseService.GetAllChoices());

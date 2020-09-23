@@ -24,7 +24,6 @@ namespace DiscordOregonTrail
                 _fileName = args[0];
             }
 
-            Console.WriteLine("Before first call");
             new Program().MainAsync().GetAwaiter().GetResult();
         }
 
@@ -32,10 +31,7 @@ namespace DiscordOregonTrail
         {
             using var services = ConfigureServices(_fileName);
 
-            Console.WriteLine("After configuring services");
-
             _client = services.GetRequiredService<DiscordSocketClient>();
-
             _client.Log += LogAsync;
 
 

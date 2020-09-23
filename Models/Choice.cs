@@ -22,6 +22,34 @@ namespace DiscordOregonTrail.Models
         {
         }
 
+        internal string GetSummary()
+        {
+            return GetSummary(0);
+        }
+
+        internal string GetSummary (int depth)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(Indent(Name, depth));
+            foreach (Outcome o in Outcomes)
+            {
+                sb.Append(o.GetSummary(depth));
+            }
+
+            return sb.ToString();
+        }
+
+        protected string Indent (string s, int depth)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; depth > 0 && i < depth; i++)
+            {
+                sb.Append("    ");
+            }
+
+            return sb.Append("++").Append(s).Append("++").ToString();
+        }
+
         public Outcome GetOutcome(string name)
         {
             return outcomeMap[name];

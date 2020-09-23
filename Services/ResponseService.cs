@@ -36,6 +36,36 @@ namespace DiscordOregonTrail.Services
             return sb.ToString();
         }
 
+
+        public Task Summarize (SocketCommandContext context)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (Choice c in _config.choiceMap.Values)
+            {
+                sb.AppendLine(c.GetSummary());
+            }
+
+            string response = sb.ToString();
+
+            if (response.Length < 2000)
+            {
+                return context.Channel.SendMessageAsync(response);
+            } else
+            {
+                var stream = new MemoryStream();
+                var writer = new StreamWriter(stream);
+                writer.Write(response);
+                writer.Flush();
+                stream.Position = 0;
+
+                string fileName = string.Format("{0}_summary.txt", context.Channel.Name);
+                return context.Channel.SendFileAsync(stream, fileName, "The summary is too long to send as a DM; " +
+                    "sending it to you as a file instead.");
+
+            }
+        }
+
         public Task Export(SocketCommandContext context, string format)
         {
             string response = "";

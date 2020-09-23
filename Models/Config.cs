@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace DiscordOregonTrail.Models
@@ -8,11 +9,10 @@ namespace DiscordOregonTrail.Models
     {
         protected Choice[] Choices { get; set; }
         public Dictionary<string, Choice> choiceMap = new Dictionary<string, Choice>();
-        public string State;
 
         public Config(string fileName)
         {
-            var fileContents = System.IO.File.ReadAllText(fileName);
+            var fileContents = File.ReadAllText(fileName);
 
             var deserializer = new YamlDotNet.Serialization.Deserializer();
             Choices = deserializer.Deserialize<Choice[]>(fileContents);
@@ -47,8 +47,11 @@ namespace DiscordOregonTrail.Models
                 }
             }
 
-            State = sb.ToString();
-            Console.WriteLine(State);
+            foreach (Choice c in Choices)
+            {
+               Console.WriteLine(c.GetSummary());
+            }
+
         }
 
     }

@@ -1,4 +1,7 @@
-﻿namespace DiscordOregonTrail.Models
+﻿using System;
+using System.Text;
+
+namespace DiscordOregonTrail.Models
 {
     public class Outcome
     {
@@ -13,9 +16,30 @@
 
         public Outcome() { }
 
-        public void Complete()
+        internal string GetSummary(int depth)
         {
+            StringBuilder sb = new StringBuilder();
+            if (ChildChoice == null) {
+                sb.AppendLine(Indent(Name, depth));
+            }
+            else {
+                sb.AppendLine(Indent(Name + ":", depth));
+                sb.Append(ChildChoice.GetSummary(depth + 1));
+            }
 
+            return sb.ToString();
+
+        }
+
+        protected string Indent(string s, int depth)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < depth; i++)
+            {
+                sb.Append("    ");
+            }
+
+            return sb.AppendFormat("* {0} ({1})", s, Weight).ToString();
         }
 
     }
