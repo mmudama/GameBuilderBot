@@ -7,42 +7,14 @@ namespace GameBuilderBot.Models
 {
     public class Config
     {
-        public Dictionary<string, Choice> ChoiceMap = new Dictionary<string, Choice>();
-        public Dictionary<string, Field> Fields = new Dictionary<string, Field>();
+        public Dictionary<string, Choice> ChoiceMap;
+        public Dictionary<string, Field> Fields;
 
-        public Config(string fileName)
+        public Config(Dictionary<string, Choice> choiceMap, Dictionary<string, Field> fields)
         {
-            var fileContents = File.ReadAllText(fileName);
-
-            var deserializer = new YamlDotNet.Serialization.Deserializer();
-            GameFile gameFile = deserializer.Deserialize<GameFile>(fileContents);
-
-            foreach (var key in gameFile.Fields.Keys)
-            {
-                Fields[key] = new Field(gameFile.Fields[key]);
-            }
-
-            foreach (ChoiceIngest c in gameFile.Choices)
-            {
-                Choice choice = new Choice(c);
-                choice.Complete();
-                ChoiceMap[c.Name.ToLower()] = choice;
-            }
-
-            foreach (Choice c in ChoiceMap.Values)
-            {
-                foreach (Outcome o in c.outcomeMap.Values)
-                {
-                    o.Complete(ChoiceMap);
-                }
-            }
-
-            foreach (Choice c in ChoiceMap.Values)
-            {
-                Console.WriteLine(c.GetSummary());
-            }
-
-        }
+            ChoiceMap = choiceMap;
+            Fields = fields;
+         }
 
 
 
