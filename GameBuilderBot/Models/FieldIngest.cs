@@ -2,8 +2,8 @@
 {
     public class FieldIngest
     {
-        public string Expression { get; private set; }
-        public int? Value { get; set; }
+        public string Expression;
+        public int? Value;
 
         public FieldIngest() { }
     }

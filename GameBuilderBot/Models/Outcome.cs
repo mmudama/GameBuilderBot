@@ -7,10 +7,10 @@ namespace GameBuilderBot.Models
     public class Outcome
     {
 
-        public string Name { get; private set; }
-        public int Weight { get; private set; }
-        public string Text { get; set; }
-        public string[] Rolls { get; private set; }
+        public string Name;
+        public int Weight;
+        public string Text;
+        public string[] Rolls;
         public string Choice;
 
         public Choice ChildChoice;

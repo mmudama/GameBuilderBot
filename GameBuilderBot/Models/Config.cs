@@ -1,7 +1,5 @@
 ﻿using GameBuilderBot.Services;
-using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace GameBuilderBot.Models
 {
@@ -14,18 +12,15 @@ namespace GameBuilderBot.Models
         {
             ChoiceMap = choiceMap;
             Fields = fields;
-         }
-
-
+        }
 
         // Rolls[N] can be an expression (like 1d4)
         // or a reference to a Field. If it starts with "!" and is a recognized
-        // Field key, then reroll. Otherwise use the current value. If it's unset (-1),
-        // 
-        // (ie, -1) (or null using "int?"?) 
-        // _config.Roll("!Sunrise") // found in map, prefix "!" means reroll and set
-        // _config.Roll("Sunrise") // found in map, retrieve (or roll if unset / < 0) / should I allow negatives?
-        // _config.Roll("1d4") // not found in map, so evaluate expression
+        // Field key, then reroll. Otherwise use the current value.
+        // If it's null, roll and set the value.
+        // _config.Evaluate("!Sunrise") // found in map, prefix "!" means reroll and set
+        // _config.Evaluate("Sunrise") // found in map, retrieve (or roll if null) // should I allow negatives?
+        // _config.Evaluate("1d4") // not found in map, so evaluate expression
         // Might want to use something other than "!" since it's meaningful in yaml
         internal int Evaluate(string expression)
         {

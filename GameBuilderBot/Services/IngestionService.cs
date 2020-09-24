@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace GameBuilderBot.Services
 {
@@ -27,7 +26,6 @@ namespace GameBuilderBot.Services
             foreach (ChoiceIngest c in gameFile.Choices)
             {
                 Choice choice = new Choice(c);
-                choice.Complete();
                 choiceMap[c.Name.ToLower()] = choice;
             }
 

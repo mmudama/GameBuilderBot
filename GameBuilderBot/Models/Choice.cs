@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using static System.Collections.Generic.Dictionary<string, GameBuilderBot.Models.Outcome>;
 
@@ -7,11 +6,11 @@ namespace GameBuilderBot.Models
 {
     public class Choice
     {
-        public string Name { get; set; }
-        public string Distribution { get; set; }
-        public string Text { get; set; }
-        public bool IsPrimary { get; set; }
-        public string Description { get; set; }
+        public string Name;
+        public string Distribution;
+        public string Text;
+        public bool IsPrimary;
+        public string Description;
 
         public Dictionary<string, Outcome> outcomeMap = new Dictionary<string, Outcome>();
 
@@ -29,6 +28,7 @@ namespace GameBuilderBot.Models
             {
                 outcomeMap[o.Name] = new Outcome(o);
             }
+            Complete();
 
         }
 

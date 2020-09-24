@@ -2,13 +2,13 @@
 {
     public class ChoiceIngest
     {
-        public string Name { get; set; }
-        public string Distribution { get; set; }
-        public string Text { get; set; }
-        public bool IsPrimary { get; set; }
-        public string Description { get; set; }
+        public string Name;
+        public string Distribution;
+        public string Text;
+        public bool IsPrimary;
+        public string Description;
 
-        public OutcomeIngest[] Outcomes { get; set; }
+        public OutcomeIngest[] Outcomes;
 
         public string[] PossibleOutcomes;
 

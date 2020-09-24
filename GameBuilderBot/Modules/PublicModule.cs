@@ -8,7 +8,7 @@ namespace GameBuilderBot.Modules
     // Modules must be public and inherit from an IModuleBase
     public class PublicModule : ModuleBase<SocketCommandContext>
     {
-        ResponseService ResponseService { get; set; }
+        protected ResponseService ResponseService;
 
         public PublicModule(ResponseService responseService)
         {
