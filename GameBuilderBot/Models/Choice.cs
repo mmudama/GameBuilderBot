@@ -60,11 +60,8 @@ namespace GameBuilderBot.Models
             return outcomeMap.Keys;
         }
 
-        public string Complete()
+        public void Complete()
         {
-
-            StringBuilder sb = new StringBuilder();
-
             if (Text == null)
             {
                 Text = Name;
@@ -72,8 +69,6 @@ namespace GameBuilderBot.Models
 
             outcomeMap = new Dictionary<string, Outcome>();
             List<string> possibleOutcomes = new List<string>();
-
-            sb.AppendLine(string.Format("Loading choice \"{0}\"", Name));
 
             foreach (Outcome o in Outcomes)
             {
@@ -87,22 +82,15 @@ namespace GameBuilderBot.Models
 
                 if (o.Name == null)
                 {
-                    sb.AppendLine(String.Format("**** WARNING: Malformed option in Choice \"{0}\"; skipping", Name));
+                    Console.WriteLine(String.Format("**** WARNING: Malformed option in Choice \"{0}\"; skipping", Name));
                 }
                 else
                 {
                     outcomeMap[o.Name] = o;
-                    sb.AppendLine(String.Format("*\tOutcome \"{0}\":\tWeight {1}", o.Name, o.Weight));
                 }
             }
 
             PossibleOutcomes = possibleOutcomes.ToArray();
-
-            sb.AppendLine(String.Format("Will roll 1D{1} for \"{0}\"", Name, PossibleOutcomes.Length));
-            sb.AppendLine();
-
-            return sb.ToString();
-
         }
 
 

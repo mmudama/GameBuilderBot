@@ -20,12 +20,9 @@ namespace GameBuilderBot.Models
 
             Fields = gameFile.Fields;
 
-            // TODO this is no longer being output
-            StringBuilder sb = new StringBuilder();
-
             foreach (Choice c in gameFile.Choices)
             {
-                sb.Append(c.Complete());
+                c.Complete();
                 ChoiceMap[c.Name.ToLower()] = c;
             }
 
@@ -43,8 +40,7 @@ namespace GameBuilderBot.Models
                         }
                         else
                         {
-
-                            sb.AppendLine(
+                            Console.WriteLine(
                                 String.Format("**** WARNING: Outcome \"{0}\" of Choice \"{1}\" specifies child choice \"{2}\"," +
                                 " but \"{2}\" is not defined ****", o.Name, c.Name, o.Choice));
                         }
