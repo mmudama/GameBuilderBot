@@ -30,9 +30,6 @@ namespace GameBuilderBot.Modules
         => ReplyAsync(ResponseService.RollEvents(objects));
 
 
-        [Command("export")]
-        public Task ExportAsync(params string[] objects) => ResponseService.Export(this.Context, objects[0]);
-
         [Command("summary")]
         public Task SummarizeAsync() => ResponseService.Summarize(this.Context);
 

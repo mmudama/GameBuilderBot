@@ -2,14 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace GameBuilderBot.Models
 {
     public class Config
     {
         public Dictionary<string, Choice> ChoiceMap = new Dictionary<string, Choice>();
-        public Dictionary<string, Field> Fields;
+        public Dictionary<string, Field> Fields = new Dictionary<string, Field>();
 
         public Config(string fileName)
         {
@@ -18,33 +17,23 @@ namespace GameBuilderBot.Models
             var deserializer = new YamlDotNet.Serialization.Deserializer();
             GameFile gameFile = deserializer.Deserialize<GameFile>(fileContents);
 
-            Fields = gameFile.Fields;
-
-            foreach (Choice c in gameFile.Choices)
+            foreach (var key in gameFile.Fields.Keys)
             {
-                c.Complete();
-                ChoiceMap[c.Name.ToLower()] = c;
+                Fields[key] = new Field(gameFile.Fields[key]);
+            }
+
+            foreach (ChoiceIngest c in gameFile.Choices)
+            {
+                Choice choice = new Choice(c);
+                choice.Complete();
+                ChoiceMap[c.Name.ToLower()] = choice;
             }
 
             foreach (Choice c in ChoiceMap.Values)
             {
-                foreach (Outcome o in c.Outcomes)
+                foreach (Outcome o in c.outcomeMap.Values)
                 {
-                    if (o.Choice != null)
-                    {
-
-                        string key = o.Choice.ToLower();
-                        if (ChoiceMap.ContainsKey(key))
-                        {
-                            o.ChildChoice = ChoiceMap[o.Choice.ToLower()];
-                        }
-                        else
-                        {
-                            Console.WriteLine(
-                                String.Format("**** WARNING: Outcome \"{0}\" of Choice \"{1}\" specifies child choice \"{2}\"," +
-                                " but \"{2}\" is not defined ****", o.Name, c.Name, o.Choice));
-                        }
-                    }
+                    o.Complete(ChoiceMap);
                 }
             }
 
@@ -54,6 +43,7 @@ namespace GameBuilderBot.Models
             }
 
         }
+
 
 
         // Rolls[N] can be an expression (like 1d4)

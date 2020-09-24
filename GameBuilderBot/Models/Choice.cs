@@ -13,13 +13,23 @@ namespace GameBuilderBot.Models
         public bool IsPrimary { get; set; }
         public string Description { get; set; }
 
-        public Outcome[] Outcomes { get; set; }
-        protected Dictionary<string, Outcome> outcomeMap;
+        public Dictionary<string, Outcome> outcomeMap = new Dictionary<string, Outcome>();
 
         public string[] PossibleOutcomes;
 
-        public Choice()
+        public Choice(ChoiceIngest c)
         {
+            Name = c.Name;
+            Distribution = c.Distribution;
+            Text = c.Text;
+            IsPrimary = c.IsPrimary;
+            Description = c.Description;
+
+            foreach (OutcomeIngest o in c.Outcomes)
+            {
+                outcomeMap[o.Name] = new Outcome(o);
+            }
+
         }
 
         internal string GetSummary()
@@ -31,7 +41,7 @@ namespace GameBuilderBot.Models
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(Indent(Name, depth));
-            foreach (Outcome o in Outcomes)
+            foreach (Outcome o in outcomeMap.Values)
             {
                 sb.Append(o.GetSummary(depth));
             }
@@ -67,10 +77,9 @@ namespace GameBuilderBot.Models
                 Text = Name;
             }
 
-            outcomeMap = new Dictionary<string, Outcome>();
             List<string> possibleOutcomes = new List<string>();
 
-            foreach (Outcome o in Outcomes)
+            foreach (Outcome o in outcomeMap.Values)
             {
                 int count = o.Weight;
                 for (int i = 0; i < count; i++)
@@ -79,15 +88,6 @@ namespace GameBuilderBot.Models
                 }
 
                 if (o.Text == null) o.Text = o.Name;
-
-                if (o.Name == null)
-                {
-                    Console.WriteLine(String.Format("**** WARNING: Malformed option in Choice \"{0}\"; skipping", Name));
-                }
-                else
-                {
-                    outcomeMap[o.Name] = o;
-                }
             }
 
             PossibleOutcomes = possibleOutcomes.ToArray();

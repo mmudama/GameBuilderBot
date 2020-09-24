@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace GameBuilderBot.Services
@@ -82,75 +81,6 @@ namespace GameBuilderBot.Services
             return sb.ToString();
         }
 
-        public Task Export(SocketCommandContext context, string format)
-        {
-            string response = "";
-            string error = "";
-
-            format = format.ToLower();
-
-            switch (format)
-            {
-                case ("yaml"):
-                    response = GetYaml();
-                    break;
-                case ("json"):
-                    response = GetJson();
-                    break;
-                default:
-                    error = "Unrecognized file format request";
-                    break;
-            }
-
-            if (error.Equals(""))
-            {
-                var stream = new MemoryStream();
-                var writer = new StreamWriter(stream);
-                writer.Write(response);
-                writer.Flush();
-                stream.Position = 0;
-
-                string fileName = string.Format("game.{0}", format);
-                return context.Channel.SendFileAsync(stream, fileName, "Here you go!");
-
-            }
-            else
-            {
-                return context.Channel.SendMessageAsync(error);
-            }
-
-        }
-
-        protected string GetJson()
-        {
-            List<ChoiceExport> export = GetExport();
-
-            var options = new JsonSerializerOptions
-            {
-                IgnoreNullValues = true,
-                WriteIndented = true
-            };
-            return JsonSerializer.Serialize(export, options);
-
-
-        }
-
-        protected string GetYaml()
-        {
-            List<ChoiceExport> export = GetExport();
-            return new YamlDotNet.Serialization.SerializerBuilder().Build().Serialize(export);
-        }
-
-        private List<ChoiceExport> GetExport()
-        {
-            var export = new List<ChoiceExport>();
-            foreach (Choice c in _config.ChoiceMap.Values)
-            {
-                export.Add(new ChoiceExport(c));
-            }
-
-            return export;
-        }
 
         public string RollEvents(params string[] objects)
         {
@@ -213,7 +143,7 @@ namespace GameBuilderBot.Services
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach (Outcome o in c.Outcomes)
+            foreach (Outcome o in c.outcomeMap.Values)
             {
 
                 if (o.ChildChoice == null)

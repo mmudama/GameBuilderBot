@@ -4,8 +4,8 @@ namespace GameBuilderBot.Models
 {
     public class GameFile
     {
-        public Choice[] Choices { get; private set; }
-        public Dictionary<string, Field> Fields;
+        public ChoiceIngest[] Choices { get; private set; }
+        public Dictionary<string, FieldIngest> Fields;
 
         public GameFile() { }
 
