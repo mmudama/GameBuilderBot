@@ -39,6 +39,11 @@ namespace GameBuilderBot.Modules
         [Command("set")]
         public Task SetAsync(params string[] objects) => ReplyAsync(ResponseService.Set(objects));
 
+        [Command("evaluate")]
+        [Alias("roll")]
+        public Task EvaluateAsync([Remainder] string expression) => ReplyAsync(ResponseService.Evaluate(expression));
+
+
     }
 
 

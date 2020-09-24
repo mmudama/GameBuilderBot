@@ -66,6 +66,24 @@ namespace GameBuilderBot.Services
             }
         }
 
+        internal string Evaluate(string expression)
+        {
+            var response = new StringBuilder("> Evaluate:").AppendLine();
+
+            int value = -1;
+
+            try
+            {
+                value = DiceRollService.Roll(expression);
+            } catch(Exception)
+            {
+                response.AppendFormat("Failure attempting to evaluate `{0}`", expression).AppendLine();
+            }
+
+            response.AppendFormat("`{0} = {1}`", expression, value).AppendLine();
+            return response.ToString();
+        }
+
         internal string Values(string[] objects)
         {
             StringBuilder sb = new StringBuilder();
