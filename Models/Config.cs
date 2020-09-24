@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DiscordOregonTrail.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -7,34 +8,38 @@ namespace DiscordOregonTrail.Models
 {
     public class Config
     {
-        protected Choice[] Choices { get; set; }
-        public Dictionary<string, Choice> choiceMap = new Dictionary<string, Choice>();
+        public Dictionary<string, Choice> ChoiceMap = new Dictionary<string, Choice>();
+        public Dictionary<string, Fields> Fields;
 
         public Config(string fileName)
         {
             var fileContents = File.ReadAllText(fileName);
 
             var deserializer = new YamlDotNet.Serialization.Deserializer();
-            Choices = deserializer.Deserialize<Choice[]>(fileContents);
+            GameFile gameFile = deserializer.Deserialize<GameFile>(fileContents);
 
+            Fields = gameFile.Fields;
+
+            // TODO this is no longer being output
             StringBuilder sb = new StringBuilder();
 
-            foreach (Choice c in Choices)
+            foreach (Choice c in gameFile.Choices)
             {
                 sb.Append(c.Complete());
-                choiceMap[c.Name.ToLower()] = c;
+                ChoiceMap[c.Name.ToLower()] = c;
             }
 
-            foreach (Choice c in Choices)
+            foreach (Choice c in ChoiceMap.Values)
             {
                 foreach (Outcome o in c.Outcomes)
                 {
                     if (o.Choice != null)
                     {
+
                         string key = o.Choice.ToLower();
-                        if (choiceMap.ContainsKey(key))
+                        if (ChoiceMap.ContainsKey(key))
                         {
-                            o.ChildChoice = choiceMap[o.Choice.ToLower()];
+                            o.ChildChoice = ChoiceMap[o.Choice.ToLower()];
                         }
                         else
                         {
@@ -47,11 +52,55 @@ namespace DiscordOregonTrail.Models
                 }
             }
 
-            foreach (Choice c in Choices)
+            foreach (Choice c in ChoiceMap.Values)
             {
-               Console.WriteLine(c.GetSummary());
+                Console.WriteLine(c.GetSummary());
             }
 
+        }
+
+
+        // Rolls[N] can be an expression (like 1d4)
+        // or a reference to a Field. If it starts with "!" and is a recognized
+        // Field key, then reroll. Otherwise use the current value. If it's unset (-1),
+        // 
+        // (ie, -1) (or null using "int?"?) 
+        // _config.Roll("!Sunrise") // found in map, prefix "!" means reroll and set
+        // _config.Roll("Sunrise") // found in map, retrieve (or roll if unset / < 0) / should I allow negatives?
+        // _config.Roll("1d4") // not found in map, so evaluate expression
+        // Might want to use something other than "!" since it's meaningful in yaml
+        internal int Evaluate(string expression)
+        {
+            bool evaluate = false;
+            string key = expression;
+            int result;
+
+            if (expression.StartsWith("!"))
+            {
+                evaluate = true;
+                key = expression.Substring(1);
+            }
+
+            if (Fields.ContainsKey(key) && evaluate)
+            {
+                result = DiceRollService.Roll(Fields[key].Expression);
+                Fields[key].Value = result;
+            }
+            else if (Fields.ContainsKey(key))
+            {
+                if (Fields[key].Value == null)
+                {
+                    Fields[key].Value = DiceRollService.Roll(Fields[key].Expression);
+                }
+                result = (int)Fields[key].Value;
+            }
+            else
+            {
+                // assume it's a dice roll expression e.g. "1d6+2"
+                result = DiceRollService.Roll(key);
+            }
+
+            return result;
         }
 
     }

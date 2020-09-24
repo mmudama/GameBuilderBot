@@ -36,8 +36,14 @@ namespace DiscordOregonTrail.Modules
         [Command("summary")]
         public Task SummarizeAsync() => ResponseService.Summarize(this.Context);
 
+
+        // TODO : still using this?
         [Command("list")]
         public Task ListAsync() => ReplyAsync(ResponseService.GetAllChoices());
+
+        [Command("values")]
+        public Task ValuesAsync(params string[] objects) => ReplyAsync(ResponseService.Values(objects));
+
 
 
     }

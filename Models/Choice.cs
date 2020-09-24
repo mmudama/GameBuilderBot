@@ -27,7 +27,7 @@ namespace DiscordOregonTrail.Models
             return GetSummary(0);
         }
 
-        internal string GetSummary (int depth)
+        internal string GetSummary(int depth)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(Indent(Name, depth));
@@ -39,7 +39,7 @@ namespace DiscordOregonTrail.Models
             return sb.ToString();
         }
 
-        protected string Indent (string s, int depth)
+        protected string Indent(string s, int depth)
         {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; depth > 0 && i < depth; i++)

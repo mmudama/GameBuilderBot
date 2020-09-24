@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace DiscordOregonTrail.Models
 {
@@ -11,6 +10,7 @@ namespace DiscordOregonTrail.Models
         public string Text { get; set; }
         public string Choice { get; private set; }
         public string[] Rolls { get; private set; }
+        public Fields[] Params { get; private set; }
 
         public Choice ChildChoice;
 
@@ -19,10 +19,12 @@ namespace DiscordOregonTrail.Models
         internal string GetSummary(int depth)
         {
             StringBuilder sb = new StringBuilder();
-            if (ChildChoice == null) {
+            if (ChildChoice == null)
+            {
                 sb.AppendLine(Indent(Name, depth));
             }
-            else {
+            else
+            {
                 sb.AppendLine(Indent(Name + ":", depth));
                 sb.Append(ChildChoice.GetSummary(depth + 1));
             }

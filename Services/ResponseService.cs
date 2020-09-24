@@ -24,9 +24,9 @@ namespace DiscordOregonTrail.Services
             var sb = new StringBuilder()
                 .AppendLine("> **Help:**");
 
-            foreach (string k in _config.choiceMap.Keys)
+            foreach (string k in _config.ChoiceMap.Keys)
             {
-                Choice c = _config.choiceMap[k];
+                Choice c = _config.ChoiceMap[k];
                 if (c.IsPrimary)
                 {
                     sb.AppendLine(String.Format("`!game {0}`: {1}", k, c.Description));
@@ -37,11 +37,11 @@ namespace DiscordOregonTrail.Services
         }
 
 
-        public Task Summarize (SocketCommandContext context)
+        public Task Summarize(SocketCommandContext context)
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach (Choice c in _config.choiceMap.Values)
+            foreach (Choice c in _config.ChoiceMap.Values)
             {
                 sb.AppendLine(c.GetSummary());
             }
@@ -51,7 +51,8 @@ namespace DiscordOregonTrail.Services
             if (response.Length < 2000)
             {
                 return context.Channel.SendMessageAsync(response);
-            } else
+            }
+            else
             {
                 var stream = new MemoryStream();
                 var writer = new StreamWriter(stream);
@@ -64,6 +65,21 @@ namespace DiscordOregonTrail.Services
                     "sending it to you as a file instead.");
 
             }
+        }
+
+        internal string Values(string[] objects)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("> **Values**:");
+
+            foreach (var k in _config.Fields.Keys)
+            {
+                sb.Append(k)
+                    .Append(": ")
+                    .AppendLine(_config.Fields[k].Value.ToString());
+            }
+
+            return sb.ToString();
         }
 
         public Task Export(SocketCommandContext context, string format)
@@ -128,7 +144,7 @@ namespace DiscordOregonTrail.Services
         private List<ChoiceExport> GetExport()
         {
             var export = new List<ChoiceExport>();
-            foreach (Choice c in _config.choiceMap.Values)
+            foreach (Choice c in _config.ChoiceMap.Values)
             {
                 export.Add(new ChoiceExport(c));
             }
@@ -160,10 +176,10 @@ namespace DiscordOregonTrail.Services
 
             StringBuilder sb = new StringBuilder();
 
-            if (_config.choiceMap.ContainsKey(choice.ToLower()))
+            if (_config.ChoiceMap.ContainsKey(choice.ToLower()))
             {
                 sb.AppendLine((string.Format("**{0}**", choice)));
-                Choice c = _config.choiceMap[choice.ToLower()];
+                Choice c = _config.ChoiceMap[choice.ToLower()];
 
                 switch (c.Distribution)
                 {
@@ -223,7 +239,7 @@ namespace DiscordOregonTrail.Services
                 var rolls = new List<int>();
                 foreach (string expression in o.Rolls)
                 {
-                    rolls.Add(DiceRollService.Roll(expression));
+                    rolls.Add(_config.Evaluate(expression));
                 }
 
                 try
@@ -282,7 +298,7 @@ namespace DiscordOregonTrail.Services
             StringBuilder sb = new StringBuilder()
             .AppendLine("> List all possible `!trail` arguments");
 
-            var list = _config.choiceMap.Keys.ToList();
+            var list = _config.ChoiceMap.Keys.ToList();
             list.Sort();
 
             foreach (string choice in list)
