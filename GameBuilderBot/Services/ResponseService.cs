@@ -81,6 +81,34 @@ namespace GameBuilderBot.Services
             return sb.ToString();
         }
 
+        internal string Set(string[] objects)
+        {
+            var response = new StringBuilder("> set").AppendLine();
+
+            var errorResponse = "> set syntax: `!set <name> <integer value>`";
+
+            int value;
+
+            if (objects.Length != 2 || !int.TryParse(objects[1], out value)) return errorResponse;
+
+            string name = objects[0].ToLower();
+
+            if (_config.Fields.ContainsKey(name))
+            {
+                response.AppendFormat("`{0}`'s previous value was `{1}`", name, _config.Fields[name].Value)
+                        .AppendLine();
+                _config.Fields[name].Value = value;
+            }
+            else
+            {
+                _config.Fields[name] = new Field(name, value);
+            }
+
+            response.AppendFormat("`{0}` has been set to `{1}`", name, _config.Fields[name].Value).AppendLine();
+
+            return response.ToString();
+        }
+
 
         public string RollEvents(params string[] objects)
         {

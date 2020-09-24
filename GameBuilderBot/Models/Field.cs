@@ -10,5 +10,11 @@
             Expression = f.Expression;
             Value = f.Value;
         }
+
+        public Field(string expression, int value)
+        {
+            Expression = expression;
+            Value = value;
+        }
     }
 }

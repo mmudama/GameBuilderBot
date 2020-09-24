@@ -35,16 +35,18 @@ namespace GameBuilderBot.Models
             if (expression.StartsWith("!"))
             {
                 evaluate = true;
-                key = expression.Substring(1);
+                key = expression.Substring(1).ToLower();
             }
 
             if (Fields.ContainsKey(key) && evaluate)
             {
+                key = key.ToLower();
                 result = DiceRollService.Roll(Fields[key].Expression);
                 Fields[key].Value = result;
             }
             else if (Fields.ContainsKey(key))
             {
+                key = key.ToLower();
                 if (Fields[key].Value == null)
                 {
                     Fields[key].Value = DiceRollService.Roll(Fields[key].Expression);

@@ -36,7 +36,8 @@ namespace GameBuilderBot.Modules
         [Command("values")]
         public Task ValuesAsync(params string[] objects) => ReplyAsync(ResponseService.Values(objects));
 
-
+        [Command("set")]
+        public Task SetAsync(params string[] objects) => ReplyAsync(ResponseService.Set(objects));
 
     }
 

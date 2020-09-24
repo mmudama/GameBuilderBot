@@ -20,7 +20,7 @@ namespace GameBuilderBot.Services
 
             foreach (var key in gameFile.Fields.Keys)
             {
-                fields[key] = new Field(gameFile.Fields[key]);
+                fields[key.ToLower()] = new Field(gameFile.Fields[key]);
             }
 
             foreach (ChoiceIngest c in gameFile.Choices)
