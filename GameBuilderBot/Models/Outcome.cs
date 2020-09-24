@@ -7,11 +7,18 @@ namespace GameBuilderBot.Models
     public class Outcome
     {
 
-        public string Name;
-        public int Weight;
+        public readonly string Name;
+        public readonly int Weight;
+
+        // TODO can I find a way to make this readonly?
         public string Text;
-        public string[] Rolls;
-        public string Choice;
+
+        // TODO make this protected after moving rolls logic into here
+        public readonly string[] Rolls;
+
+
+        // TODO get rid of this string!
+        public readonly string Choice;
 
         public Choice ChildChoice;
 

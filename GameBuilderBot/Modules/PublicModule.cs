@@ -15,10 +15,6 @@ namespace GameBuilderBot.Modules
             ResponseService = responseService;
         }
 
-        [Command("ping")]
-        public Task PingAsync()
-            => ReplyAsync("pong!");
-
         [Command("help")]
         public Task HelpAsync()
             => ReplyAsync(ResponseService.Help());
@@ -26,6 +22,7 @@ namespace GameBuilderBot.Modules
 
 
         [Command("game")]
+        [Alias("g", "gb")]
         public Task TrailAsync(params string[] objects)
         => ReplyAsync(ResponseService.RollEvents(objects));
 
@@ -33,8 +30,6 @@ namespace GameBuilderBot.Modules
         [Command("summary")]
         public Task SummarizeAsync() => ResponseService.Summarize(this.Context);
 
-
-        // TODO : still using this?
         [Command("list")]
         public Task ListAsync() => ReplyAsync(ResponseService.GetAllChoices());
 

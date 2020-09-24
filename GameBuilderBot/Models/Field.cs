@@ -2,7 +2,7 @@
 {
     public class Field
     {
-        public string Expression;
+        public readonly string Expression;
         public int? Value;
 
         public Field(FieldIngest f)

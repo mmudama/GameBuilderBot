@@ -139,6 +139,7 @@ namespace GameBuilderBot.Services
 
         }
 
+        // TODO make this a member of Choice
         private StringBuilder GetAllResponse(Choice c, int depth)
         {
             StringBuilder sb = new StringBuilder();
@@ -159,6 +160,7 @@ namespace GameBuilderBot.Services
             return sb;
         }
 
+        // TODO make this a member of outcome
         private string GetOutcomeResponse(Outcome o)
         {
 
@@ -198,7 +200,7 @@ namespace GameBuilderBot.Services
             int max = c.PossibleOutcomes.Length;
             int roll = DiceRollService.Roll(max) - 1;
 
-            Outcome o = c.GetOutcome(c.PossibleOutcomes[roll]);
+            Outcome o = c.outcomeMap[c.PossibleOutcomes[roll]];
 
             string outcome = GetOutcomeResponse(o);
 

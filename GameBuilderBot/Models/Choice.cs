@@ -6,13 +6,13 @@ namespace GameBuilderBot.Models
 {
     public class Choice
     {
-        public string Name;
-        public string Distribution;
-        public string Text;
-        public bool IsPrimary;
-        public string Description;
+        public readonly string Name;
+        public readonly string Distribution;
+        public readonly string Text;
+        public readonly bool IsPrimary;
+        public readonly string Description;
 
-        public Dictionary<string, Outcome> outcomeMap = new Dictionary<string, Outcome>();
+        public readonly Dictionary<string, Outcome> outcomeMap = new Dictionary<string, Outcome>();
 
         public string[] PossibleOutcomes;
 
@@ -28,6 +28,12 @@ namespace GameBuilderBot.Models
             {
                 outcomeMap[o.Name] = new Outcome(o);
             }
+
+            if (Text == null)
+            {
+                Text = Name;
+            }
+
             Complete();
 
         }
@@ -60,23 +66,8 @@ namespace GameBuilderBot.Models
             return sb.Append("++").Append(s).Append("++").ToString();
         }
 
-        public Outcome GetOutcome(string name)
+        protected void Complete()
         {
-            return outcomeMap[name];
-        }
-
-        public KeyCollection GetOutcomesAsKeys()
-        {
-            return outcomeMap.Keys;
-        }
-
-        public void Complete()
-        {
-            if (Text == null)
-            {
-                Text = Name;
-            }
-
             List<string> possibleOutcomes = new List<string>();
 
             foreach (Outcome o in outcomeMap.Values)
