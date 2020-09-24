@@ -1,10 +1,10 @@
-﻿using DiscordOregonTrail.Services;
+﻿using GameBuilderBot.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace DiscordOregonTrail.Models
+namespace GameBuilderBot.Models
 {
     public class Config
     {

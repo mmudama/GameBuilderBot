@@ -1,8 +1,8 @@
 ﻿using Discord.Commands;
-using DiscordOregonTrail.Services;
+using GameBuilderBot.Services;
 using System.Threading.Tasks;
 
-namespace DiscordOregonTrail.Modules
+namespace GameBuilderBot.Modules
 {
 
     // Modules must be public and inherit from an IModuleBase

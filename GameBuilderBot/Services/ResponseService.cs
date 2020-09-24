@@ -1,5 +1,5 @@
 ﻿using Discord.Commands;
-using DiscordOregonTrail.Models;
+using GameBuilderBot.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace DiscordOregonTrail.Services
+namespace GameBuilderBot.Services
 {
     public class ResponseService
     {

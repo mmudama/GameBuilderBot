@@ -1,6 +1,6 @@
 ﻿using Dice;
 
-namespace DiscordOregonTrail.Services
+namespace GameBuilderBot.Services
 {
 
     // TODO - if everything is static, is it a service?

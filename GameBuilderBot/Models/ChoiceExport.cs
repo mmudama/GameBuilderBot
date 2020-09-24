@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DiscordOregonTrail.Models
+namespace GameBuilderBot.Models
 {
     public class ChoiceExport
     {

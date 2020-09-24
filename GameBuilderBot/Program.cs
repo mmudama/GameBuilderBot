@@ -1,14 +1,14 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordOregonTrail.Models;
-using DiscordOregonTrail.Services;
+using GameBuilderBot.Models;
+using GameBuilderBot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace DiscordOregonTrail
+namespace GameBuilderBot
 {
     public class Program
     {

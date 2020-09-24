@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace DiscordOregonTrail.Models
+namespace GameBuilderBot.Models
 {
     public class Outcome
     {
