@@ -103,11 +103,24 @@ namespace GameBuilderBot.Services
         {
             var response = new StringBuilder("> set").AppendLine();
 
-            var errorResponse = "> set syntax: `!set <name> <integer value>`";
+            var errorResponse = "> set syntax: `!set <name> <integer value>`" +
+                "\n OR `!set <name> <expression>` (like 1d4 or 1+5)";
 
-            int value;
 
-            if (objects.Length != 2 || !int.TryParse(objects[1], out value)) return errorResponse;
+            int value = -1;
+
+            if (objects.Length != 2) return errorResponse;
+            
+            if (!int.TryParse(objects[1], out value))
+            {
+                try
+                {
+                    value = DiceRollService.Roll(objects[1]);
+                } catch (Exception)
+                {
+                    return errorResponse;
+                }
+            }
 
             string name = objects[0].ToLower();
 
