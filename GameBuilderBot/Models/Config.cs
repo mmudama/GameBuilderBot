@@ -9,7 +9,7 @@ namespace GameBuilderBot.Models
     public class Config
     {
         public Dictionary<string, Choice> ChoiceMap = new Dictionary<string, Choice>();
-        public Dictionary<string, Fields> Fields;
+        public Dictionary<string, Field> Fields;
 
         public Config(string fileName)
         {

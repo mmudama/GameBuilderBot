@@ -10,7 +10,7 @@ namespace GameBuilderBot.Models
         public string Text { get; set; }
         public string Choice { get; private set; }
         public string[] Rolls { get; private set; }
-        public Fields[] Params { get; private set; }
+        public Field[] Params { get; private set; }
 
         public Choice ChildChoice;
 
