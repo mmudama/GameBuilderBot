@@ -43,6 +43,14 @@ namespace GameBuilderBot.Modules
         [Alias("roll")]
         public Task EvaluateAsync([Remainder] string expression) => ReplyAsync(ResponseService.Evaluate(expression));
 
+        [Command("add")]
+        [Alias("+")]
+        public Task AddAsync(params string[] objects) => ReplyAsync(ResponseService.Add(objects));
+
+        [Command("subtract")]
+        [Alias("sub", "-")]
+        public Task SubAsync(params string[] objects) => ReplyAsync(ResponseService.Subtract(objects));
+
 
     }
 

@@ -3,6 +3,7 @@ using Discord.Commands;
 using GameBuilderBot.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -156,37 +157,54 @@ namespace GameBuilderBot.Services
 
         internal string Set(string[] objects)
         {
-            var response = new StringBuilder("> set").AppendLine();
+            Set(objects, Set, out string response);
+            return response;
+                
+        }
+
+        private int Set(string fieldName, string expression)
+        {
+            if (!int.TryParse(expression, out int value))
+            {
+                expression = _config.Interpret(expression);
+            }
+
+            return (int)DiceRollService.Roll(expression);
+        }
+
+        internal void Set(string[] objects, Func<string, string, int> f, out string response)
+        {
+            var sbResponse = new StringBuilder("> set").AppendLine();
 
             var errorResponse = "> set syntax: `!set <name> <integer value>`" +
                 "\n OR `!set <name> <expression>` (like 1d4 or 1+5)";
 
-
-            int value = -1;
-
-            if (objects.Length != 2) return errorResponse;
-
-            string expression = objects[1];
-
-
-            if (!int.TryParse(expression, out value))
+            if (objects.Length != 2)
             {
-                try
-                {
-                    expression = _config.Interpret(expression);
-                    value = DiceRollService.Roll(expression);
-                }
-                catch (Exception)
-                {
-                    return errorResponse;
-                }
+                response = errorResponse;
+                return;
             }
 
             string name = objects[0].ToLower();
+            string expression = objects[1];
+
+            int value;
+
+            try
+            {
+                value = f(name, expression);
+
+            }
+            catch (Exception)
+            {
+                response = errorResponse;
+                return;
+            }
+
 
             if (_config.Fields.ContainsKey(name) && _config.Fields[name].Value != null)
             {
-                response.AppendFormat("`{0}`'s previous value was `{1}`", name, _config.Fields[name].Value)
+                sbResponse.AppendFormat("`{0}`'s previous value was `{1}`", name, _config.Fields[name].Value)
                         .AppendLine();
                 _config.Fields[name].Value = value;
             }
@@ -195,11 +213,41 @@ namespace GameBuilderBot.Services
                 _config.Fields[name] = new Field(name, value);
             }
 
-            response.AppendFormat("`{0}` has been set to `{1}`", name, _config.Fields[name].Value).AppendLine();
+            sbResponse.AppendFormat("`{0}` has been set to `{1}`", name, _config.Fields[name].Value).AppendLine();
 
-            return response.ToString();
+            response = sbResponse.ToString();
+        }
+ 
+
+        internal string Subtract(string[] objects)
+        {
+            Set(objects, Subtract, out string response);
+            return response;
         }
 
+        private int Subtract(string fieldName, string expression)
+        {
+            // TODO handle when field is undefined
+            // TODO actually can I pass in the field instead of fieldName?
+
+            expression = _config.Interpret(expression);
+            return (int)_config.Fields[fieldName].Value - DiceRollService.Roll(expression);
+        }
+
+        internal string Add(string[] objects)
+        {
+            Set(objects, Add, out string response);
+            return response;
+        }
+
+        private int Add(string fieldName, string expression)
+        {
+            // TODO handle when field is undefined
+            // TODO actually can I pass in the field instead of fieldName?
+
+            expression = _config.Interpret(expression);
+            return (int)_config.Fields[fieldName].Value + DiceRollService.Roll(expression);
+        }
 
         public string RollEvents(params string[] objects)
         {
