@@ -1,9 +1,7 @@
-﻿using Antlr4.Runtime.Tree;
-using Discord.Commands;
+﻿using Discord.Commands;
 using GameBuilderBot.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,10 +12,12 @@ namespace GameBuilderBot.Services
     public class ResponseService
     {
         private readonly Config _config;
+        private readonly ExportService _exportService;
 
-        public ResponseService(Config config)
+        public ResponseService(Config config, ExportService exportService)
         {
             _config = config;
+            _exportService = exportService;
         }
 
         public string Help()
@@ -66,6 +66,38 @@ namespace GameBuilderBot.Services
                     "sending it to you as a file instead.");
 
             }
+        }
+
+        internal Task Export(string[] objects, SocketCommandContext context)
+        {
+            if (objects.Length < 1)
+            {
+                return context.Channel.SendMessageAsync("> Missing parameter filetype");
+            }
+
+            string type = objects[0].ToUpper();
+
+            string fileContents = "";
+
+            switch (type)
+            {
+                case "JSON":
+                    fileContents = ExportService.Export(FileType.JSON, _config);
+                    break;
+                default:
+                    return context.Channel.SendMessageAsync("> Unsupported filetype");
+            }
+
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(fileContents);
+            writer.Flush();
+            stream.Position = 0;
+
+            string fileName = string.Format("game_state.txt", context.Channel.Name);
+            return context.Channel.SendFileAsync(stream, fileName);
+
+            throw new NotImplementedException();
         }
 
         internal string Evaluate(string expression)
@@ -159,7 +191,7 @@ namespace GameBuilderBot.Services
         {
             Set(objects, Set, out string response);
             return response;
-                
+
         }
 
         private int Set(string fieldName, string expression)
@@ -167,7 +199,7 @@ namespace GameBuilderBot.Services
             if (!int.TryParse(expression, out int result))
             {
                 expression = _config.Interpret(expression);
-                result = (int)DiceRollService.Roll(expression);
+                result = DiceRollService.Roll(expression);
             }
 
             return result;
@@ -211,7 +243,9 @@ namespace GameBuilderBot.Services
                     was.AppendFormat("(was `{1}`)", name, _config.Fields[name].Value);
                 }
                 _config.Fields[name].Value = value;
-            } else { 
+            }
+            else
+            {
                 _config.Fields[name] = new Field(name, value);
             }
 
@@ -220,7 +254,7 @@ namespace GameBuilderBot.Services
 
             response = sbResponse.ToString();
         }
- 
+
 
         internal string Subtract(string[] objects)
         {
@@ -235,8 +269,8 @@ namespace GameBuilderBot.Services
             int value = 0;
 
             // TODO extract this condition as a method and call it in Add, too 
-            if (_config.Fields.ContainsKey(fieldName) 
-                &&!(_config.Fields[fieldName] == null) 
+            if (_config.Fields.ContainsKey(fieldName)
+                && !(_config.Fields[fieldName] == null)
                 && !(_config.Fields[fieldName].Value == null))
             {
                 value = (int)_config.Fields[fieldName].Value;

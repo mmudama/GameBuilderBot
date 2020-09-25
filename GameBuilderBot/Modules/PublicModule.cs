@@ -51,6 +51,8 @@ namespace GameBuilderBot.Modules
         [Alias("sub", "-")]
         public Task SubAsync(params string[] objects) => ReplyAsync(ResponseService.Subtract(objects));
 
+        [Command("export")]
+        public Task ExportAsync(params string[] objects) => ResponseService.Export(objects, this.Context);
 
     }
 

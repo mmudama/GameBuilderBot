@@ -11,7 +11,7 @@
             Value = f.Value;
         }
 
-        public Field(string expression, int value)
+        public Field(string expression, int? value)
         {
             Expression = expression;
             Value = value;

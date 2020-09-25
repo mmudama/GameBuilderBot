@@ -5,11 +5,11 @@ namespace GameBuilderBot.Models
 {
     public class Choice
     {
-        public readonly string Name;
-        public readonly string Distribution;
-        public readonly string Text;
-        public readonly bool IsPrimary;
-        public readonly string Description;
+        public string Name;
+        public string Distribution;
+        public string Text;
+        public bool IsPrimary;
+        public string Description;
 
         public readonly Dictionary<string, Outcome> outcomeMap = new Dictionary<string, Outcome>();
 
