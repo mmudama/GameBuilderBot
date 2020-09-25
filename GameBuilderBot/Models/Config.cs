@@ -62,5 +62,22 @@ namespace GameBuilderBot.Models
             return result;
         }
 
+        public string Interpret(string expression)
+        {
+            string[] parts = expression.Split('#');
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (Fields.ContainsKey(parts[i]))
+                {
+                    parts[i] = Fields[parts[i]].Value.ToString();
+                }
+            }
+
+            expression = string.Join(" ", parts);
+            return expression;
+        }
+
+
     }
 }

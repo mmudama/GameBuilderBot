@@ -46,7 +46,7 @@ namespace GameBuilderBot.Services
             bool hasMentionPrefix = message.HasMentionPrefix(_discord.CurrentUser, ref argPos);
 
             // e.g. !ping
-            bool hasCharPrefix = 
+            bool hasCharPrefix =
                 message.HasCharPrefix('!', ref argPos)
                 || message.HasCharPrefix('.', ref argPos)
                 || message.HasCharPrefix(';', ref argPos);

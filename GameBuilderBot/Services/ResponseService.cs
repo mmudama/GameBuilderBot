@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Antlr4.Runtime.Tree;
+using Discord.Commands;
 using GameBuilderBot.Models;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization;
 
 namespace GameBuilderBot.Services
 {
@@ -69,6 +69,8 @@ namespace GameBuilderBot.Services
 
         internal string Evaluate(string expression)
         {
+            expression = _config.Interpret(expression);
+
             var response = new StringBuilder("> Evaluate:").AppendLine();
 
             int value = -1;
@@ -76,7 +78,8 @@ namespace GameBuilderBot.Services
             try
             {
                 value = DiceRollService.Roll(expression);
-            } catch(Exception)
+            }
+            catch (Exception)
             {
                 response.AppendFormat("Failure attempting to evaluate `{0}`", expression).AppendLine();
             }
@@ -89,6 +92,7 @@ namespace GameBuilderBot.Services
         {
             StringBuilder sb = new StringBuilder();
 
+            // TODO consolidate "all" vs identified output logic
 
             if (objects.Length == 0)
             {
@@ -104,7 +108,8 @@ namespace GameBuilderBot.Services
                     if (_config.Fields[key].Value != null)
                     {
                         sb.AppendFormat("{0}", _config.Fields[key].Value);
-                    } else
+                    }
+                    else
                     {
                         sb.Append("**Undefined**");
                     }
@@ -116,7 +121,8 @@ namespace GameBuilderBot.Services
 
                     sb.AppendLine("`");
                 }
-            } else
+            }
+            else
             {
                 sb.AppendLine("> **Requested Fields**:");
                 foreach (string s in objects)
@@ -125,12 +131,11 @@ namespace GameBuilderBot.Services
                     if (_config.Fields.ContainsKey(s) && _config.Fields[s].Value != null)
                     {
                         value = _config.Fields[s].Value.ToString();
-                    } else
+                    }
+                    else
                     {
                         value = "**Undefined**";
                     }
-
-
 
                     sb.Append("`")
                         .Append(s)
@@ -160,13 +165,18 @@ namespace GameBuilderBot.Services
             int value = -1;
 
             if (objects.Length != 2) return errorResponse;
-            
-            if (!int.TryParse(objects[1], out value))
+
+            string expression = objects[1];
+
+
+            if (!int.TryParse(expression, out value))
             {
                 try
                 {
-                    value = DiceRollService.Roll(objects[1]);
-                } catch (Exception)
+                    expression = _config.Interpret(expression);
+                    value = DiceRollService.Roll(expression);
+                }
+                catch (Exception)
                 {
                     return errorResponse;
                 }
@@ -174,7 +184,7 @@ namespace GameBuilderBot.Services
 
             string name = objects[0].ToLower();
 
-            if (_config.Fields.ContainsKey(name))
+            if (_config.Fields.ContainsKey(name) && _config.Fields[name].Value != null)
             {
                 response.AppendFormat("`{0}`'s previous value was `{1}`", name, _config.Fields[name].Value)
                         .AppendLine();
