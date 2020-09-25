@@ -175,7 +175,6 @@ namespace GameBuilderBot.Services
 
         internal void Set(string[] objects, Func<string, string, int> f, out string response)
         {
-            var sbResponse = new StringBuilder();
 
             var errorResponse = "> set syntax: `!set <name> <integer value>`" +
                 "\n OR `!set <name> <expression>` (like 1d4 or 1+5)";
@@ -205,16 +204,18 @@ namespace GameBuilderBot.Services
 
             var was = new StringBuilder();
 
-            if (_config.Fields.ContainsKey(name) && _config.Fields[name].Value != null)
+            if (_config.Fields.ContainsKey(name))
             {
-                was.AppendFormat("(was `{1}`)", name, _config.Fields[name].Value);
+                if (_config.Fields[name].Value != null)
+                {
+                    was.AppendFormat("(was `{1}`)", name, _config.Fields[name].Value);
+                }
                 _config.Fields[name].Value = value;
-            }
-            else
-            {
+            } else { 
                 _config.Fields[name] = new Field(name, value);
             }
 
+            var sbResponse = new StringBuilder();
             sbResponse.AppendFormat("`{0}` = `{1}` {2}", name, _config.Fields[name].Value, was).AppendLine();
 
             response = sbResponse.ToString();
