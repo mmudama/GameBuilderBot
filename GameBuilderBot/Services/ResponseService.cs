@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
 
 namespace GameBuilderBot.Services
 {
@@ -84,16 +85,65 @@ namespace GameBuilderBot.Services
             return response.ToString();
         }
 
-        internal string Values(string[] objects)
+        internal string Get(string[] objects)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("> **Values**:");
 
-            foreach (var k in _config.Fields.Keys)
+
+            if (objects.Length == 0)
             {
-                sb.Append(k)
-                    .Append(": ")
-                    .AppendLine(_config.Fields[k].Value.ToString());
+                sb.AppendLine("> **All Fields**:");
+
+                foreach (string key in _config.Fields.Keys)
+                {
+
+                    sb.Append("`")
+                        .Append(key)
+                        .Append(": ");
+
+                    if (_config.Fields[key].Value != null)
+                    {
+                        sb.AppendFormat("{0}", _config.Fields[key].Value);
+                    } else
+                    {
+                        sb.Append("**Undefined**");
+                    }
+
+                    if (_config.Fields[key].Expression != null)
+                    {
+                        sb.AppendFormat(" ({0})", _config.Fields[key].Expression);
+                    }
+
+                    sb.AppendLine("`");
+                }
+            } else
+            {
+                sb.AppendLine("> **Requested Fields**:");
+                foreach (string s in objects)
+                {
+                    string value;
+                    if (_config.Fields.ContainsKey(s) && _config.Fields[s].Value != null)
+                    {
+                        value = _config.Fields[s].Value.ToString();
+                    } else
+                    {
+                        value = "**Undefined**";
+                    }
+
+
+
+                    sb.Append("`")
+                        .Append(s)
+                        .Append(": ")
+                        .AppendFormat("{0}", value);
+
+                    if (_config.Fields.ContainsKey(s) && _config.Fields[s].Expression != null)
+                    {
+                        sb.AppendFormat(" ({0})", _config.Fields[s].Expression);
+                    }
+
+                    sb.AppendLine("`");
+                }
             }
 
             return sb.ToString();

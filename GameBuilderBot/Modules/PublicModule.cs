@@ -33,8 +33,8 @@ namespace GameBuilderBot.Modules
         [Command("list")]
         public Task ListAsync() => ReplyAsync(ResponseService.GetAllChoices());
 
-        [Command("values")]
-        public Task ValuesAsync(params string[] objects) => ReplyAsync(ResponseService.Values(objects));
+        [Command("get")]
+        public Task GetAsync(params string[] objects) => ReplyAsync(ResponseService.Get(objects));
 
         [Command("set")]
         public Task SetAsync(params string[] objects) => ReplyAsync(ResponseService.Set(objects));
