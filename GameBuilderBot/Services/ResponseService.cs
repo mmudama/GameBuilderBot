@@ -164,17 +164,18 @@ namespace GameBuilderBot.Services
 
         private int Set(string fieldName, string expression)
         {
-            if (!int.TryParse(expression, out int value))
+            if (!int.TryParse(expression, out int result))
             {
                 expression = _config.Interpret(expression);
+                result = (int)DiceRollService.Roll(expression);
             }
 
-            return (int)DiceRollService.Roll(expression);
+            return result;
         }
 
         internal void Set(string[] objects, Func<string, string, int> f, out string response)
         {
-            var sbResponse = new StringBuilder("> set").AppendLine();
+            var sbResponse = new StringBuilder();
 
             var errorResponse = "> set syntax: `!set <name> <integer value>`" +
                 "\n OR `!set <name> <expression>` (like 1d4 or 1+5)";
@@ -202,10 +203,11 @@ namespace GameBuilderBot.Services
             }
 
 
+            var was = new StringBuilder();
+
             if (_config.Fields.ContainsKey(name) && _config.Fields[name].Value != null)
             {
-                sbResponse.AppendFormat("`{0}`'s previous value was `{1}`", name, _config.Fields[name].Value)
-                        .AppendLine();
+                was.AppendFormat("(was `{1}`)", name, _config.Fields[name].Value);
                 _config.Fields[name].Value = value;
             }
             else
@@ -213,7 +215,7 @@ namespace GameBuilderBot.Services
                 _config.Fields[name] = new Field(name, value);
             }
 
-            sbResponse.AppendFormat("`{0}` has been set to `{1}`", name, _config.Fields[name].Value).AppendLine();
+            sbResponse.AppendFormat("`{0}` = `{1}` {2}", name, _config.Fields[name].Value, was).AppendLine();
 
             response = sbResponse.ToString();
         }
@@ -227,11 +229,20 @@ namespace GameBuilderBot.Services
 
         private int Subtract(string fieldName, string expression)
         {
-            // TODO handle when field is undefined
             // TODO actually can I pass in the field instead of fieldName?
 
+            int value = 0;
+
+            // TODO extract this condition as a method and call it in Add, too 
+            if (_config.Fields.ContainsKey(fieldName) 
+                &&!(_config.Fields[fieldName] == null) 
+                && !(_config.Fields[fieldName].Value == null))
+            {
+                value = (int)_config.Fields[fieldName].Value;
+            }
+
             expression = _config.Interpret(expression);
-            return (int)_config.Fields[fieldName].Value - DiceRollService.Roll(expression);
+            return value - DiceRollService.Roll(expression);
         }
 
         internal string Add(string[] objects)
@@ -242,11 +253,19 @@ namespace GameBuilderBot.Services
 
         private int Add(string fieldName, string expression)
         {
-            // TODO handle when field is undefined
             // TODO actually can I pass in the field instead of fieldName?
 
+            int value = 0;
+
+            if (_config.Fields.ContainsKey(fieldName)
+                && !(_config.Fields[fieldName] == null)
+                && !(_config.Fields[fieldName].Value == null))
+            {
+                value = (int)_config.Fields[fieldName].Value;
+            }
+
             expression = _config.Interpret(expression);
-            return (int)_config.Fields[fieldName].Value + DiceRollService.Roll(expression);
+            return value + DiceRollService.Roll(expression);
         }
 
         public string RollEvents(params string[] objects)
