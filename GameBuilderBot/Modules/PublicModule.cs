@@ -22,7 +22,7 @@ namespace GameBuilderBot.Modules
 
 
         [Command("game")]
-        [Alias("g", "gb")]
+        [Alias("g", "gb", "gamebuilder")]
         public Task TrailAsync(params string[] objects)
         => ReplyAsync(ResponseService.RollEvents(objects));
 
@@ -30,14 +30,17 @@ namespace GameBuilderBot.Modules
         [Command("summary")]
         public Task SummarizeAsync() => ResponseService.Summarize(this.Context);
 
-        [Command("list")]
-        public Task ListAsync() => ReplyAsync(ResponseService.GetAllChoices());
 
         [Command("get")]
+        [Alias("list")]
         public Task GetAsync(params string[] objects) => ReplyAsync(ResponseService.Get(objects));
 
         [Command("set")]
         public Task SetAsync(params string[] objects) => ReplyAsync(ResponseService.Set(objects));
+
+        [Command("Delete")]
+        [Alias("del", "remove", "rm")]
+        public Task DeleteAsync(params string[] objects) => ReplyAsync(ResponseService.Delete(objects));
 
         [Command("evaluate")]
         [Alias("eval")]

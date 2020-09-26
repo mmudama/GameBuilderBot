@@ -61,7 +61,6 @@ namespace GameBuilderBot.Services
             {
                 var serializer = new YamlDotNet.Serialization.Serializer();
                 output = serializer.Serialize(game);
-                    
             }
             else output = "Invalid file type";
 
