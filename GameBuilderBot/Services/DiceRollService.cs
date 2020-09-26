@@ -2,7 +2,6 @@
 
 namespace GameBuilderBot.Services
 {
-
     // TODO - if everything is static, is it a service?
     public class DiceRollService
     {
@@ -28,7 +27,5 @@ namespace GameBuilderBot.Services
             RollResult result = Roller.Roll(expression);
             return (int)result.Value;
         }
-
-
     }
 }

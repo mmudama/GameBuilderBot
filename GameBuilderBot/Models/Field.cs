@@ -31,6 +31,7 @@ namespace GameBuilderBot.Models
                     Type = typeof(int);
                     Value = Convert.ToInt64(value);
                     break;
+
                 default:
                     string msg = "Type " + type + " not implemented in Fields.";
                     throw new System.InvalidOperationException(msg);

@@ -21,6 +21,12 @@ namespace GameBuilderBot.Models
                 && !(Fields[fieldName].Value == null);
         }
 
+        public bool FieldHasExpression(string fieldName)
+        {
+            return Fields.ContainsKey(fieldName)
+                && !(Fields[fieldName] == null)
+                && !(Fields[fieldName].Expression == null);
+        }
 
         // TODO put CalculateExpressionAndSometimesSetFieldValue somewhere else? Maybe have a class just for parsing
         // TODO definitely break it up and make it make more sense
@@ -89,7 +95,5 @@ namespace GameBuilderBot.Models
             expression = string.Join(" ", parts);
             return expression;
         }
-
-
     }
 }

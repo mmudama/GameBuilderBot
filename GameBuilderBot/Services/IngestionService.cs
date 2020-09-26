@@ -7,7 +7,6 @@ namespace GameBuilderBot.Services
 {
     public class IngestionService
     {
-
         public static GameConfig Ingest(string fileName)
         {
             var choiceMap = new Dictionary<string, Choice>();
@@ -43,8 +42,6 @@ namespace GameBuilderBot.Services
             }
 
             return new GameConfig(choiceMap, fields);
-
         }
-
     }
 }

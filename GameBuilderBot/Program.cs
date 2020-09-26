@@ -12,7 +12,6 @@ namespace GameBuilderBot
 {
     public class Program
     {
-
         private static string _fileName;
 
         private DiscordSocketClient _client;
@@ -33,7 +32,6 @@ namespace GameBuilderBot
 
             _client = services.GetRequiredService<DiscordSocketClient>();
             _client.Log += LogAsync;
-
 
             //TODO use logs instead of console writes?
             services.GetRequiredService<CommandService>().Log += LogAsync;
