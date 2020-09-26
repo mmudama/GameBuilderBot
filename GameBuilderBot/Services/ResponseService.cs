@@ -1,4 +1,5 @@
 ﻿using Discord.Commands;
+using GameBuilderBot.ExpressionHandling;
 using GameBuilderBot.Models;
 using System;
 using System.Collections.Generic;
@@ -262,7 +263,7 @@ namespace GameBuilderBot.Services
             }
             else
             {
-                _config.Fields[name] = new Field(name, value);
+                _config.Fields[name] = new Field(name, value.ToString());
             }
 
             var sbResponse = new StringBuilder();
@@ -303,11 +304,11 @@ namespace GameBuilderBot.Services
 
             if (_config.FieldHasValue(fieldName))
             {
-                value = (int)_config.Fields[fieldName].Value;
+                value = Convert.ToInt32(_config.Fields[fieldName].Value.ToString());
             }
 
-            expression = _config.ReplaceVariablesWithValues(expression);
-            return value + DiceRollService.Roll(expression);
+            MathExpression mathexpression = new MathExpression(expression, _config.Fields);
+            return value + Convert.ToInt32(mathexpression.Evaluate().ToString());
         }
 
         public string RollEvents(params string[] objects)
