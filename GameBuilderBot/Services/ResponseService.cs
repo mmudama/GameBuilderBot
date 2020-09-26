@@ -66,6 +66,26 @@ namespace GameBuilderBot.Services
             }
         }
 
+        internal string Delete(string[] variables)
+        {
+            var errorResponse = "> Delete syntax: !delete <name> (<name> <name> ...)";
+
+            if (variables.Length < 1)
+            {
+                return errorResponse;
+            }
+
+            foreach (string key in variables)
+            {
+                if (_config.Fields.ContainsKey(key))
+                {
+                    _config.Fields.Remove(key);
+                }
+            }
+
+            return String.Format("Deleted variables: {0}", String.Join(", ", variables));
+        }
+
         internal Task Export(string[] objects, SocketCommandContext context)
         {
             if (objects.Length < 1)
@@ -121,9 +141,9 @@ namespace GameBuilderBot.Services
         {
             StringBuilder sb = new StringBuilder();
 
-            // TODO consolidate "all" vs identified output logic
+            bool getAll = objects.Length == 1 && objects[0].ToLower().Equals("all");
 
-            if (objects.Length == 0)
+            if (objects.Length == 0 || getAll)
             {
                 sb.AppendLine("> **All Fields**:");
 
@@ -434,6 +454,7 @@ namespace GameBuilderBot.Services
             return sb;
         }
 
+        // Not currently in use
         public string GetAllChoices()
         {
             StringBuilder sb = new StringBuilder()
