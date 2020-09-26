@@ -11,13 +11,11 @@ namespace GameBuilderBot.Services
 {
     public class ResponseService
     {
-        private readonly Config _config;
-        private readonly ExportService _exportService;
+        private readonly GameConfig _config;
 
-        public ResponseService(Config config, ExportService exportService)
+        public ResponseService(GameConfig config)
         {
             _config = config;
-            _exportService = exportService;
         }
 
         public string Help()
@@ -96,13 +94,11 @@ namespace GameBuilderBot.Services
 
             string fileName = string.Format("game_state.txt", context.Channel.Name);
             return context.Channel.SendFileAsync(stream, fileName);
-
-            throw new NotImplementedException();
         }
 
         internal string Evaluate(string expression)
         {
-            expression = _config.Interpret(expression);
+            expression = _config.ReplaceVariablesWithValues(expression);
 
             var response = new StringBuilder("> Evaluate:").AppendLine();
 
@@ -189,23 +185,23 @@ namespace GameBuilderBot.Services
 
         internal string Set(string[] objects)
         {
-            Set(objects, Set, out string response);
+            Set(objects, CalculateValueSimple, out string response);
             return response;
 
         }
 
-        private int Set(string fieldName, string expression)
+        private int CalculateValueSimple(string fieldName, string expression)
         {
             if (!int.TryParse(expression, out int result))
             {
-                expression = _config.Interpret(expression);
+                expression = _config.ReplaceVariablesWithValues(expression);
                 result = DiceRollService.Roll(expression);
             }
 
             return result;
         }
 
-        internal void Set(string[] objects, Func<string, string, int> f, out string response)
+        private void Set(string[] objects, Func<string, string, int> CalculateValue, out string response)
         {
 
             var errorResponse = "> set syntax: `!set <name> <integer value>`" +
@@ -224,7 +220,7 @@ namespace GameBuilderBot.Services
 
             try
             {
-                value = f(name, expression);
+                value = CalculateValue(name, expression);
 
             }
             catch (Exception)
@@ -258,48 +254,39 @@ namespace GameBuilderBot.Services
 
         internal string Subtract(string[] objects)
         {
-            Set(objects, Subtract, out string response);
+            Set(objects, CalculateValueBySubtracting, out string response);
             return response;
         }
 
-        private int Subtract(string fieldName, string expression)
+        private int CalculateValueBySubtracting(string fieldName, string expression)
         {
-            // TODO actually can I pass in the field instead of fieldName?
-
             int value = 0;
 
-            // TODO extract this condition as a method and call it in Add, too 
-            if (_config.Fields.ContainsKey(fieldName)
-                && !(_config.Fields[fieldName] == null)
-                && !(_config.Fields[fieldName].Value == null))
+            if (_config.FieldHasValue(fieldName))
             {
                 value = (int)_config.Fields[fieldName].Value;
             }
 
-            expression = _config.Interpret(expression);
+            expression = _config.ReplaceVariablesWithValues(expression);
             return value - DiceRollService.Roll(expression);
         }
 
         internal string Add(string[] objects)
         {
-            Set(objects, Add, out string response);
+            Set(objects, CalculateValueByAdding, out string response);
             return response;
         }
 
-        private int Add(string fieldName, string expression)
+        private int CalculateValueByAdding(string fieldName, string expression)
         {
-            // TODO actually can I pass in the field instead of fieldName?
-
             int value = 0;
 
-            if (_config.Fields.ContainsKey(fieldName)
-                && !(_config.Fields[fieldName] == null)
-                && !(_config.Fields[fieldName].Value == null))
+            if (_config.FieldHasValue(fieldName))
             {
                 value = (int)_config.Fields[fieldName].Value;
             }
 
-            expression = _config.Interpret(expression);
+            expression = _config.ReplaceVariablesWithValues(expression);
             return value + DiceRollService.Roll(expression);
         }
 
@@ -392,7 +379,7 @@ namespace GameBuilderBot.Services
                 var rolls = new List<int>();
                 foreach (string expression in o.Rolls)
                 {
-                    rolls.Add(_config.Evaluate(expression));
+                    rolls.Add(GameConfig.CalculateExpressionAndSometimesSetFieldValue(expression, _config.Fields));
                 }
 
                 try
@@ -414,6 +401,7 @@ namespace GameBuilderBot.Services
 
         }
 
+        // TODO make this a member of choice
         private StringBuilder GetWeightedResponse(Choice c, int depth)
         {
             StringBuilder sb = new StringBuilder();

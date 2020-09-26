@@ -13,7 +13,7 @@ namespace GameBuilderBot.Services
     public class ExportService
     {
 
-        public static string Export(FileType fileType, Config config)
+        public static string Export(FileType fileType, GameConfig config)
         {
             string output = "";
             GameFile game = new GameFile();

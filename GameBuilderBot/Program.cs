@@ -58,7 +58,7 @@ namespace GameBuilderBot
 
         private ServiceProvider ConfigureServices(string fileName)
         {
-            Config config = IngestionService.Ingest(fileName);
+            GameConfig config = IngestionService.Ingest(fileName);
 
             return new ServiceCollection()
                 .AddSingleton<DiscordSocketClient>()
@@ -67,7 +67,6 @@ namespace GameBuilderBot
                 .AddSingleton<HttpClient>()
                 .AddSingleton(c => config)
                 .AddSingleton<ResponseService>()
-                .AddSingleton<ExportService>()
                 .BuildServiceProvider();
         }
     }

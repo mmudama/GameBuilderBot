@@ -3,16 +3,27 @@ using System.Collections.Generic;
 
 namespace GameBuilderBot.Models
 {
-    public class Config
+    public class GameConfig
     {
         public Dictionary<string, Choice> ChoiceMap;
         public Dictionary<string, Field> Fields;
 
-        public Config(Dictionary<string, Choice> choiceMap, Dictionary<string, Field> fields)
+        public GameConfig(Dictionary<string, Choice> choiceMap, Dictionary<string, Field> fields)
         {
             ChoiceMap = choiceMap;
             Fields = fields;
         }
+
+        public bool FieldHasValue(string fieldName)
+        {
+            return Fields.ContainsKey(fieldName)
+                && !(Fields[fieldName] == null)
+                && !(Fields[fieldName].Value == null);
+        }
+
+
+        // TODO put CalculateExpressionAndSometimesSetFieldValue somewhere else? Maybe have a class just for parsing
+        // TODO definitely break it up and make it make more sense
 
         /// <summary>
         /// Input can be an expression (like 1d4)
@@ -26,32 +37,33 @@ namespace GameBuilderBot.Models
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        internal int Evaluate(string expression)
+
+        internal static int CalculateExpressionAndSometimesSetFieldValue(string expression, Dictionary<string, Field> fields)
         {
-            bool evaluate = false;
+            bool shouldCalculate = false;
             string key = expression;
             int result;
 
             if (expression.StartsWith("!"))
             {
-                evaluate = true;
+                shouldCalculate = true;
                 key = expression.Substring(1).ToLower();
             }
 
-            if (Fields.ContainsKey(key) && evaluate)
+            if (fields.ContainsKey(key) && shouldCalculate)
             {
                 key = key.ToLower();
-                result = DiceRollService.Roll(Fields[key].Expression);
-                Fields[key].Value = result;
+                result = DiceRollService.Roll(fields[key].Expression);
+                fields[key].Value = result;
             }
-            else if (Fields.ContainsKey(key))
+            else if (fields.ContainsKey(key))
             {
                 key = key.ToLower();
-                if (Fields[key].Value == null)
+                if (fields[key].Value == null)
                 {
-                    Fields[key].Value = DiceRollService.Roll(Fields[key].Expression);
+                    fields[key].Value = DiceRollService.Roll(fields[key].Expression);
                 }
-                result = (int)Fields[key].Value;
+                result = (int)fields[key].Value;
             }
             else
             {
@@ -62,7 +74,7 @@ namespace GameBuilderBot.Models
             return result;
         }
 
-        public string Interpret(string expression)
+        public string ReplaceVariablesWithValues(string expression)
         {
             string[] parts = expression.Split('#');
 

@@ -8,7 +8,7 @@ namespace GameBuilderBot.Services
     public class IngestionService
     {
 
-        public static Config Ingest(string fileName)
+        public static GameConfig Ingest(string fileName)
         {
             var choiceMap = new Dictionary<string, Choice>();
             var fields = new Dictionary<string, Field>();
@@ -42,7 +42,7 @@ namespace GameBuilderBot.Services
                 Console.WriteLine(c.GetSummary());
             }
 
-            return new Config(choiceMap, fields);
+            return new GameConfig(choiceMap, fields);
 
         }
 
