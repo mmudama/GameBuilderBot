@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace GameBuilderBot.ExpressionHandling
 {
@@ -32,7 +30,7 @@ namespace GameBuilderBot.ExpressionHandling
             }
 
             expression = string.Join(" ", parts);
-            
+
             return GameBuilderBot.Services.DiceRollService.Roll(expression);
         }
     }

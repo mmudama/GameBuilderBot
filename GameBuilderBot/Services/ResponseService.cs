@@ -37,7 +37,7 @@ namespace GameBuilderBot.Services
         }
 
 
-        public Task Summarize(SocketCommandContext context)
+        public Task SummarizeEventData(SocketCommandContext context)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -67,7 +67,7 @@ namespace GameBuilderBot.Services
             }
         }
 
-        internal string Delete(string[] variables)
+        internal string DeleteFieldValue(string[] variables)
         {
             var errorResponse = "> Delete syntax: !delete <name> (<name> <name> ...)";
 
@@ -87,7 +87,7 @@ namespace GameBuilderBot.Services
             return String.Format("Deleted variables: {0}", String.Join(", ", variables));
         }
 
-        internal Task Export(string[] objects, SocketCommandContext context)
+        internal Task ExportConfigAsFile(string[] objects, SocketCommandContext context)
         {
             if (objects.Length < 1)
             {
@@ -117,7 +117,7 @@ namespace GameBuilderBot.Services
             return context.Channel.SendFileAsync(stream, fileName);
         }
 
-        internal string Evaluate(string expression)
+        internal string EvaluateExpression(string expression)
         {
             expression = _config.ReplaceVariablesWithValues(expression);
 
@@ -138,7 +138,7 @@ namespace GameBuilderBot.Services
             return response.ToString();
         }
 
-        internal string Get(string[] objects)
+        internal string GetPrettyPrintedFieldValues(string[] objects)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -204,14 +204,14 @@ namespace GameBuilderBot.Services
             return sb.ToString();
         }
 
-        internal string Set(string[] objects)
+        internal string SetFieldValue(string[] objects)
         {
-            Set(objects, CalculateValueSimple, out string response);
+            CalculateFieldValue(objects, CalculateFieldValueByValue, out string response);
             return response;
 
         }
 
-        private int CalculateValueSimple(string fieldName, string expression)
+        private int CalculateFieldValueByValue(string fieldName, string expression)
         {
             if (!int.TryParse(expression, out int result))
             {
@@ -222,60 +222,74 @@ namespace GameBuilderBot.Services
             return result;
         }
 
-        private void Set(string[] objects, Func<string, string, int> CalculateValue, out string response)
+        private void CalculateFieldValue(string[] objects, Func<string, string, int> CalculateValue, out string response)
         {
-
             var errorResponse = "> set syntax: `!set <name> <integer value>`" +
-                "\n OR `!set <name> <expression>` (like 1d4 or 1+5)";
-
-            if (objects.Length != 2)
-            {
-                response = errorResponse;
-                return;
-            }
-
-            string name = objects[0].ToLower();
-            string expression = objects[1];
-
-            int value;
+            "\n OR `!set <name> <expression>` (like 1d4 or 1+5)";
 
             try
             {
-                value = CalculateValue(name, expression);
+                if (objects.Length != 2)
+                {
+                    response = errorResponse;
+                    return;
+                }
 
+                string name = objects[0].ToLower();
+                string expression = objects[1];
+                int value = CalculateValue(name, expression);
+
+                if (int.TryParse(expression, out _))
+                {
+                    // The second user parameter was an explicit integer value, not an expression
+                    expression = null;
+                }
+
+                object oldValue = null;
+
+                if (_config.FieldHasValue(name))
+                {
+                    oldValue = _config.Fields[name].Value;
+                }
+                
+                if (_config.Fields.ContainsKey(name))
+                {
+                    _config.Fields[name].Value = value;
+
+                    // TODO should this also set the expression if it exists?
+                    // Punt because Aaron wants to get rid of all that anyway
+                }
+                else
+                {
+                    _config.Fields[name] = new Field(expression, value.ToString());
+                }
+
+                response = OutputResponseForCalculateFieldValue(name, _config.Fields[name].Value, oldValue);
             }
             catch (Exception)
             {
                 response = errorResponse;
                 return;
             }
-
-
-            var was = new StringBuilder();
-
-            if (_config.Fields.ContainsKey(name))
-            {
-                if (_config.Fields[name].Value != null)
-                {
-                    was.AppendFormat("(was `{1}`)", name, _config.Fields[name].Value);
-                }
-                _config.Fields[name].Value = value;
-            }
-            else
-            {
-                _config.Fields[name] = new Field(name, value.ToString());
-            }
-
-            var sbResponse = new StringBuilder();
-            sbResponse.AppendFormat("`{0}` = `{1}` {2}", name, _config.Fields[name].Value, was).AppendLine();
-
-            response = sbResponse.ToString();
         }
 
-
-        internal string Subtract(string[] objects)
+        private string OutputResponseForCalculateFieldValue(string name, object value, object oldValue)
         {
-            Set(objects, CalculateValueBySubtracting, out string response);
+
+            var sbResponse = new StringBuilder();
+            sbResponse.AppendFormat("`{0} = {1}", name, _config.Fields[name].Value);
+
+            if (oldValue != null)
+            {
+                sbResponse.AppendFormat(" (was {0})", oldValue);
+            }
+
+            return sbResponse.AppendLine("`").ToString();
+        }
+
+        internal string SubtractFieldValue(string[] objects)
+        {
+            CalculateFieldValue(objects, CalculateValueBySubtracting, out string response);
             return response;
         }
 
@@ -292,9 +306,9 @@ namespace GameBuilderBot.Services
             return value - DiceRollService.Roll(expression);
         }
 
-        internal string Add(string[] objects)
+        internal string AddFieldValue(string[] objects)
         {
-            Set(objects, CalculateValueByAdding, out string response);
+            CalculateFieldValue(objects, CalculateValueByAdding, out string response);
             return response;
         }
 
@@ -319,12 +333,12 @@ namespace GameBuilderBot.Services
 
             string choice = objects[0];
 
-            response = "> " + GetResponse(choice, 0);
+            response = "> " + GetResponseForEventRoll(choice, 0);
 
             return response;
         }
 
-        public string GetResponse(string choice, int depth)
+        public string GetResponseForEventRoll(string choice, int depth)
         {
             depth++;
 
@@ -343,10 +357,10 @@ namespace GameBuilderBot.Services
                 switch (c.Distribution)
                 {
                     case "Weighted":
-                        sb.Append(GetWeightedResponse(c, depth));
+                        sb.Append(GetResponseForWeightedChoice(c, depth));
                         break;
                     case "All":
-                        sb.Append(GetAllResponse(c, depth));
+                        sb.Append(GetResponseForDistributionAllChoice(c, depth));
                         break;
                     default:
                         sb.AppendLine(String.Format("\"{0}\" has an invalid Distribution", choice));
@@ -369,7 +383,7 @@ namespace GameBuilderBot.Services
         }
 
         // TODO make this a member of Choice
-        private StringBuilder GetAllResponse(Choice c, int depth)
+        private StringBuilder GetResponseForDistributionAllChoice(Choice c, int depth)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -378,11 +392,11 @@ namespace GameBuilderBot.Services
 
                 if (o.ChildChoice == null)
                 {
-                    sb.AppendLine("\t" + GetOutcomeResponse(o));
+                    sb.AppendLine("\t" + GetResponseForOutcome(o));
                 }
                 else
                 {
-                    sb.Append(GetResponse(o.ChildChoice.Name, depth));
+                    sb.Append(GetResponseForEventRoll(o.ChildChoice.Name, depth));
                 }
             }
 
@@ -390,7 +404,7 @@ namespace GameBuilderBot.Services
         }
 
         // TODO make this a member of outcome
-        private string GetOutcomeResponse(Outcome o)
+        private string GetResponseForOutcome(Outcome o)
         {
 
             string response;
@@ -423,7 +437,7 @@ namespace GameBuilderBot.Services
         }
 
         // TODO make this a member of choice
-        private StringBuilder GetWeightedResponse(Choice c, int depth)
+        private StringBuilder GetResponseForWeightedChoice(Choice c, int depth)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -432,7 +446,7 @@ namespace GameBuilderBot.Services
 
             Outcome o = c.outcomeMap[c.PossibleOutcomes[roll]];
 
-            string outcome = GetOutcomeResponse(o);
+            string outcome = GetResponseForOutcome(o);
 
             if (max <= 1)
             {
@@ -449,27 +463,10 @@ namespace GameBuilderBot.Services
 
             if (o.ChildChoice != null)
             {
-                sb.Append(GetResponse(o.ChildChoice.Name, depth));
+                sb.Append(GetResponseForEventRoll(o.ChildChoice.Name, depth));
             }
 
             return sb;
-        }
-
-        // Not currently in use
-        public string GetAllChoices()
-        {
-            StringBuilder sb = new StringBuilder()
-            .AppendLine("> List all possible `!trail` arguments");
-
-            var list = _config.ChoiceMap.Keys.ToList();
-            list.Sort();
-
-            foreach (string choice in list)
-            {
-                sb.AppendLine(String.Format("`{0}`", choice));
-            }
-
-            return sb.ToString();
         }
 
     }

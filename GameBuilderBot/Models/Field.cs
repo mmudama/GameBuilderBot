@@ -24,7 +24,7 @@ namespace GameBuilderBot.Models
         {
             Expression = expression;
             Value = value;
-            switch(type)
+            switch (type)
             {
                 case "int":
                 case "integer":
