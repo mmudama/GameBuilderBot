@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace GameBuilderBot.Modules
 {
-
     // Modules must be public and inherit from an IModuleBase
     public class PublicModule : ModuleBase<SocketCommandContext>
     {
@@ -17,48 +16,40 @@ namespace GameBuilderBot.Modules
 
         [Command("help")]
         public Task HelpAsync()
-            => ReplyAsync(ResponseService.Help());
-
-
+            => ReplyAsync(ResponseService.HelpForUser());
 
         [Command("game")]
         [Alias("g", "gb", "gamebuilder")]
-        public Task TrailAsync(params string[] objects)
-        => ReplyAsync(ResponseService.RollEvents(objects));
-
+        public Task RollEventsAsync(params string[] inputs)
+        => ReplyAsync(ResponseService.RollEventsForUser(inputs));
 
         [Command("summary")]
-        public Task SummarizeAsync() => ResponseService.SummarizeEventData(this.Context);
-
+        public Task SummarizeAsync() => ResponseService.SummarizeEventDataForUser(this.Context);
 
         [Command("get")]
         [Alias("list")]
-        public Task GetAsync(params string[] objects) => ReplyAsync(ResponseService.GetPrettyPrintedFieldValues(objects));
+        public Task GetAsync(params string[] inputs) => ReplyAsync(ResponseService.GetFieldValuesForUser(inputs));
 
         [Command("set")]
-        public Task SetAsync(params string[] objects) => ReplyAsync(ResponseService.SetFieldValue(objects));
+        public Task SetAsync(params string[] inputs) => ReplyAsync(ResponseService.SetFieldValueForUser(inputs));
 
         [Command("Delete")]
         [Alias("del", "remove", "rm", "unset")]
-        public Task DeleteAsync(params string[] objects) => ReplyAsync(ResponseService.DeleteFieldValue(objects));
+        public Task DeleteAsync(params string[] inputs) => ReplyAsync(ResponseService.DeleteFieldValueForUser(inputs));
 
         [Command("evaluate")]
         [Alias("eval")]
-        public Task EvaluateAsync([Remainder] string expression) => ReplyAsync(ResponseService.EvaluateExpression(expression));
+        public Task EvaluateAsync([Remainder] string expression) => ReplyAsync(ResponseService.EvaluateExpressionForUser(expression));
 
         [Command("add")]
         [Alias("+")]
-        public Task AddAsync(params string[] objects) => ReplyAsync(ResponseService.AddFieldValue(objects));
+        public Task AddAsync(params string[] inputs) => ReplyAsync(ResponseService.AddFieldValueForUser(inputs));
 
         [Command("subtract")]
         [Alias("sub", "-")]
-        public Task SubAsync(params string[] objects) => ReplyAsync(ResponseService.SubtractFieldValue(objects));
+        public Task SubAsync(params string[] inputs) => ReplyAsync(ResponseService.SubtractFieldValueForUser(inputs));
 
         [Command("export")]
-        public Task ExportAsync(params string[] objects) => ResponseService.ExportConfigAsFile(objects, this.Context);
-
+        public Task ExportAsync([Remainder] string fileType) => ResponseService.ExportConfigAsFileForUser(fileType, Context);
     }
-
-
-
 }

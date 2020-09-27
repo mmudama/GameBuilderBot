@@ -64,6 +64,7 @@ namespace GameBuilderBot.Models
                         Value = Convert.ToDateTime(value);
                     }
                     break;
+
                 default:
                     string msg = "Type " + type + " not implemented in Fields.";
                     throw new System.InvalidOperationException(msg);

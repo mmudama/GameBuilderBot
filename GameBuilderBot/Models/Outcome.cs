@@ -6,7 +6,6 @@ namespace GameBuilderBot.Models
 {
     public class Outcome
     {
-
         public readonly string Name;
         public readonly int Weight;
 
@@ -15,7 +14,6 @@ namespace GameBuilderBot.Models
 
         // TODO make this protected after moving rolls logic into here
         public readonly string[] Rolls;
-
 
         // TODO get rid of this string!
         public readonly string Choice;
@@ -49,8 +47,6 @@ namespace GameBuilderBot.Models
             }
         }
 
-
-
         internal string GetSummary(int depth)
         {
             StringBuilder sb = new StringBuilder();
@@ -65,7 +61,6 @@ namespace GameBuilderBot.Models
             }
 
             return sb.ToString();
-
         }
 
         protected string Indent(string s, int depth)
@@ -78,6 +73,5 @@ namespace GameBuilderBot.Models
 
             return sb.AppendFormat("* {0} ({1})", s, Weight).ToString();
         }
-
     }
 }

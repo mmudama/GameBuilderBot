@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GameBuilderBot.Services
 {
-    class CommandHandlingService
+    internal class CommandHandlingService
     {
         private readonly CommandService _commands;
         private readonly DiscordSocketClient _discord;
@@ -53,7 +53,6 @@ namespace GameBuilderBot.Services
 
             if (!hasMentionPrefix && !hasCharPrefix) return;
 
-
             var context = new SocketCommandContext(_discord, message);
             // Perform the execution of the command. In this method,
             // the command service will perform precondition and parsing check
@@ -61,7 +60,6 @@ namespace GameBuilderBot.Services
             await _commands.ExecuteAsync(context, argPos, _services);
             // Note that normally a result will be returned by this format, but here
             // we will handle the result in CommandExecutedAsync,
-
         }
 
         public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
@@ -76,7 +74,6 @@ namespace GameBuilderBot.Services
 
             // the command failed, let's notify the user that something happened.
             await context.Channel.SendMessageAsync($"error: {result}");
-
         }
     }
 }

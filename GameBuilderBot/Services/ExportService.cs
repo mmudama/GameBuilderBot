@@ -12,7 +12,6 @@ namespace GameBuilderBot.Services
 
     public class ExportService
     {
-
         public static string Export(FileType fileType, GameConfig config)
         {
             string output = "";
@@ -52,7 +51,6 @@ namespace GameBuilderBot.Services
 
             game.Choices = choices.ToArray();
 
-
             if (fileType == FileType.JSON)
             {
                 output = JsonSerializer.Serialize(game);
@@ -65,7 +63,6 @@ namespace GameBuilderBot.Services
             else output = "Invalid file type";
 
             return output;
-
         }
     }
 }

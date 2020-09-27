@@ -34,7 +34,6 @@ namespace GameBuilderBot.Models
             }
 
             Complete();
-
         }
 
         internal string GetSummary()
@@ -82,7 +81,5 @@ namespace GameBuilderBot.Models
 
             PossibleOutcomes = possibleOutcomes.ToArray();
         }
-
-
     }
 }
