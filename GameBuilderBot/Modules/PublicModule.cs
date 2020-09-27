@@ -51,5 +51,8 @@ namespace GameBuilderBot.Modules
 
         [Command("export")]
         public Task ExportAsync([Remainder] string fileType) => ResponseService.ExportConfigAsFileForUser(fileType, Context);
+
+        [Command("load")]
+        public Task LoadGameStateAsync(string gameName) => ResponseService.LoadGameStateForUser(gameName, Context);
     }
 }

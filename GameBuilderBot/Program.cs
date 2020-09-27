@@ -65,6 +65,8 @@ namespace GameBuilderBot
                 .AddSingleton<HttpClient>()
                 .AddSingleton(c => config)
                 .AddSingleton<ResponseService>()
+                .AddSingleton<ExportService>()
+                .AddSingleton<GameStateImporter>()
                 .BuildServiceProvider();
         }
     }

@@ -4,10 +4,11 @@ namespace GameBuilderBot.Models
 {
     public class Field
     {
-        public readonly string Expression;
-        public object Value;
-        public Type Type;
+        public string Expression { get; set; }
+        public object Value { get; set; }
+        public Type Type { get; set; }
 
+        public Field() { }
         public Field(FieldIngest f)
         {
             Expression = f.Expression;

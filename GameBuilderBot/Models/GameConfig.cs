@@ -5,19 +5,20 @@ namespace GameBuilderBot.Models
 {
     public class GameConfig
     {
+        public string Name;
+
         public Dictionary<string, Choice> ChoiceMap;
-        public Dictionary<string, Field> Fields;
+        public Dictionary<string, Field> Fields { get; set; }
 
         /// <summary>
         /// User-provided name to identify game. Allows the user to switch back and forth among
         /// different games in the same channel.
         /// </summary>
-        public string Name;
-
-        public GameConfig(Dictionary<string, Choice> choiceMap, Dictionary<string, Field> fields)
+        public GameConfig(string name, Dictionary<string, Choice> choiceMap, Dictionary<string, Field> fields)
         {
             ChoiceMap = choiceMap;
             Fields = fields;
+            Name = name;
         }
 
         public bool FieldHasValue(string fieldName)

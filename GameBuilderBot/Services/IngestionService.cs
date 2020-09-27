@@ -41,7 +41,7 @@ namespace GameBuilderBot.Services
                 Console.WriteLine(c.GetSummary());
             }
 
-            return new GameConfig(choiceMap, fields);
+            return new GameConfig(gameFile.Name, choiceMap, fields);
         }
     }
 }

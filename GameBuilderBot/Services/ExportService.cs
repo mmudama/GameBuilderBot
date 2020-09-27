@@ -1,10 +1,6 @@
 ﻿using Discord.Commands;
-using Discord.WebSocket;
-using GameBuilderBot.Exceptions;
 using GameBuilderBot.Models;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
 
 namespace GameBuilderBot.Services
@@ -17,7 +13,15 @@ namespace GameBuilderBot.Services
 
     public class ExportService
     {
-        public static string Export(FileType fileType, GameConfig config)
+
+        GameStateExporter exporter;
+
+        public ExportService()
+        {
+
+        }
+
+        public string ExportGameConfigToFile(FileType fileType, GameConfig config)
         {
             string output;
             GameFile game = new GameFile();
@@ -74,55 +78,10 @@ namespace GameBuilderBot.Services
             return output;
         }
 
-        public static void SaveGameState(GameConfig config, SocketCommandContext discordContext)
+        public void ExportGameState(GameConfig config, ICommandContext discordContext)
         {
-            var gameState = new GameState();
-            gameState.Fields = config.Fields;
-            gameState.ChannelId = discordContext.Channel.Id;
-            gameState.Name = config.Name;
+            new GameStateExporterJsonFile().SaveGameState(config, discordContext);
 
-            if (discordContext.Channel is SocketTextChannel)
-            {
-                gameState.FriendlyName = GetFriendlyName((SocketTextChannel)discordContext.Channel);
-            }
-            else if (discordContext.Channel is SocketDMChannel)
-            {
-                gameState.FriendlyName = GetFriendlyName((SocketDMChannel)discordContext.Channel);
-            }
-            else throw new GameBuilderBotException("Unrecognized channel type; cannot save state");
-
-            SaveGameStateToFile(gameState);
-        }
-
-        private static string GetFriendlyName(SocketTextChannel channel)
-        {
-            return string.Format("{0};{1}", channel.Guild.Name, channel.Name);
-        }
-
-        private static string GetFriendlyName(SocketDMChannel channel)
-        {
-            return channel.Recipient.Username;
-        }
-
-        protected static void SaveGameStateToFile(GameState state) {
-
-
-            string fileName = string.Format("c:\\temp\\GameBuilderBot.{0}.json", DateTime.Now.ToString("yyyy’-‘MM’-‘dd’T’HH’:’mm’:’ss"));
-
-            try
-            {
-                fileName = string.Format("c:\\Temp\\GameBuilderBot.{0}.json", state.ChannelId);
-                string stateAsString = JsonSerializer.Serialize(state);
-                var streamWriter = new StreamWriter(fileName);
-                streamWriter.Write(stateAsString);
-                streamWriter.Close();
-            } catch (Exception e)
-            {
-                Console.WriteLine(String.Format("Could not save GameState to file : {0}", fileName));
-                Console.WriteLine(e.Message);
-
-                throw new GameBuilderBotException("Could not save game state; your data will not be available for reload");
-            }
         }
     }
 }

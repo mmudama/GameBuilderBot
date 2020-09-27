@@ -3,6 +3,7 @@ using GameBuilderBot.Common;
 using GameBuilderBot.Exceptions;
 using GameBuilderBot.ExpressionHandling;
 using GameBuilderBot.Models;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,10 +16,12 @@ namespace GameBuilderBot.Services
     public class ResponseService
     {
         private readonly GameConfig _config;
+        private readonly ExportService _exportService;
 
-        public ResponseService(GameConfig config)
+        public ResponseService(IServiceProvider services)
         {
-            _config = config;
+            _config = services.GetRequiredService<GameConfig>();
+            _exportService = services.GetRequiredService<ExportService>();
         }
 
         public string HelpForUser()
@@ -88,6 +91,12 @@ namespace GameBuilderBot.Services
             }
         }
 
+        internal Task LoadGameStateForUser(string gameName, SocketCommandContext context)
+        {
+            new GameStateImporter().LoadGameState(_config, context);
+            return context.Channel.SendMessageAsync(GetFieldValuesForUser(new[] { "all" }));
+        }
+
         internal Task DeleteFieldValueForUser(string[] variables, SocketCommandContext discordContext)
         {
             try
@@ -128,7 +137,7 @@ namespace GameBuilderBot.Services
                 switch (fileType)
                 {
                     case "JSON":
-                        fileContents = ExportService.Export(FileType.JSON, _config);
+                        fileContents = _exportService.ExportGameConfigToFile(FileType.JSON, _config);
                         break;
 
                     default:
@@ -315,7 +324,7 @@ namespace GameBuilderBot.Services
                     _config.Fields[fieldName] = new Field(expression, value.ToString());
                 }
 
-                ExportService.SaveGameState(_config, discordContext);
+                _exportService.ExportGameState(_config, discordContext);
 
                 response = OutputResponseForCalculateFieldValue(fieldName, oldValue);
             }
