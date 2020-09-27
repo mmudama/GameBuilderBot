@@ -24,7 +24,7 @@ namespace GameBuilderBot.Models
         {
             Expression = expression;  //Deprecated, to be moved to choices and other locations.
 
-            switch(type.ToLower())
+            switch (type.ToLower())
             {
                 case "int":
                 case "integer":
@@ -76,16 +76,16 @@ namespace GameBuilderBot.Models
             if (Value.GetType().Equals(typeof(string)))
             {
                 throw new System.InvalidOperationException("Not Implemented.");
-            } 
+            }
             else if (Value.GetType().Equals(typeof(int)))
             {
                 throw new System.InvalidOperationException("Not Implemented.");
-            } 
+            }
             else if (Value.GetType().Equals(typeof(DateTime)))
             {
                 AddToDateTime(valueToAdd);
-            } 
-            else 
+            }
+            else
             {
                 string msg = "Field type " + Value.GetType().ToString() + " not supported in Field.AddTo.";
                 throw new System.InvalidOperationException(msg);

@@ -88,7 +88,7 @@ namespace GameBuilderBot.Services
             }
         }
 
-        internal string DeleteFieldValueForUser(string[] variables)
+        internal Task DeleteFieldValueForUser(string[] variables, SocketCommandContext discordContext)
         {
             try
             {
@@ -105,11 +105,11 @@ namespace GameBuilderBot.Services
                     }
                 }
 
-                return String.Format("Deleted variables: {0}", String.Join(", ", variables));
+                return discordContext.Channel.SendMessageAsync(String.Format("Deleted variables: {0}", String.Join(", ", variables)));
             }
             catch (Exception e)
             {
-                return e.Message;
+                return discordContext.Channel.SendMessageAsync(e.Message);
             }
         }
 
@@ -254,16 +254,16 @@ namespace GameBuilderBot.Services
             return response.ToString();
         }
 
-        internal string SetFieldValueForUser(string[] FieldNameAndValue)
+        internal Task SetFieldValueForUser(string[] FieldNameAndValue, SocketCommandContext discordContext)
         {
             try
             {
-                CalculateFieldValue(FieldNameAndValue, CalculateFieldValueByValue, out string response);
-                return response;
+                CalculateFieldValue(FieldNameAndValue, CalculateFieldValueByValue, discordContext, out string response);
+                return discordContext.Channel.SendMessageAsync(response);
             }
             catch (Exception e)
             {
-                return e.Message;
+                return discordContext.Channel.SendMessageAsync(e.Message);
             }
         }
 
@@ -278,12 +278,14 @@ namespace GameBuilderBot.Services
             return result;
         }
 
-        private void CalculateFieldValue(string[] FieldNameAndValue, Func<string, string, int> CalculateValue, out string response)
+        private void CalculateFieldValue(string[] FieldNameAndValue, Func<string, string, int> CalculateValue,
+            SocketCommandContext discordContext, out string response)
         {
             try
             {
                 if (FieldNameAndValue.Length != 2)
                 {
+                    // TODO it's not just set! it's also used by add and delete
                     throw new GameBuilderBotException("Set takes two arguments. Try `!set foo 100` or `!set foo 1d4`");
                 }
 
@@ -313,6 +315,8 @@ namespace GameBuilderBot.Services
                     _config.Fields[fieldName] = new Field(expression, value.ToString());
                 }
 
+                ExportService.SaveGameState(_config, discordContext);
+
                 response = OutputResponseForCalculateFieldValue(fieldName, oldValue);
             }
             catch (Exception e)
@@ -341,16 +345,16 @@ namespace GameBuilderBot.Services
             }
         }
 
-        internal string SubtractFieldValueForUser(string[] objects)
+        internal Task SubtractFieldValueForUser(string[] objects, SocketCommandContext discordContext)
         {
             try
             {
-                CalculateFieldValue(objects, CalculateValueBySubtracting, out string response);
-                return response;
+                CalculateFieldValue(objects, CalculateValueBySubtracting, discordContext, out string response);
+                return discordContext.Channel.SendMessageAsync(response);
             }
             catch (Exception e)
             {
-                return e.Message;
+                return discordContext.Channel.SendMessageAsync(e.Message);
             }
         }
 
@@ -367,16 +371,16 @@ namespace GameBuilderBot.Services
             return value - DiceRollService.Roll(expression);
         }
 
-        internal string AddFieldValueForUser(string[] objects)
+        internal Task AddFieldValueForUser(string[] objects, SocketCommandContext discordContext)
         {
             try
             {
-                CalculateFieldValue(objects, CalculateValueByAdding, out string response);
-                return response;
+                CalculateFieldValue(objects, CalculateValueByAdding, discordContext, out string response);
+                return discordContext.Channel.SendMessageAsync(response);
             }
             catch (Exception e)
             {
-                return e.Message;
+                return discordContext.Channel.SendMessageAsync(e.Message);
             }
         }
 

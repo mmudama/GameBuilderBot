@@ -8,6 +8,12 @@ namespace GameBuilderBot.Models
         public Dictionary<string, Choice> ChoiceMap;
         public Dictionary<string, Field> Fields;
 
+        /// <summary>
+        /// User-provided name to identify game. Allows the user to switch back and forth among
+        /// different games in the same channel.
+        /// </summary>
+        public string Name;
+
         public GameConfig(Dictionary<string, Choice> choiceMap, Dictionary<string, Field> fields)
         {
             ChoiceMap = choiceMap;
