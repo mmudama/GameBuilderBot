@@ -17,7 +17,7 @@ namespace GameBuilderBot.Services
             _serializer = service.GetRequiredService<Serializer>();
         }
 
-        public void LoadGameState(GameConfig config, ICommandContext discordContext)
+        public void LoadGameState(GameDefinition config, ICommandContext discordContext)
         {
             string fileName = string.Format("{0}\\GameBuilderBot.{1}.{2}.json", _botConfig.GameStateDirectory,
                 discordContext.Channel.Id, StringUtils.SanitizeForFileName(config.Name));
@@ -26,8 +26,6 @@ namespace GameBuilderBot.Services
 
             // TODO loop through these so that existing new variables are not removed?
             config.Fields = gameState.Fields;
-
-            Console.WriteLine("BREAK");
         }
     }
 }

@@ -14,6 +14,9 @@ namespace GameBuilderBot
     public class Program
     {
         private static string _fileName;
+        private static GameBuilderBotConfig _botConfig;
+
+        private const string ENV_BOT_CONFIG_FILE = "GBB_CONFIG_FILE";
 
         private DiscordSocketClient _client;
 
@@ -29,7 +32,7 @@ namespace GameBuilderBot
 
         public async Task MainAsync()
         {
-            using var services = ConfigureServices(_fileName);
+            using var services = ConfigureServices();
 
             _client = services.GetRequiredService<DiscordSocketClient>();
             _client.Log += LogAsync;
@@ -37,9 +40,7 @@ namespace GameBuilderBot
             //TODO use logs instead of console writes?
             services.GetRequiredService<CommandService>().Log += LogAsync;
 
-            await _client.LoginAsync(TokenType.Bot,
-                Environment.GetEnvironmentVariable("DiscordToken")
-                );
+            await _client.LoginAsync(TokenType.Bot,  _botConfig.DiscordBotToken);
             await _client.StartAsync();
 
             // Here we initialize the logic required to register our commands.
@@ -55,26 +56,27 @@ namespace GameBuilderBot
             return Task.CompletedTask;
         }
 
-        private ServiceProvider ConfigureServices(string fileName)
+        private ServiceProvider ConfigureServices()
         {
             Serializer serializer = new Serializer();
 
-            string appConfigFileName = Environment.GetEnvironmentVariable("GBB_CONFIG_FILE");
-            GameBuilderBotConfig botConfig = new GameBuilderBotConfigFactory(serializer).GetBotConfig(appConfigFileName);
+            string appConfigFileName = Environment.GetEnvironmentVariable(ENV_BOT_CONFIG_FILE);
+            _botConfig = new GameBuilderBotConfigFactory(serializer).GetBotConfig(appConfigFileName);
 
-            GameConfig config = IngestionService.Ingest(fileName, serializer);
+            GameDefinition gameDefinition = IngestionService.Ingest(_botConfig.GameDefinitionDirectory
+                + _botConfig.GameDefinitionFile, serializer);
 
             return new ServiceCollection()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<HttpClient>()
-                .AddSingleton(c => config)
+                .AddSingleton(gd => gameDefinition)
                 .AddSingleton<ResponseService>()
                 .AddSingleton<ExportService>()
                 .AddSingleton<GameStateImporter>()
                 .AddSingleton<Serializer>()
-                .AddSingleton(bc => botConfig)
+                .AddSingleton(bc => _botConfig)
                 .BuildServiceProvider();
         }
     }

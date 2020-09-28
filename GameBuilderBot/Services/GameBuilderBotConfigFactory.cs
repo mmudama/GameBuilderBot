@@ -5,6 +5,7 @@ using System;
 
 namespace GameBuilderBot.Services
 {
+    // TODO does GBBConfig really need a factory?
     public class GameBuilderBotConfigFactory
     {
         private Serializer _serializer;

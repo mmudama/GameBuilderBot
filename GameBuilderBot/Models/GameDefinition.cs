@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace GameBuilderBot.Models
 {
-    public class GameConfig
+    public class GameDefinition
     {
+        /// <summary>
+        /// User-provided name to identify game. Allows the user to switch back and forth among
+        /// different games in the same channel.
+        /// </summary>
         public string Name { get; set; }
 
         public Dictionary<string, Choice> ChoiceMap;
         public Dictionary<string, Field> Fields { get; set; }
 
-        /// <summary>
-        /// User-provided name to identify game. Allows the user to switch back and forth among
-        /// different games in the same channel.
-        /// </summary>
-        public GameConfig(string name, Dictionary<string, Choice> choiceMap, Dictionary<string, Field> fields)
+        public GameDefinition(string name, Dictionary<string, Choice> choiceMap, Dictionary<string, Field> fields)
         {
             ChoiceMap = choiceMap;
             Fields = fields;
@@ -43,9 +43,9 @@ namespace GameBuilderBot.Models
         /// or a reference to a Field. If it starts with "!" and is a recognized
         /// Field key, then reroll. Otherwise use the current value.
         /// If it's null, roll and set the value.
-        /// _config.Evaluate("!Sunrise") // found in map, prefix "!" means reroll and set
-        /// _config.Evaluate("Sunrise") // found in map, retrieve (or roll if null) // should I allow negatives?
-        /// _config.Evaluate("1d4") // not found in map, so evaluate expression
+        /// _gameDefinition.Evaluate("!Sunrise") // found in map, prefix "!" means reroll and set
+        /// _gameDefinition.Evaluate("Sunrise") // found in map, retrieve (or roll if null) // should I allow negatives?
+        /// _gameDefinition.Evaluate("1d4") // not found in map, so evaluate expression
         /// TODO: Might want to use something other than "!" since it's meaningful in yaml
         /// </summary>
         /// <param name="expression"></param>

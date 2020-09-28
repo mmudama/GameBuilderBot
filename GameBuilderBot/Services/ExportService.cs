@@ -19,7 +19,7 @@ namespace GameBuilderBot.Services
             _service = services;
         }
 
-        public string ExportGameConfigToFile(FileType fileType, GameConfig config)
+        public string ExportGameConfigToFile(FileType fileType, GameDefinition config)
         {
             GameFile game = new GameFile();
 
@@ -64,7 +64,7 @@ namespace GameBuilderBot.Services
             return _serializer.SerializeToString(game, fileType);
         }
 
-        public void ExportGameState(GameConfig config, ICommandContext discordContext)
+        public void ExportGameState(GameDefinition config, ICommandContext discordContext)
         {
             new GameStateExporterJsonFile(_service).SaveGameState(config, discordContext);
         }

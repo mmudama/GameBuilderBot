@@ -7,7 +7,7 @@ namespace GameBuilderBot.Services
 {
     public abstract class GameStateExporter
     {
-        public void SaveGameState(GameConfig config, ICommandContext discordContext)
+        public void SaveGameState(GameDefinition config, ICommandContext discordContext)
         {
             var gameState = new GameState();
             gameState.ChannelId = discordContext.Channel.Id;

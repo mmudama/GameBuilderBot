@@ -15,13 +15,13 @@ namespace GameBuilderBot.Services
 {
     public class ResponseService
     {
-        private readonly GameConfig _config;
+        private readonly GameDefinition _gameDefinition;
         private readonly ExportService _exportService;
         private readonly IServiceProvider _service;
 
         public ResponseService(IServiceProvider services)
         {
-            _config = services.GetRequiredService<GameConfig>();
+            _gameDefinition = services.GetRequiredService<GameDefinition>();
             _exportService = services.GetRequiredService<ExportService>();
             _service = services;
         }
@@ -33,9 +33,9 @@ namespace GameBuilderBot.Services
                 var response = new StringBuilder()
                     .AppendLine("> **Help:**");
 
-                foreach (string k in _config.ChoiceMap.Keys)
+                foreach (string k in _gameDefinition.ChoiceMap.Keys)
                 {
-                    Choice c = _config.ChoiceMap[k];
+                    Choice c = _gameDefinition.ChoiceMap[k];
                     if (c.IsPrimary)
                     {
                         response.AppendLine(String.Format("`!game {0}`: {1}", k, c.Description));
@@ -67,7 +67,7 @@ namespace GameBuilderBot.Services
             {
                 StringBuilder sbResponse = new StringBuilder();
 
-                foreach (Choice c in _config.ChoiceMap.Values)
+                foreach (Choice c in _gameDefinition.ChoiceMap.Values)
                 {
                     sbResponse.AppendLine(c.GetSummary());
                 }
@@ -95,7 +95,7 @@ namespace GameBuilderBot.Services
 
         internal Task LoadGameStateForUser(string gameName, SocketCommandContext context)
         {
-            new GameStateImporter(_service).LoadGameState(_config, context);
+            new GameStateImporter(_service).LoadGameState(_gameDefinition, context);
             return context.Channel.SendMessageAsync(GetFieldValuesForUser(new[] { "all" }));
         }
 
@@ -110,9 +110,9 @@ namespace GameBuilderBot.Services
 
                 foreach (string key in variables)
                 {
-                    if (_config.Fields.ContainsKey(key))
+                    if (_gameDefinition.Fields.ContainsKey(key))
                     {
-                        _config.Fields.Remove(key);
+                        _gameDefinition.Fields.Remove(key);
                     }
                 }
 
@@ -139,7 +139,7 @@ namespace GameBuilderBot.Services
                 switch (fileType)
                 {
                     case "JSON":
-                        fileContents = _exportService.ExportGameConfigToFile(FileType.JSON, _config);
+                        fileContents = _exportService.ExportGameConfigToFile(FileType.JSON, _gameDefinition);
                         break;
 
                     default:
@@ -171,7 +171,7 @@ namespace GameBuilderBot.Services
         {
             try
             {
-                expression = _config.ReplaceVariablesWithValues(expression);
+                expression = _gameDefinition.ReplaceVariablesWithValues(expression);
 
                 var response = new StringBuilder("> Evaluate:").AppendLine();
 
@@ -215,7 +215,7 @@ namespace GameBuilderBot.Services
 
                 if (fieldNames.Length == 0 || getAll)
                 {
-                    foreach (string key in _config.Fields.Keys)
+                    foreach (string key in _gameDefinition.Fields.Keys)
                     {
                         response.AppendLine(PrettyPrintField(key));
                     }
@@ -241,9 +241,9 @@ namespace GameBuilderBot.Services
             var response = new StringBuilder();
 
             string value;
-            if (_config.FieldHasValue(fieldName))
+            if (_gameDefinition.FieldHasValue(fieldName))
             {
-                value = _config.Fields[fieldName].Value.ToString();
+                value = _gameDefinition.Fields[fieldName].Value.ToString();
             }
             else
             {
@@ -255,9 +255,9 @@ namespace GameBuilderBot.Services
                 .Append(": ")
                 .AppendFormat("{0}", value);
 
-            if (_config.FieldHasExpression(fieldName))
+            if (_gameDefinition.FieldHasExpression(fieldName))
             {
-                response.AppendFormat(" ({0})", _config.Fields[fieldName].Expression);
+                response.AppendFormat(" ({0})", _gameDefinition.Fields[fieldName].Expression);
             }
 
             response.Append("`");
@@ -282,7 +282,7 @@ namespace GameBuilderBot.Services
         {
             if (!int.TryParse(expression, out int result))
             {
-                expression = _config.ReplaceVariablesWithValues(expression);
+                expression = _gameDefinition.ReplaceVariablesWithValues(expression);
                 result = DiceRollService.Roll(expression);
             }
 
@@ -312,21 +312,21 @@ namespace GameBuilderBot.Services
 
                 object oldValue = null;
 
-                if (_config.FieldHasValue(fieldName))
+                if (_gameDefinition.FieldHasValue(fieldName))
                 {
-                    oldValue = _config.Fields[fieldName].Value;
+                    oldValue = _gameDefinition.Fields[fieldName].Value;
                 }
 
-                if (_config.Fields.ContainsKey(fieldName))
+                if (_gameDefinition.Fields.ContainsKey(fieldName))
                 {
-                    _config.Fields[fieldName].Value = value;
+                    _gameDefinition.Fields[fieldName].Value = value;
                 }
                 else
                 {
-                    _config.Fields[fieldName] = new Field(expression, value.ToString());
+                    _gameDefinition.Fields[fieldName] = new Field(expression, value.ToString());
                 }
 
-                _exportService.ExportGameState(_config, discordContext);
+                _exportService.ExportGameState(_gameDefinition, discordContext);
 
                 response = OutputResponseForCalculateFieldValue(fieldName, oldValue);
             }
@@ -341,7 +341,7 @@ namespace GameBuilderBot.Services
             try
             {
                 var sbResponse = new StringBuilder();
-                sbResponse.AppendFormat("`{0} = {1}", fieldName, _config.Fields[fieldName].Value);
+                sbResponse.AppendFormat("`{0} = {1}", fieldName, _gameDefinition.Fields[fieldName].Value);
 
                 if (oldValue != null)
                 {
@@ -373,12 +373,12 @@ namespace GameBuilderBot.Services
         {
             int value = 0;
 
-            if (_config.FieldHasValue(fieldName))
+            if (_gameDefinition.FieldHasValue(fieldName))
             {
-                value = (int)_config.Fields[fieldName].Value;
+                value = (int)_gameDefinition.Fields[fieldName].Value;
             }
 
-            expression = _config.ReplaceVariablesWithValues(expression);
+            expression = _gameDefinition.ReplaceVariablesWithValues(expression);
             return value - DiceRollService.Roll(expression);
         }
 
@@ -399,12 +399,12 @@ namespace GameBuilderBot.Services
         {
             int value = 0;
 
-            if (_config.FieldHasValue(fieldName))
+            if (_gameDefinition.FieldHasValue(fieldName))
             {
-                value = Convert.ToInt32(_config.Fields[fieldName].Value.ToString());
+                value = Convert.ToInt32(_gameDefinition.Fields[fieldName].Value.ToString());
             }
 
-            MathExpression mathexpression = new MathExpression(expression, _config.Fields);
+            MathExpression mathexpression = new MathExpression(expression, _gameDefinition.Fields);
             return value + Convert.ToInt32(mathexpression.Evaluate().ToString());
         }
 
@@ -439,10 +439,10 @@ namespace GameBuilderBot.Services
 
             StringBuilder response = new StringBuilder();
 
-            if (_config.ChoiceMap.ContainsKey(choice.ToLower()))
+            if (_gameDefinition.ChoiceMap.ContainsKey(choice.ToLower()))
             {
                 response.AppendLine((string.Format("**{0}**", choice)));
-                Choice c = _config.ChoiceMap[choice.ToLower()];
+                Choice c = _gameDefinition.ChoiceMap[choice.ToLower()];
 
                 switch (c.Distribution)
                 {
@@ -501,7 +501,7 @@ namespace GameBuilderBot.Services
                 var rolls = new List<int>();
                 foreach (string expression in o.Rolls)
                 {
-                    rolls.Add(GameConfig.CalculateExpressionAndSometimesSetFieldValue(expression, _config.Fields));
+                    rolls.Add(GameDefinition.CalculateExpressionAndSometimesSetFieldValue(expression, _gameDefinition.Fields));
                 }
 
                 try
