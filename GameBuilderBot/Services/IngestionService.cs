@@ -1,21 +1,18 @@
-﻿using GameBuilderBot.Models;
+﻿using GameBuilderBot.Common;
+using GameBuilderBot.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace GameBuilderBot.Services
 {
     public class IngestionService
     {
-        public static GameConfig Ingest(string fileName)
+        public static GameDefinition Ingest(string fileName, Serializer serializer)
         {
             var choiceMap = new Dictionary<string, Choice>();
             var fields = new Dictionary<string, Field>();
 
-            var fileContents = File.ReadAllText(fileName);
-
-            var deserializer = new YamlDotNet.Serialization.Deserializer();
-            GameFile gameFile = deserializer.Deserialize<GameFile>(fileContents);
+            GameFile gameFile = serializer.DeserializeFromFile<GameFile>(fileName, FileType.YAML);
 
             foreach (var key in gameFile.Fields.Keys)
             {
@@ -41,7 +38,7 @@ namespace GameBuilderBot.Services
                 Console.WriteLine(c.GetSummary());
             }
 
-            return new GameConfig(choiceMap, fields);
+            return new GameDefinition(gameFile.Name, choiceMap, fields);
         }
     }
 }

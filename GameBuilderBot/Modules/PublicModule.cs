@@ -31,11 +31,11 @@ namespace GameBuilderBot.Modules
         public Task GetAsync(params string[] inputs) => ReplyAsync(ResponseService.GetFieldValuesForUser(inputs));
 
         [Command("set")]
-        public Task SetAsync(params string[] inputs) => ReplyAsync(ResponseService.SetFieldValueForUser(inputs));
+        public Task SetAsync(params string[] inputs) => ResponseService.SetFieldValueForUser(inputs, Context);
 
         [Command("Delete")]
         [Alias("del", "remove", "rm", "unset")]
-        public Task DeleteAsync(params string[] inputs) => ReplyAsync(ResponseService.DeleteFieldValueForUser(inputs));
+        public Task DeleteAsync(params string[] inputs) => ResponseService.DeleteFieldValueForUser(inputs, Context);
 
         [Command("evaluate")]
         [Alias("eval")]
@@ -43,13 +43,16 @@ namespace GameBuilderBot.Modules
 
         [Command("add")]
         [Alias("+")]
-        public Task AddAsync(params string[] inputs) => ReplyAsync(ResponseService.AddFieldValueForUser(inputs));
+        public Task AddAsync(params string[] inputs) => ResponseService.AddFieldValueForUser(inputs, Context);
 
         [Command("subtract")]
         [Alias("sub", "-")]
-        public Task SubAsync(params string[] inputs) => ReplyAsync(ResponseService.SubtractFieldValueForUser(inputs));
+        public Task SubAsync(params string[] inputs) => ResponseService.SubtractFieldValueForUser(inputs, Context);
 
         [Command("export")]
         public Task ExportAsync([Remainder] string fileType) => ResponseService.ExportConfigAsFileForUser(fileType, Context);
+
+        [Command("load")]
+        public Task LoadGameStateAsync(string gameName) => ResponseService.LoadGameStateForUser(gameName, Context);
     }
 }

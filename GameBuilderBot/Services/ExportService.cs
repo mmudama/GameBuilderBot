@@ -1,20 +1,26 @@
-﻿using GameBuilderBot.Models;
+﻿using Discord.Commands;
+using GameBuilderBot.Common;
+using GameBuilderBot.Models;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
-using System.Text.Json;
 
 namespace GameBuilderBot.Services
 {
-    public enum FileType
-    {
-        JSON,
-        YAML
-    }
-
     public class ExportService
     {
-        public static string Export(FileType fileType, GameConfig config)
+        private GameStateExporter _exporter;
+        private Serializer _serializer;
+        private IServiceProvider _service;
+
+        public ExportService(IServiceProvider services)
         {
-            string output = "";
+            _serializer = services.GetRequiredService<Serializer>();
+            _service = services;
+        }
+
+        public string ExportGameConfigToFile(FileType fileType, GameDefinition config)
+        {
             GameFile game = new GameFile();
 
             var choices = new List<ChoiceIngest>();
@@ -27,23 +33,27 @@ namespace GameBuilderBot.Services
 
             foreach (Choice c in config.ChoiceMap.Values)
             {
-                ChoiceIngest choice = new ChoiceIngest();
-                choice.Name = c.Name;
-                choice.Distribution = c.Distribution;
-                choice.Text = c.Text;
-                choice.IsPrimary = c.IsPrimary;
-                choice.Description = c.Description;
+                ChoiceIngest choice = new ChoiceIngest
+                {
+                    Name = c.Name,
+                    Distribution = c.Distribution,
+                    Text = c.Text,
+                    IsPrimary = c.IsPrimary,
+                    Description = c.Description
+                };
 
                 List<OutcomeIngest> outcomes = new List<OutcomeIngest>();
                 foreach (Outcome o in c.outcomeMap.Values)
                 {
-                    OutcomeIngest oi = new OutcomeIngest();
-                    oi.Name = o.Name;
-                    oi.Weight = o.Weight;
-                    oi.Text = o.Text;
-                    oi.Choice = o.Choice;
-                    oi.Rolls = o.Rolls;
-                    outcomes.Add(oi);
+                    outcomes.Add(
+                        new OutcomeIngest
+                        {
+                            Name = o.Name,
+                            Weight = o.Weight,
+                            Text = o.Text,
+                            Choice = o.Choice,
+                            Rolls = o.Rolls
+                        });
                 }
                 choice.Outcomes = outcomes.ToArray();
                 choices.Add(choice);
@@ -51,18 +61,12 @@ namespace GameBuilderBot.Services
 
             game.Choices = choices.ToArray();
 
-            if (fileType == FileType.JSON)
-            {
-                output = JsonSerializer.Serialize(game);
-            }
-            else if (fileType == FileType.YAML)
-            {
-                var serializer = new YamlDotNet.Serialization.Serializer();
-                output = serializer.Serialize(game);
-            }
-            else output = "Invalid file type";
+            return _serializer.SerializeToString(game, fileType);
+        }
 
-            return output;
+        public void ExportGameState(GameDefinition config, ICommandContext discordContext)
+        {
+            new GameStateExporterJsonFile(_service).SaveGameState(config, discordContext);
         }
     }
 }
