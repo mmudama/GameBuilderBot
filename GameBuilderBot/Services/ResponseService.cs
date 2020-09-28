@@ -17,11 +17,13 @@ namespace GameBuilderBot.Services
     {
         private readonly GameConfig _config;
         private readonly ExportService _exportService;
+        private readonly IServiceProvider _service;
 
         public ResponseService(IServiceProvider services)
         {
             _config = services.GetRequiredService<GameConfig>();
             _exportService = services.GetRequiredService<ExportService>();
+            _service = services;
         }
 
         public string HelpForUser()
@@ -93,7 +95,7 @@ namespace GameBuilderBot.Services
 
         internal Task LoadGameStateForUser(string gameName, SocketCommandContext context)
         {
-            new GameStateImporter().LoadGameState(_config, context);
+            new GameStateImporter(_service).LoadGameState(_config, context);
             return context.Channel.SendMessageAsync(GetFieldValuesForUser(new[] { "all" }));
         }
 

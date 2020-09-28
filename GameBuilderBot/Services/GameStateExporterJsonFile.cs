@@ -1,26 +1,29 @@
 ﻿using GameBuilderBot.Common;
 using GameBuilderBot.Exceptions;
 using GameBuilderBot.Models;
-using Newtonsoft.Json;
+using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.IO;
 
 namespace GameBuilderBot.Services
 {
-    class GameStateExporterJsonFile : GameStateExporter
+    internal class GameStateExporterJsonFile : GameStateExporter
     {
+        protected Serializer _serializer;
+
+        public GameStateExporterJsonFile(IServiceProvider service)
+        {
+            _serializer = service.GetRequiredService<Serializer>();
+        }
+
         public override void SaveGameStateConcrete(GameState gameState)
         {
             string fileName = string.Format("c:\\temp\\GameBuilderBot.{0}.json", DateTime.Now.ToString("yyyy’-‘MM’-‘dd’T’HH’:’mm’:’ss"));
 
             try
             {
-
                 fileName = string.Format("c:\\Temp\\GameBuilderBot.{0}.{1}.json", gameState.ChannelId, StringUtils.SanitizeForFileName(gameState.Name));
-                string stateAsString = JsonConvert.SerializeObject(gameState);
-                var streamWriter = new StreamWriter(fileName);
-                streamWriter.Write(stateAsString);
-                streamWriter.Close();
+
+                _serializer.SerializeToFile(gameState, FileType.JSON, fileName);
             }
             catch (Exception e)
             {

@@ -5,7 +5,7 @@ namespace GameBuilderBot.Models
 {
     public class GameConfig
     {
-        public string Name;
+        public string Name { get; set; }
 
         public Dictionary<string, Choice> ChoiceMap;
         public Dictionary<string, Field> Fields { get; set; }

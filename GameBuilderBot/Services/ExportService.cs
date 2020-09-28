@@ -1,29 +1,26 @@
 ﻿using Discord.Commands;
+using GameBuilderBot.Common;
 using GameBuilderBot.Models;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
-using System.Text.Json;
 
 namespace GameBuilderBot.Services
 {
-    public enum FileType
-    {
-        JSON,
-        YAML
-    }
-
     public class ExportService
     {
+        private GameStateExporter _exporter;
+        private Serializer _serializer;
+        private IServiceProvider _service;
 
-        GameStateExporter exporter;
-
-        public ExportService()
+        public ExportService(IServiceProvider services)
         {
-
+            _serializer = services.GetRequiredService<Serializer>();
+            _service = services;
         }
 
         public string ExportGameConfigToFile(FileType fileType, GameConfig config)
         {
-            string output;
             GameFile game = new GameFile();
 
             var choices = new List<ChoiceIngest>();
@@ -64,24 +61,12 @@ namespace GameBuilderBot.Services
 
             game.Choices = choices.ToArray();
 
-            if (fileType == FileType.JSON)
-            {
-                output = JsonSerializer.Serialize(game);
-            }
-            else if (fileType == FileType.YAML)
-            {
-                var serializer = new YamlDotNet.Serialization.Serializer();
-                output = serializer.Serialize(game);
-            }
-            else output = "Invalid file type";
-
-            return output;
+            return _serializer.SerializeToString(game, fileType);
         }
 
         public void ExportGameState(GameConfig config, ICommandContext discordContext)
         {
-            new GameStateExporterJsonFile().SaveGameState(config, discordContext);
-
+            new GameStateExporterJsonFile(_service).SaveGameState(config, discordContext);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using GameBuilderBot.Common;
 using GameBuilderBot.Models;
 using GameBuilderBot.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,7 +57,12 @@ namespace GameBuilderBot
 
         private ServiceProvider ConfigureServices(string fileName)
         {
-            GameConfig config = IngestionService.Ingest(fileName);
+            Serializer serializer = new Serializer();
+
+            string appConfigFileName = Environment.GetEnvironmentVariable("GBB_CONFIG_FILE");
+            GameBuilderBotConfig botConfig = new GameBuilderBotConfigFactory(serializer).GetBotConfig(appConfigFileName);
+
+            GameConfig config = IngestionService.Ingest(fileName, serializer);
 
             return new ServiceCollection()
                 .AddSingleton<DiscordSocketClient>()
@@ -67,6 +73,7 @@ namespace GameBuilderBot
                 .AddSingleton<ResponseService>()
                 .AddSingleton<ExportService>()
                 .AddSingleton<GameStateImporter>()
+                .AddSingleton<Serializer>()
                 .BuildServiceProvider();
         }
     }

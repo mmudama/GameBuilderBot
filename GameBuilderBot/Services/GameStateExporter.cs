@@ -29,7 +29,6 @@ namespace GameBuilderBot.Services
 
         public abstract void SaveGameStateConcrete(GameState gameState);
 
-
         protected static string GetFriendlyName(SocketTextChannel channel)
         {
             return string.Format("{0};{1}", channel.Guild.Name, channel.Name);
@@ -39,8 +38,5 @@ namespace GameBuilderBot.Services
         {
             return channel.Recipient.Username;
         }
-
-
-
     }
 }
