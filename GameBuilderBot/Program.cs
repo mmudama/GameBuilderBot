@@ -74,6 +74,7 @@ namespace GameBuilderBot
                 .AddSingleton<ExportService>()
                 .AddSingleton<GameStateImporter>()
                 .AddSingleton<Serializer>()
+                .AddSingleton(bc => botConfig)
                 .BuildServiceProvider();
         }
     }
