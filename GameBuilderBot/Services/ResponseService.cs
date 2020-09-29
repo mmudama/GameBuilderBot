@@ -1,13 +1,10 @@
 ﻿using Discord.Commands;
-using GameBuilderBot.Common;
 using GameBuilderBot.Exceptions;
-using GameBuilderBot.ExpressionHandling;
 using GameBuilderBot.Models;
+using GameBuilderBot.Runners;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,34 +12,80 @@ namespace GameBuilderBot.Services
 {
     public class ResponseService
     {
-        private readonly GameDefinition _gameDefinition;
+        private readonly GameHandlingService _gameService;
         private readonly ExportService _exportService;
-        private readonly IServiceProvider _service;
+        private readonly DeleteVariableRunner _deleteVariableRunner;
+        private readonly EvaluateExpressionRunner _evaluateExpressionRunner;
+        private readonly PrettyPrintVariableRunner _prettyPrintVariableRunner;
+        private readonly RestoreGameRunner _restoreGameRunner;
+        private readonly RollEventRunner _rollEventRunner;
+        private readonly StartGameRunner _startGameRunner;
+
+        private readonly SetValueRunner _setValueRunner;
+        private readonly AddValueRunner _addValueRunner;
+        private readonly SubtractValueRunner _subtractValueRunner;
+
+        private readonly List<CommandRunner> _runners = new List<CommandRunner>();
+
+        private const string NO_ACTIVE_GAME_RESPONSE = "No active game found. Type `!start` to start a game.";
 
         public ResponseService(IServiceProvider services)
         {
-            _gameDefinition = services.GetRequiredService<GameDefinition>();
+            _gameService = services.GetRequiredService<GameHandlingService>();
             _exportService = services.GetRequiredService<ExportService>();
-            _service = services;
+
+            // Registration order matters for help message
+            _startGameRunner = RegisterRunner(new StartGameRunner(_gameService));
+            _restoreGameRunner = RegisterRunner(new RestoreGameRunner(_gameService));
+            _rollEventRunner = RegisterRunner(new RollEventRunner(_gameService));
+            _deleteVariableRunner = RegisterRunner(new DeleteVariableRunner(_gameService, _exportService));
+            _prettyPrintVariableRunner = RegisterRunner(new PrettyPrintVariableRunner(_gameService));
+            _setValueRunner = RegisterRunner(new SetValueRunner(_gameService, _exportService));
+            _subtractValueRunner = RegisterRunner(new SubtractValueRunner(_gameService, _exportService));
+            _addValueRunner = RegisterRunner(new AddValueRunner(_gameService, _exportService));
+            _evaluateExpressionRunner = RegisterRunner(new EvaluateExpressionRunner(_gameService));
+        }
+
+        private T RegisterRunner<T>(T runner) where T : CommandRunner
+        {
+            _runners.Add(runner);
+            return runner;
         }
 
         public string HelpForUser()
         {
+            StringBuilder sbResponse = new StringBuilder();
+
+            sbResponse.AppendLine("Welcome to the Game Builder Bot!");
+
+            foreach (CommandRunner runner in _runners)
+            {
+                sbResponse.AppendLine(runner.OneLinerHelp());
+            }
+
+            return sbResponse.ToString();
+        }
+
+        // TODO maybe it should automatically load the game, and offer a delete all or reset all option
+        // once values no longer have expressions
+        internal string RestoreGame(ulong channelId)
+        {
             try
             {
-                var response = new StringBuilder()
-                    .AppendLine("> **Help:**");
-
-                foreach (string k in _gameDefinition.ChoiceMap.Keys)
+                StringBuilder sbResponse = new StringBuilder();
+                if (_restoreGameRunner.RestoreGame(channelId))
                 {
-                    Choice c = _gameDefinition.ChoiceMap[k];
-                    if (c.IsPrimary)
-                    {
-                        response.AppendLine(String.Format("`!game {0}`: {1}", k, c.Description));
-                    }
+                    sbResponse.AppendLine("Your game has been restored");
+                    sbResponse.Append(GetFieldValuesForUser(channelId, new[] { "all" }));
+                } else
+                {
+                    sbResponse.Append("Could not find any previously saved state");
                 }
-
-                return response.ToString();
+                return sbResponse.ToString();
+            }
+            catch (NoActiveGameException)
+            {
+                return NO_ACTIVE_GAME_RESPONSE;
             }
             catch (Exception e)
             {
@@ -50,110 +93,52 @@ namespace GameBuilderBot.Services
             }
         }
 
-        /// <summary>
-        /// Creates a pretty printed, nested summary of all loaded Choice and Outcome objects.
-        /// Sends back a task that either DMs the output directly to the user or, if the
-        /// output is too long for a DM, sends a file.
-        ///
-        /// The output does not represent all object fields and does not conform to any standardized
-        /// format - it's just intended to make it easier for a human to review nested Choices.
-        ///
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public Task SummarizeEventDataForUser(SocketCommandContext context)
+        internal string StartGame(string[] inputs, SocketCommandContext context)
         {
+            StringBuilder sbResponse = new StringBuilder();
             try
             {
-                StringBuilder sbResponse = new StringBuilder();
-
-                foreach (Choice c in _gameDefinition.ChoiceMap.Values)
+                if (_startGameRunner.DisplayAllGames(inputs, out List<GameDefinition> definitions))
                 {
-                    sbResponse.AppendLine(c.GetSummary());
-                }
+                    sbResponse.AppendLine("To start a game:");
 
-                string response = sbResponse.ToString();
-
-                if (response.Length < 2000)
-                {
-                    return context.Channel.SendMessageAsync(response);
+                    for (int i = 0; i < definitions.Count; i++)
+                    {
+                        sbResponse.AppendFormat("`!start {0}` for ", i + 1);
+                        sbResponse.AppendLine(definitions[i].Name);
+                    }
                 }
                 else
                 {
-                    Stream stream = StreamUtils.GetStreamFromString(response);
+                    string gameName = _startGameRunner.StartGame(inputs, context.Channel.Id);
 
-                    string fileName = string.Format("{0}_summary.txt", context.Channel.Name);
-                    return context.Channel.SendFileAsync(stream, fileName, "The summary is too long to send as a DM; " +
-                        "sending it to you as a file instead.");
+                    sbResponse.AppendFormat("Loaded game {0}", gameName);
+                    sbResponse.AppendLine();
+                    sbResponse.AppendLine("If you want to restore your previous game state, type `!restore`");
+                    sbResponse.AppendLine("To see what you can do next, type `!game help`");
                 }
+            }
+            catch (NoActiveGameException)
+            {
+                sbResponse = new StringBuilder(NO_ACTIVE_GAME_RESPONSE);
             }
             catch (Exception e)
             {
-                return context.Channel.SendMessageAsync(e.Message);
+                sbResponse = new StringBuilder(e.Message);
             }
+            return sbResponse.ToString();
         }
 
-        internal Task LoadGameStateForUser(string gameName, SocketCommandContext context)
-        {
-            new GameStateImporter(_service).LoadGameState(_gameDefinition, context);
-            return context.Channel.SendMessageAsync(GetFieldValuesForUser(new[] { "all" }));
-        }
-
-        internal Task DeleteFieldValueForUser(string[] variables, SocketCommandContext discordContext)
-        {
-            try
-            {
-                if (variables.Length < 1)
-                {
-                    throw new GameBuilderBotException("Delete requires at least one parameter, e.g. `!delete foo`");
-                }
-
-                foreach (string key in variables)
-                {
-                    if (_gameDefinition.Fields.ContainsKey(key))
-                    {
-                        _gameDefinition.Fields.Remove(key);
-                    }
-                }
-
-                return discordContext.Channel.SendMessageAsync(String.Format("Deleted variables: {0}", String.Join(", ", variables)));
-            }
-            catch (Exception e)
-            {
-                return discordContext.Channel.SendMessageAsync(e.Message);
-            }
-        }
-
-        internal Task ExportConfigAsFileForUser(string fileType, SocketCommandContext context)
+        internal string DeleteFieldValueForUser(string[] variables, SocketCommandContext discordContext)
         {
             try
             {
-                if (fileType.Length == 0)
-                {
-                    return context.Channel.SendMessageAsync("> Missing parameter filetype");
-                }
-
-                fileType = fileType.ToUpper();
-
-                string fileContents;
-                switch (fileType)
-                {
-                    case "JSON":
-                        fileContents = _exportService.ExportGameConfigToFile(FileType.JSON, _gameDefinition);
-                        break;
-
-                    default:
-                        return context.Channel.SendMessageAsync("> Unsupported filetype");
-                }
-
-                Stream stream = StreamUtils.GetStreamFromString(fileContents);
-
-                string fileName = string.Format("game_state.txt", context.Channel.Name);
-                return context.Channel.SendFileAsync(stream, fileName);
+                _deleteVariableRunner.Delete(variables, discordContext);
+                return String.Format("Deleted variables: {0}", String.Join(", ", variables));
             }
             catch (Exception e)
             {
-                return context.Channel.SendMessageAsync(e.Message);
+                return e.Message;
             }
         }
 
@@ -167,27 +152,12 @@ namespace GameBuilderBot.Services
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        internal string EvaluateExpressionForUser(string expression)
+        internal string EvaluateExpressionForUser(string expression, ulong channelId)
         {
             try
             {
-                expression = _gameDefinition.ReplaceVariablesWithValues(expression);
-
-                var response = new StringBuilder("> Evaluate:").AppendLine();
-
-                int value = -1;
-
-                try
-                {
-                    value = DiceRollService.Roll(expression);
-                }
-                catch (Exception)
-                {
-                    response.AppendFormat("Failure attempting to evaluate `{0}`", expression).AppendLine();
-                }
-
-                response.AppendFormat("`{0} = {1}`", expression, value).AppendLine();
-                return response.ToString();
+                int value = _evaluateExpressionRunner.Evaluate(expression, channelId);
+                return string.Format("`{0} = {1}`", expression, value);
             }
             catch (Exception e)
             {
@@ -203,32 +173,15 @@ namespace GameBuilderBot.Services
         /// </summary>
         /// <param name="fieldNames"></param>
         /// <returns></returns>
-        internal string GetFieldValuesForUser(string[] fieldNames)
+        internal string GetFieldValuesForUser(ulong channelId, string[] fieldNames)
         {
             try
             {
-                StringBuilder response = new StringBuilder();
-
-                bool getAll = fieldNames.Length == 1 && fieldNames[0].ToLower().Equals("all");
-
-                response.AppendLine("Here you go!");
-
-                if (fieldNames.Length == 0 || getAll)
-                {
-                    foreach (string key in _gameDefinition.Fields.Keys)
-                    {
-                        response.AppendLine(PrettyPrintField(key));
-                    }
-                }
-                else
-                {
-                    foreach (string s in fieldNames)
-                    {
-                        response.AppendLine(PrettyPrintField(s));
-                    }
-                }
-
-                return response.ToString();
+                return _prettyPrintVariableRunner.PrettyPrint(fieldNames, channelId);
+            }
+            catch (NoActiveGameException)
+            {
+                return NO_ACTIVE_GAME_RESPONSE;
             }
             catch (Exception e)
             {
@@ -236,40 +189,12 @@ namespace GameBuilderBot.Services
             }
         }
 
-        protected string PrettyPrintField(string fieldName)
-        {
-            var response = new StringBuilder();
-
-            string value;
-            if (_gameDefinition.FieldHasValue(fieldName))
-            {
-                value = _gameDefinition.Fields[fieldName].Value.ToString();
-            }
-            else
-            {
-                value = "**Undefined**";
-            }
-
-            response.Append("`")
-                .Append(fieldName)
-                .Append(": ")
-                .AppendFormat("{0}", value);
-
-            if (_gameDefinition.FieldHasExpression(fieldName))
-            {
-                response.AppendFormat(" ({0})", _gameDefinition.Fields[fieldName].Expression);
-            }
-
-            response.Append("`");
-
-            return response.ToString();
-        }
-
         internal Task SetFieldValueForUser(string[] FieldNameAndValue, SocketCommandContext discordContext)
         {
             try
             {
-                CalculateFieldValue(FieldNameAndValue, CalculateFieldValueByValue, discordContext, out string response);
+                (object oldValue, object newValue) = _setValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext);
+                string response = AssignmentResponse(FieldNameAndValue[0], oldValue, newValue);
                 return discordContext.Channel.SendMessageAsync(response);
             }
             catch (Exception e)
@@ -278,70 +203,12 @@ namespace GameBuilderBot.Services
             }
         }
 
-        private int CalculateFieldValueByValue(string fieldName, string expression)
-        {
-            if (!int.TryParse(expression, out int result))
-            {
-                expression = _gameDefinition.ReplaceVariablesWithValues(expression);
-                result = DiceRollService.Roll(expression);
-            }
-
-            return result;
-        }
-
-        private void CalculateFieldValue(string[] FieldNameAndValue, Func<string, string, int> CalculateValue,
-            SocketCommandContext discordContext, out string response)
-        {
-            try
-            {
-                if (FieldNameAndValue.Length != 2)
-                {
-                    // TODO it's not just set! it's also used by add and delete
-                    throw new GameBuilderBotException("Set takes two arguments. Try `!set foo 100` or `!set foo 1d4`");
-                }
-
-                string fieldName = FieldNameAndValue[0].ToLower();
-                string expression = FieldNameAndValue[1];
-                int value = CalculateValue(fieldName, expression);
-
-                if (int.TryParse(expression, out _))
-                {
-                    // The second user parameter was an explicit integer value, not an expression
-                    expression = null;
-                }
-
-                object oldValue = null;
-
-                if (_gameDefinition.FieldHasValue(fieldName))
-                {
-                    oldValue = _gameDefinition.Fields[fieldName].Value;
-                }
-
-                if (_gameDefinition.Fields.ContainsKey(fieldName))
-                {
-                    _gameDefinition.Fields[fieldName].Value = value;
-                }
-                else
-                {
-                    _gameDefinition.Fields[fieldName] = new Field(expression, value.ToString());
-                }
-
-                _exportService.ExportGameState(_gameDefinition, discordContext);
-
-                response = OutputResponseForCalculateFieldValue(fieldName, oldValue);
-            }
-            catch (Exception e)
-            {
-                response = e.Message;
-            }
-        }
-
-        private string OutputResponseForCalculateFieldValue(string fieldName, object oldValue)
+        private string AssignmentResponse(string fieldName, object oldValue, object newValue)
         {
             try
             {
                 var sbResponse = new StringBuilder();
-                sbResponse.AppendFormat("`{0} = {1}", fieldName, _gameDefinition.Fields[fieldName].Value);
+                sbResponse.AppendFormat("`{0} = {1}", fieldName, newValue);
 
                 if (oldValue != null)
                 {
@@ -356,11 +223,12 @@ namespace GameBuilderBot.Services
             }
         }
 
-        internal Task SubtractFieldValueForUser(string[] objects, SocketCommandContext discordContext)
+        internal Task SubtractFieldValueForUser(string[] FieldNameAndValue, SocketCommandContext discordContext)
         {
             try
             {
-                CalculateFieldValue(objects, CalculateValueBySubtracting, discordContext, out string response);
+                (object oldValue, object newValue) = _subtractValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext);
+                string response = AssignmentResponse(FieldNameAndValue[0], oldValue, newValue);
                 return discordContext.Channel.SendMessageAsync(response);
             }
             catch (Exception e)
@@ -369,24 +237,12 @@ namespace GameBuilderBot.Services
             }
         }
 
-        private int CalculateValueBySubtracting(string fieldName, string expression)
-        {
-            int value = 0;
-
-            if (_gameDefinition.FieldHasValue(fieldName))
-            {
-                value = (int)_gameDefinition.Fields[fieldName].Value;
-            }
-
-            expression = _gameDefinition.ReplaceVariablesWithValues(expression);
-            return value - DiceRollService.Roll(expression);
-        }
-
-        internal Task AddFieldValueForUser(string[] objects, SocketCommandContext discordContext)
+        internal Task AddFieldValueForUser(string[] FieldNameAndValue, SocketCommandContext discordContext)
         {
             try
             {
-                CalculateFieldValue(objects, CalculateValueByAdding, discordContext, out string response);
+                (object oldValue, object newValue) = _addValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext);
+                string response = AssignmentResponse(FieldNameAndValue[0], oldValue, newValue);
                 return discordContext.Channel.SendMessageAsync(response);
             }
             catch (Exception e)
@@ -395,164 +251,20 @@ namespace GameBuilderBot.Services
             }
         }
 
-        private int CalculateValueByAdding(string fieldName, string expression)
-        {
-            int value = 0;
-
-            if (_gameDefinition.FieldHasValue(fieldName))
-            {
-                value = Convert.ToInt32(_gameDefinition.Fields[fieldName].Value.ToString());
-            }
-
-            MathExpression mathexpression = new MathExpression(expression, _gameDefinition.Fields);
-            return value + Convert.ToInt32(mathexpression.Evaluate().ToString());
-        }
-
-        public string RollEventsForUser(params string[] objects)
+        public string RollEventsForUser(SocketCommandContext discordContext, params string[] events)
         {
             try
             {
-                string response = HelpForUser();
-
-                if (objects.Length == 0 || objects[0].ToLower().Equals("help")) return response;
-
-                string choice = objects[0];
-
-                response = "> " + GetResponseForEventRoll(choice, 0);
-
-                return response;
+                return _rollEventRunner.RollEvent(events, discordContext);
+            }
+            catch (NoActiveGameException)
+            {
+                return NO_ACTIVE_GAME_RESPONSE;
             }
             catch (Exception e)
             {
                 return e.Message;
             }
-        }
-
-        public string GetResponseForEventRoll(string choice, int depth)
-        {
-            depth++;
-
-            if (depth > 20)
-            {
-                return "Too much nesting detected. Check your config file. Aborting!";
-            }
-
-            StringBuilder response = new StringBuilder();
-
-            if (_gameDefinition.ChoiceMap.ContainsKey(choice.ToLower()))
-            {
-                response.AppendLine((string.Format("**{0}**", choice)));
-                Choice c = _gameDefinition.ChoiceMap[choice.ToLower()];
-
-                switch (c.Distribution)
-                {
-                    case "Weighted":
-                        response.Append(GetResponseForWeightedChoice(c, depth));
-                        break;
-
-                    case "All":
-                        response.Append(GetResponseForDistributionAllChoice(c, depth));
-                        break;
-
-                    default:
-                        response.AppendLine(String.Format("\"{0}\" has an invalid Distribution", choice));
-                        break;
-                }
-            }
-            else
-            {
-                response.AppendLine(String.Format("unrecognized parameter **`{0}`**", choice));
-            }
-
-            if (response.Length == 0)
-            {
-                response.AppendLine("Something went wrong");
-            }
-            return response.ToString();
-        }
-
-        // TODO make this a member of Choice
-        private StringBuilder GetResponseForDistributionAllChoice(Choice c, int depth)
-        {
-            StringBuilder response = new StringBuilder();
-
-            foreach (Outcome o in c.outcomeMap.Values)
-            {
-                if (o.ChildChoice == null)
-                {
-                    response.AppendLine("\t" + GetResponseForOutcome(o));
-                }
-                else
-                {
-                    response.Append(GetResponseForEventRoll(o.ChildChoice.Name, depth));
-                }
-            }
-
-            return response;
-        }
-
-        // TODO make this a member of outcome
-        private string GetResponseForOutcome(Outcome o)
-        {
-            string response;
-
-            if (o.Rolls != null && o.Rolls.Length > 0)
-            {
-                var rolls = new List<int>();
-                foreach (string expression in o.Rolls)
-                {
-                    rolls.Add(GameDefinition.CalculateExpressionAndSometimesSetFieldValue(expression, _gameDefinition.Fields));
-                }
-
-                try
-                {
-                    response = String.Format(o.Text, rolls.Select(x => x.ToString()).ToArray());
-                    response = String.Format("**{0}**", response);
-                }
-                catch (FormatException)
-                {
-                    response = "**!! Number of rolls specified does not match string format. Check your config file.!!**";
-                }
-            }
-            else
-            {
-                response = o.Text;
-            }
-
-            return response;
-        }
-
-        // TODO make this a member of choice
-        private StringBuilder GetResponseForWeightedChoice(Choice c, int depth)
-        {
-            StringBuilder response = new StringBuilder();
-
-            int max = c.PossibleOutcomes.Length;
-            int roll = DiceRollService.Roll(max) - 1;
-
-            Outcome o = c.outcomeMap[c.PossibleOutcomes[roll]];
-
-            string outcome = GetResponseForOutcome(o);
-
-            if (max <= 1)
-            {
-                response.AppendLine(outcome);
-            }
-            else if (max == 2)
-            {
-                response.AppendLine(string.Format("Flipped a coin and got: **{0}**", outcome));
-            }
-            else
-            {
-                response.AppendLine(string.Format("[1d{0}: {1}] **{2}**", max, roll + 1, outcome));
-            }
-
-            if (o.ChildChoice != null)
-            {
-                response.Append(GetResponseForEventRoll(o.ChildChoice.Name, depth));
-            }
-
-            return response;
         }
     }
 }

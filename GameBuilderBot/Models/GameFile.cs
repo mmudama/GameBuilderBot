@@ -9,6 +9,5 @@ namespace GameBuilderBot.Models
         public Dictionary<string, FieldIngest> Fields { get; set; }
 
         public GameFile() { }
-
     }
 }

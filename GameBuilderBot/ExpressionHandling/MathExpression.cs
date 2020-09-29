@@ -1,18 +1,15 @@
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace GameBuilderBot.ExpressionHandling
 {
     public class MathExpression
     {
-        string RawExpression;
-        Dictionary<string, GameBuilderBot.Models.Field> Fields;
+        private string RawExpression;
+        private Dictionary<string, GameBuilderBot.Models.Field> Fields;
 
-        static char[] SupportedOperators = { '+', '-', '*', '/' };
+        private static char[] SupportedOperators = { '+', '-', '*', '/' };
 
         public MathExpression(string rawexpression, Dictionary<string, GameBuilderBot.Models.Field> fields)
         {
@@ -62,7 +59,7 @@ namespace GameBuilderBot.ExpressionHandling
                     if (Expression[current].Equals('('))
                     {
                         sublevel++;
-                    } 
+                    }
                     else if (Expression[current].Equals(')'))
                     {
                         if (sublevel > 0) sublevel--;
@@ -74,7 +71,7 @@ namespace GameBuilderBot.ExpressionHandling
                     string msg = "Failed to find closing parenthesis in expression: " + Expression;
                     throw new System.Exception(msg);
                 }
-                Expression = Expression.Substring(0, start - 1) + RecursiveEval(Expression.Substring(start, end - start)).ToString() + Expression.Substring(end + 1, Expression.Length - end);
+                Expression = $"{Expression.Substring(0, start - 1)}{RecursiveEval(Expression[start..end])}{Expression.Substring(end + 1, Expression.Length - end)}";
             }
 
             //Split apart based on operators and then perform each operation in order.
@@ -86,7 +83,7 @@ namespace GameBuilderBot.ExpressionHandling
 
             for (int currentoperandindex = 0; currentoperandindex < operands.Length; currentoperandindex++)
             {
-                if ((currentoperandindex+1) % 2 == 0)
+                if ((currentoperandindex + 1) % 2 == 0)
                 {
                     switch (operands[currentoperandindex])
                     {
@@ -94,8 +91,8 @@ namespace GameBuilderBot.ExpressionHandling
                         case "-": operation = "subtract"; break;
                         case "/": operation = "divide"; break;
                         case "*": operation = "multiple"; break;
-                        default: 
-                            string msg = "Invalid operand "+ operands[currentoperandindex] + " in expression: " + Expression;
+                        default:
+                            string msg = "Invalid operand " + operands[currentoperandindex] + " in expression: " + Expression;
                             throw new System.Exception(msg);
                     }
                     currentoperandindex++;
@@ -151,7 +148,7 @@ namespace GameBuilderBot.ExpressionHandling
         protected bool TryStringToDateTime(string input, out DateTime output)
         {
             input = input.Trim();
-           
+
             if (Regex.IsMatch(input, @"^([0-9]+):([0-9]+)$"))  //Handle HH:MM to allow simple hours and minutes math.
             {
                 string[] values = input.Split(':');
@@ -167,7 +164,7 @@ namespace GameBuilderBot.ExpressionHandling
         protected object ValueAdd(object first, object second)
         {
             //If either is a string treat as string.
-            if ( (first.GetType().Equals(typeof(string))) || (second.GetType().Equals(typeof(string))) )
+            if ((first.GetType().Equals(typeof(string))) || (second.GetType().Equals(typeof(string))))
             {
                 return first.ToString() + second.ToString();
             }

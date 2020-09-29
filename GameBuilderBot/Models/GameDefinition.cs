@@ -12,27 +12,11 @@ namespace GameBuilderBot.Models
         public string Name { get; set; }
 
         public Dictionary<string, Choice> ChoiceMap;
-        public Dictionary<string, Field> Fields { get; set; }
 
-        public GameDefinition(string name, Dictionary<string, Choice> choiceMap, Dictionary<string, Field> fields)
+        public GameDefinition(string name, Dictionary<string, Choice> choiceMap)
         {
             ChoiceMap = choiceMap;
-            Fields = fields;
             Name = name;
-        }
-
-        public bool FieldHasValue(string fieldName)
-        {
-            return Fields.ContainsKey(fieldName)
-                && !(Fields[fieldName] == null)
-                && !(Fields[fieldName].Value == null);
-        }
-
-        public bool FieldHasExpression(string fieldName)
-        {
-            return Fields.ContainsKey(fieldName)
-                && !(Fields[fieldName] == null)
-                && !(Fields[fieldName].Expression == null);
         }
 
         // TODO put CalculateExpressionAndSometimesSetFieldValue somewhere else? Maybe have a class just for parsing
@@ -85,22 +69,6 @@ namespace GameBuilderBot.Models
             }
 
             return result;
-        }
-
-        public string ReplaceVariablesWithValues(string expression)
-        {
-            string[] parts = expression.Split('#');
-
-            for (int i = 0; i < parts.Length; i++)
-            {
-                if (Fields.ContainsKey(parts[i]))
-                {
-                    parts[i] = Fields[parts[i]].Value.ToString();
-                }
-            }
-
-            expression = string.Join(" ", parts);
-            return expression;
         }
     }
 }

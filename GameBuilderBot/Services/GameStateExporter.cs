@@ -7,13 +7,8 @@ namespace GameBuilderBot.Services
 {
     public abstract class GameStateExporter
     {
-        public void SaveGameState(GameDefinition config, ICommandContext discordContext)
+        public void SaveGameState(GameState gameState, ICommandContext discordContext)
         {
-            var gameState = new GameState();
-            gameState.ChannelId = discordContext.Channel.Id;
-            gameState.Name = config.Name;
-            gameState.Fields = config.Fields;
-
             if (discordContext.Channel is SocketTextChannel)
             {
                 gameState.FriendlyName = GetFriendlyName((SocketTextChannel)discordContext.Channel);

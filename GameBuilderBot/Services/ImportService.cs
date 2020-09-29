@@ -3,12 +3,11 @@ using System.Collections.Generic;
 
 namespace GameBuilderBot.Services
 {
-    class ImportService
+    internal class ImportService
     {
         public static void LoadGameState()
         {
             var fields = new Dictionary<string, Field>();
-
         }
     }
 }

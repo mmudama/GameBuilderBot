@@ -14,6 +14,5 @@
             Value = value;
             Type = type;
         }
-
     }
 }

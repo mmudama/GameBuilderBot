@@ -9,6 +9,7 @@ namespace GameBuilderBot.Models
         public Type Type { get; set; }
 
         public Field() { }
+
         public Field(FieldIngest f)
         {
             Expression = f.Expression;
@@ -39,6 +40,7 @@ namespace GameBuilderBot.Models
                         Value = Convert.ToInt32(value);
                     }
                     break;
+
                 case "string":
                     Type = typeof(string);
                     if (string.IsNullOrWhiteSpace(value))
@@ -50,6 +52,7 @@ namespace GameBuilderBot.Models
                         Value = value;
                     }
                     break;
+
                 case "datetime":
                     Type = typeof(DateTime);
                     if (string.IsNullOrWhiteSpace(value))
