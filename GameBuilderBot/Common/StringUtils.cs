@@ -12,7 +12,6 @@
 
             sanitizedGameName = sanitizedGameName.Replace(' ', '_');
 
-
             return sanitizedGameName;
         }
     }

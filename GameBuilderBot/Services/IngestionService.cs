@@ -7,7 +7,7 @@ namespace GameBuilderBot.Services
 {
     public class IngestionService
     {
-        public static GameDefinition Ingest(string fileName, Serializer serializer)
+        public static (GameDefinition, GameState) Ingest(string fileName, Serializer serializer)
         {
             var choiceMap = new Dictionary<string, Choice>();
             var fields = new Dictionary<string, Field>();
@@ -18,6 +18,11 @@ namespace GameBuilderBot.Services
             {
                 fields[key.ToLower()] = new Field(gameFile.Fields[key]);
             }
+
+            GameState defaultState = new GameState();
+            defaultState.Name = gameFile.Name;
+            defaultState.ChannelId = 0;
+            defaultState.Fields = fields;
 
             foreach (ChoiceIngest c in gameFile.Choices)
             {
@@ -35,10 +40,11 @@ namespace GameBuilderBot.Services
 
             foreach (Choice c in choiceMap.Values)
             {
-                Console.WriteLine(c.GetSummary());
+                // TODO do this differently - currently GetSummary can cause a stack overflow exception with nested choices
+                //Console.WriteLine(c.GetSummary());
             }
 
-            return new GameDefinition(gameFile.Name, choiceMap, fields);
+            return (new GameDefinition(gameFile.Name, choiceMap), defaultState);
         }
     }
 }

@@ -1,9 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GameBuilderBot.ExpressionHandling;
-using System;
+﻿using GameBuilderBot.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Text;
-using GameBuilderBot.Models;
 
 namespace GameBuilderBot.ExpressionHandling.Tests
 {
