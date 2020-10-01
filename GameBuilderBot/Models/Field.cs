@@ -2,14 +2,40 @@
 
 namespace GameBuilderBot.Models
 {
+    /// <summary>
+    /// Represents a variable that is part of a game's active state. Probably this class
+    /// should be renamed to "Variable" or something.
+    /// <seealso cref="GameState"/><seealso cref="GameFile"/>
+    /// </summary>
     public class Field
     {
+        /// <summary>
+        /// Optional member suggesting the way to calculate the value. Expression could be
+        /// "1d4 + 6" or "#Gallons# * #MPG#" ... or just null. This will need to be 
+        /// re-evaluated when Value supports non-numeric types
+        /// </summary>
         public string Expression { get; set; }
+
+        /// <summary>
+        /// Value of a Field. Currently, non-int Values may produce unexpected results.
+        /// </summary>
         public object Value { get; set; }
+
+        /// <summary>
+        /// The Type of the Value object
+        /// </summary>
         public Type Type { get; set; }
 
+        /// <summary>
+        /// Default constructor required for deserialization
+        /// </summary>
         public Field() { }
 
+        /// <summary>
+        /// Used when values are loaded from a <seealso cref="GameFile"/>
+        /// <seealso cref="FieldIngest"/>
+        /// </summary>
+        /// <param name="f"></param>
         public Field(FieldIngest f)
         {
             Expression = f.Expression;

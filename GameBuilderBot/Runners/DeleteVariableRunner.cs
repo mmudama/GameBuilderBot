@@ -33,7 +33,7 @@ namespace GameBuilderBot.Runners
 
         public override string OneLinerHelp()
         {
-            return "`!delete foo` removes the variable foo from this context";
+            return "`!delete foo` removes the variable foo from the current game";
         }
     }
 }

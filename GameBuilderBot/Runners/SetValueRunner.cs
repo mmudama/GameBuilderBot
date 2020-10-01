@@ -22,7 +22,7 @@ namespace GameBuilderBot.Runners
 
         public override string OneLinerHelp()
         {
-            return "`!set foo 1` sets the variable named foo to the value 1";
+            return "`!set foo 1` sets the variable named foo to the value 1 in the current game";
         }
     }
 }

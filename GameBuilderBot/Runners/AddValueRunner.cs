@@ -26,7 +26,7 @@ namespace GameBuilderBot.Runners
 
         public override string OneLinerHelp()
         {
-            return "`!add foo 12` subtracts 12 from the variable foo";
+            return "`!add foo 12` adds 12 to the variable foo in the current game";
         }
     }
 }

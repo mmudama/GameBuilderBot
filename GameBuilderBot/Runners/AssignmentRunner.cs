@@ -6,6 +6,11 @@ using System;
 
 namespace GameBuilderBot.Runners
 {
+    /// <summary>
+    /// For bot commands that set the value of a name/value pair.
+    /// TODO can this be simplified since add and delete are really just 
+    /// sopecial cases of set?
+    /// </summary>
     abstract public class AssignmentRunner : CommandRunner
     {
         private ExportService _exportService;
@@ -17,6 +22,12 @@ namespace GameBuilderBot.Runners
 
         abstract protected int CalculateValue(GameState state, string fieldName, string expression);
 
+        /// <summary>
+        /// TODO definitely rename this. Maybe also switch to using out params instead of returning a tuple?
+        /// </summary>
+        /// <param name="FieldNameAndValue"></param>
+        /// <param name="discordContext"></param>
+        /// <returns></returns>
         public (object, object) CalculateFieldValue(string[] FieldNameAndValue, SocketCommandContext discordContext)
         {
             try

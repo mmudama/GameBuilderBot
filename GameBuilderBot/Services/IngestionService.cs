@@ -1,6 +1,5 @@
 ﻿using GameBuilderBot.Common;
 using GameBuilderBot.Models;
-using System;
 using System.Collections.Generic;
 
 namespace GameBuilderBot.Services
@@ -38,11 +37,11 @@ namespace GameBuilderBot.Services
                 }
             }
 
-            foreach (Choice c in choiceMap.Values)
-            {
-                // TODO do this differently - currently GetSummary can cause a stack overflow exception with nested choices
-                //Console.WriteLine(c.GetSummary());
-            }
+            //foreach (Choice c in choiceMap.Values)
+            //{
+            //    // TODO do this differently - currently GetSummary can cause a stack overflow exception with nested choices
+            //    //Console.WriteLine(c.GetSummary());
+            //}
 
             return (new GameDefinition(gameFile.Name, choiceMap), defaultState);
         }

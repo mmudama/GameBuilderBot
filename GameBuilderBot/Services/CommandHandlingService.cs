@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace GameBuilderBot.Services
 {
+    /// <summary>
+    /// Copied from the example code with only minor adjustments
+    /// </summary>
     internal class CommandHandlingService
     {
         private readonly CommandService _commands;

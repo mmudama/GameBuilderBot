@@ -1,63 +1,76 @@
-# Choose among three equally likely options
-#Try "!trail player"
-- Name: Player
-  Distribution: Weighted
-  Outcomes:
-  - Name: Jane Doe
-    Weight: 1
-  - Name: Joe Smith
-    Weight: 1
-  - Name: Robin
-    Weight: 1
+Name: Example
 
-# Give a pet to one of the players. Some are more likely than others.
-# You can specify a random number using the "Roll" value
-# Try "!trail gift"
-- Name: Pet
-  Distribution: Weighted
-  Outcomes:
-  - Name: Puppy
-    Weight: 30
-    Text: "You get a puppy!"
-    Choice: Player
-  - Name: Kitten
-    Weight: 20
-    Text: "You get a kitten!"
-    Choice: Player
-  - Name: Fish
-    Weight: 15
-    Roll: 10
-    Text: "You get {0} fish!"
+Fields:
+  Test: {}
 
-# Call all of the following
-# try "!trail dimensions"
-- Name: Dimensions
-  Distribution: All
-  Outcomes:
-  - Name: Length
-    Roll: 30
-    Text: "Length: {0} feet"
-  - Name: Width
-    Roll: 20
-    Text: "Width: {0} feet"
-  - Name: Height
-    Roll: 10
-    Text: "Height: {0} feet"
-  - Name: Thing
-    Text: "Type of thing"
-    Choice: Object
+Choices:
+  # Choose among three equally likely options
+  #Try "!trail player"
+  - Name: Player
+    Distribution: Weighted
+    Outcomes:
+    - Name: Jane Doe
+      Weight: 1
+    - Name: Joe Smith
+      Weight: 1
+    - Name: Robin
+      Weight: 1
+
+  # Give a pet to one of the players. Some are more likely than others.
+  # You can specify a random number using the "Roll" value
+  # Try "!trail gift"
+  - Name: Pet
+    Distribution: Weighted
+    IsPrimary: true
+    Outcomes:
+    - Name: Puppy
+      Weight: 30
+      Text: "You get a puppy!"
+      Choice: Player
+    - Name: Kitten
+      Weight: 20
+      Text: "You get a kitten!"
+      Choice: Player
+    - Name: Fish
+      Weight: 15
+      Rolls: 
+      - 1d10
+      Text: "You get {0} fish!"
+
+  # Call all of the following
+  # try "!trail dimensions"
+  - Name: Dimensions
+    Distribution: All
+    IsPrimary: true
+    Outcomes:
+    - Name: Length
+      Rolls: 
+      - 1d30
+      Text: "Length: {0} feet"
+    - Name: Width
+      Rolls:
+      - 1d20
+      Text: "Width: {0} feet"
+    - Name: Height
+      Rolls: 
+      - 1d10
+      Text: "Height: {0} feet"
+    - Name: Thing
+      Text: "Type of thing"
+      Choice: Object
 
 
-- Name: Object
-  Distribution: Weighted
-  Outcomes:
-  - Name: Table
-    Weight: 50
-  - Name: Pool
-    Weight: 20
-  - Name: Reroll
-    Weight: 30
-    Choice: Object
+  - Name: Object
+    Distribution: Weighted
+    IsPrimary: true
+    Outcomes:
+    - Name: Table
+      Weight: 50
+    - Name: Pool
+      Weight: 20
+    - Name: Reroll
+      Weight: 1
+      Choice: Object
 
     
 

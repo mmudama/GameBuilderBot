@@ -10,6 +10,10 @@ using System.Threading.Tasks;
 
 namespace GameBuilderBot.Services
 {
+    /// <summary>
+    /// Method calls for requests received via Discord. Methods that represent top-level calls
+    /// from Discord chat should by convention have the suffix "ForUser"
+    /// </summary>
     public class ResponseService
     {
         private readonly GameHandlingService _gameService;
@@ -20,7 +24,6 @@ namespace GameBuilderBot.Services
         private readonly RestoreGameRunner _restoreGameRunner;
         private readonly RollEventRunner _rollEventRunner;
         private readonly StartGameRunner _startGameRunner;
-
         private readonly SetValueRunner _setValueRunner;
         private readonly AddValueRunner _addValueRunner;
         private readonly SubtractValueRunner _subtractValueRunner;
@@ -34,7 +37,7 @@ namespace GameBuilderBot.Services
             _gameService = services.GetRequiredService<GameHandlingService>();
             _exportService = services.GetRequiredService<ExportService>();
 
-            // Registration order matters for help message
+            // Registration order of runners dictates order of output in the help message
             _startGameRunner = RegisterRunner(new StartGameRunner(_gameService));
             _restoreGameRunner = RegisterRunner(new RestoreGameRunner(_gameService));
             _rollEventRunner = RegisterRunner(new RollEventRunner(_gameService));
@@ -68,7 +71,7 @@ namespace GameBuilderBot.Services
 
         // TODO maybe it should automatically load the game, and offer a delete all or reset all option
         // once values no longer have expressions
-        internal string RestoreGame(ulong channelId)
+        internal string RestoreGameForUser(ulong channelId)
         {
             try
             {
@@ -77,7 +80,8 @@ namespace GameBuilderBot.Services
                 {
                     sbResponse.AppendLine("Your game has been restored");
                     sbResponse.Append(GetFieldValuesForUser(channelId, new[] { "all" }));
-                } else
+                }
+                else
                 {
                     sbResponse.Append("Could not find any previously saved state");
                 }
@@ -93,6 +97,22 @@ namespace GameBuilderBot.Services
             }
         }
 
+        /// <summary>
+        /// 
+        /// If <paramref name="inputs"/> is empty, StartGame will give the user a list
+        /// of games from which they may choose. If inputs contains at least one value,
+        /// StartGame will attempt to treat the value as an integer representing
+        /// a game selection.
+        /// 
+        /// Note: If the bot's game definitions are reloaded between a `!start` call
+        /// and a `!start N` call, it is possible that the second command will load
+        /// the wrong game. This could potentially also become an issue if multiple
+        /// GameBuilderBot instances are linked to the same Discord bot.
+        /// 
+        /// </summary>
+        /// <param name="inputs"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         internal string StartGame(string[] inputs, SocketCommandContext context)
         {
             StringBuilder sbResponse = new StringBuilder();
@@ -134,7 +154,11 @@ namespace GameBuilderBot.Services
             try
             {
                 _deleteVariableRunner.Delete(variables, discordContext);
-                return String.Format("Deleted variables: {0}", String.Join(", ", variables));
+                return string.Format("Deleted variables: {0}", string.Join(", ", variables));
+            }
+            catch (NoActiveGameException)
+            {
+                return NO_ACTIVE_GAME_RESPONSE;
             }
             catch (Exception e)
             {
@@ -168,6 +192,7 @@ namespace GameBuilderBot.Services
         /// <summary>
         /// From discord:
         /// !get foo
+        /// !get foo bar baz
         /// !get all
         /// !get
         /// </summary>
@@ -189,6 +214,12 @@ namespace GameBuilderBot.Services
             }
         }
 
+        /// <summary>
+        /// Assign value to key
+        /// </summary>
+        /// <param name="FieldNameAndValue"></param>
+        /// <param name="discordContext"></param>
+        /// <returns></returns>
         internal Task SetFieldValueForUser(string[] FieldNameAndValue, SocketCommandContext discordContext)
         {
             try
@@ -196,6 +227,10 @@ namespace GameBuilderBot.Services
                 (object oldValue, object newValue) = _setValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext);
                 string response = AssignmentResponse(FieldNameAndValue[0], oldValue, newValue);
                 return discordContext.Channel.SendMessageAsync(response);
+            }
+            catch (NoActiveGameException)
+            {
+                return discordContext.Channel.SendMessageAsync(NO_ACTIVE_GAME_RESPONSE);
             }
             catch (Exception e)
             {
@@ -231,6 +266,10 @@ namespace GameBuilderBot.Services
                 string response = AssignmentResponse(FieldNameAndValue[0], oldValue, newValue);
                 return discordContext.Channel.SendMessageAsync(response);
             }
+            catch (NoActiveGameException)
+            {
+                return discordContext.Channel.SendMessageAsync(NO_ACTIVE_GAME_RESPONSE);
+            }
             catch (Exception e)
             {
                 return discordContext.Channel.SendMessageAsync(e.Message);
@@ -244,6 +283,10 @@ namespace GameBuilderBot.Services
                 (object oldValue, object newValue) = _addValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext);
                 string response = AssignmentResponse(FieldNameAndValue[0], oldValue, newValue);
                 return discordContext.Channel.SendMessageAsync(response);
+            }
+            catch (NoActiveGameException)
+            {
+                return discordContext.Channel.SendMessageAsync(NO_ACTIVE_GAME_RESPONSE);
             }
             catch (Exception e)
             {

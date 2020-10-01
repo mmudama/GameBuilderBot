@@ -5,6 +5,9 @@ using GameBuilderBot.Models;
 
 namespace GameBuilderBot.Services
 {
+    /// <summary>
+    /// In theory, this should be extended for various data stores (file, database, etc)
+    /// </summary>
     public abstract class GameStateExporter
     {
         public void SaveGameState(GameState gameState, ICommandContext discordContext)

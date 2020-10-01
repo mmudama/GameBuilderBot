@@ -73,7 +73,8 @@ namespace GameBuilderBot.Services
                 GameState gameState = _serializer.DeserializeFromFile<GameState>(fileName, FileType.JSON);
                 _gameStateMap[new StateIdentifier(gameState.ChannelId, definition)] = gameState;
                 fileFound = true;
-            } catch (FileNotFoundException e)
+            }
+            catch (FileNotFoundException)
             {
                 fileFound = false;
             }
