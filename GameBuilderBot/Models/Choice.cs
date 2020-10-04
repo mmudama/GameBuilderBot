@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using GameBuilderBot.Services;
+using System.Collections.Generic;
+using System.Text;
 
 namespace GameBuilderBot.Models
 {
@@ -101,6 +103,92 @@ namespace GameBuilderBot.Models
             }
 
             PossibleOutcomes = possibleOutcomes.ToArray();
+        }
+
+        private StringBuilder GetResponseForWeightedChoice(GameDefinition definition, GameState state, int depth)
+        {
+            StringBuilder response = new StringBuilder();
+
+            int max = PossibleOutcomes.Length;
+            int roll = DiceRollService.Roll(max) - 1;
+
+            Outcome o = outcomeMap[PossibleOutcomes[roll]];
+
+            string outcome = o.GetResponse(state);
+
+            if (max <= 1)
+            {
+                response.AppendLine(outcome);
+            }
+            else if (max == 2)
+            {
+                response.AppendLine(string.Format("Flipped a coin and got: **{0}**", outcome));
+            }
+            else
+            {
+                response.AppendLine(string.Format("[1d{0}: {1}] **{2}**", max, roll + 1, outcome));
+            }
+
+            if (o.ChildChoice != null)
+            {
+                response.Append(GetResponseForEventRoll(definition, state, depth));
+            }
+
+            return response;
+        }
+
+        private StringBuilder GetResponseForDistributionAllChoice(GameDefinition definition, GameState state, int depth)
+        {
+            StringBuilder response = new StringBuilder();
+
+            foreach (Outcome o in outcomeMap.Values)
+            {
+                if (o.ChildChoice == null)
+                {
+                    response.AppendLine("\t" + o.GetResponse(state));
+                }
+                else
+                {
+                    response.Append(o.ChildChoice.GetResponseForEventRoll(definition, state, depth));
+                }
+            }
+
+            return response;
+        }
+
+        public string GetResponseForEventRoll(GameDefinition definition, GameState state, int depth)
+        {
+            depth++;
+
+            if (depth > 20)
+            {
+                return "Too much nesting detected. Check your config file. Aborting!";
+            }
+
+            StringBuilder response = new StringBuilder();
+
+            response.AppendLine((string.Format("**{0}**", Name)));
+
+            switch (Distribution)
+            {
+                case "Weighted":
+                    response.Append(GetResponseForWeightedChoice(definition, state, depth));
+                    break;
+
+                case "All":
+                    response.Append(GetResponseForDistributionAllChoice(definition, state, depth));
+                    break;
+
+                default:
+                    response.AppendLine(string.Format("\"{0}\" has an invalid Distribution", Name));
+                    break;
+            }
+
+            if (response.Length == 0)
+            {
+                response.AppendLine("Something went wrong");
+            }
+            return response.ToString();
         }
     }
 }
