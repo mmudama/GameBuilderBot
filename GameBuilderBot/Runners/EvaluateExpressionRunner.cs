@@ -7,9 +7,6 @@ namespace GameBuilderBot.Runners
 {
     public class EvaluateExpressionRunner : CommandRunner
     {
-        protected string _helpMessage =
-            "<evaluate expression>";
-
         protected string[] _variables;
 
         public EvaluateExpressionRunner(GameHandlingService gameHandler) : base(gameHandler)
