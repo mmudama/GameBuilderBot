@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using GameBuilderBot.Services;
+using System.Collections.Generic;
 
 namespace GameBuilderBot.Models
 {
@@ -79,6 +80,54 @@ namespace GameBuilderBot.Models
 
             expression = string.Join(" ", parts);
             return expression;
+        }
+
+        /// <summary>
+        /// Input can be an expression (like 1d4)
+        /// or a reference to a Field. If it starts with "!" and is a recognized
+        /// Field key, then reroll. Otherwise use the current value.
+        /// If it's null, roll and set the value.
+        /// _gameDefinition.Evaluate("!Sunrise") // found in map, prefix "!" means reroll and set
+        /// _gameDefinition.Evaluate("Sunrise") // found in map, retrieve (or roll if null) // should I allow negatives?
+        /// _gameDefinition.Evaluate("1d4") // not found in map, so evaluate expression
+        /// TODO: Might want to use something other than "!" since it's meaningful in yaml
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        internal int SetFieldValueByExpression(string expression)
+        {
+            bool shouldCalculate = false;
+            string key = expression;
+            int result;
+
+            if (expression.StartsWith("!"))
+            {
+                shouldCalculate = true;
+                key = expression.Substring(1).ToLower();
+            }
+
+            if (Fields.ContainsKey(key) && shouldCalculate)
+            {
+                key = key.ToLower();
+                result = DiceRollService.Roll(Fields[key].Expression);
+                Fields[key].Value = result;
+            }
+            else if (Fields.ContainsKey(key))
+            {
+                key = key.ToLower();
+                if (Fields[key].Value == null)
+                {
+                    Fields[key].Value = DiceRollService.Roll(Fields[key].Expression);
+                }
+                result = (int)Fields[key].Value;
+            }
+            else
+            {
+                // assume it's a dice roll expression e.g. "1d6+2"
+                result = DiceRollService.Roll(key);
+            }
+
+            return result;
         }
     }
 }

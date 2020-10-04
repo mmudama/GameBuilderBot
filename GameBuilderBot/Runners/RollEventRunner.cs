@@ -123,7 +123,7 @@ namespace GameBuilderBot.Runners
                 var rolls = new List<int>();
                 foreach (string expression in o.Rolls)
                 {
-                    rolls.Add(GameDefinition.CalculateExpressionAndSometimesSetFieldValue(expression, state.Fields));
+                    rolls.Add(state.SetFieldValueByExpression(expression));
                 }
 
                 try
