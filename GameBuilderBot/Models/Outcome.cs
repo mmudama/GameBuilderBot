@@ -113,7 +113,7 @@ namespace GameBuilderBot.Models
                 try
                 {
                     response = string.Format(Text, rolls.Select(x => x.ToString()).ToArray());
-                    response = string.Format("**{0}**", response);
+                    response = string.Format("{0}", response);
                 }
                 catch (FormatException)
                 {

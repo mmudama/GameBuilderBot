@@ -122,16 +122,16 @@ namespace GameBuilderBot.Models
             }
             else if (max == 2)
             {
-                response.AppendLine(string.Format("Flipped a coin and got: **{0}**", outcome));
+                response.AppendLine(string.Format("Flipped a coin and got: {0}", outcome));
             }
             else
             {
-                response.AppendLine(string.Format("[1d{0}: {1}] **{2}**", max, roll + 1, outcome));
+                response.AppendLine(string.Format("[1d{0}: {1}] {2}", max, roll + 1, outcome));
             }
 
             if (o.ChildChoice != null)
             {
-                response.Append(GetResponseForEventRoll(definition, state, depth));
+                response.Append(o.ChildChoice.GetResponseForEventRoll(definition, state, depth));
             }
 
             return response;
@@ -145,7 +145,7 @@ namespace GameBuilderBot.Models
             {
                 if (o.ChildChoice == null)
                 {
-                    response.AppendLine("\t" + o.GetResponse(state));
+                    response.AppendLine($"{o.GetResponse(state)}");
                 }
                 else
                 {
@@ -167,20 +167,18 @@ namespace GameBuilderBot.Models
 
             StringBuilder response = new StringBuilder();
 
-            response.AppendLine((string.Format("**{0}**", Name)));
-
             switch (Distribution)
             {
                 case "Weighted":
-                    response.Append(GetResponseForWeightedChoice(definition, state, depth));
+                    response.Append($"**{Name}**: {GetResponseForWeightedChoice(definition, state, depth)}");
                     break;
 
                 case "All":
-                    response.Append(GetResponseForDistributionAllChoice(definition, state, depth));
+                    response.Append($"{GetResponseForDistributionAllChoice(definition, state, depth)}");
                     break;
 
                 default:
-                    response.AppendLine(string.Format("\"{0}\" has an invalid Distribution", Name));
+                    response.AppendLine($"\"{Name}\" has an invalid Distribution");
                     break;
             }
 

@@ -34,7 +34,7 @@ namespace GameBuilderBot.Runners
             {
                 Choice theChoice = definition.ChoiceMap[choice];
 
-                response = "> " + theChoice.GetResponseForEventRoll(definition, state, 0);
+                response = $"Outcome of {choice} event:\n{theChoice.GetResponseForEventRoll(definition, state, 0)}";
             }
             else
             {
