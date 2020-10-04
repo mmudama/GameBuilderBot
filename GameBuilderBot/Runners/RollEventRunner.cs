@@ -102,43 +102,12 @@ namespace GameBuilderBot.Runners
             {
                 if (o.ChildChoice == null)
                 {
-                    response.AppendLine("\t" + GetResponseForOutcome(state, o));
+                    response.AppendLine("\t" + o.GetResponse(state));
                 }
                 else
                 {
                     response.Append(GetResponseForEventRoll(definition, state, o.ChildChoice.Name, depth));
                 }
-            }
-
-            return response;
-        }
-
-        // TODO make this a member of outcome
-        private string GetResponseForOutcome(GameState state, Outcome o)
-        {
-            string response;
-
-            if (o.Rolls != null && o.Rolls.Length > 0)
-            {
-                var rolls = new List<int>();
-                foreach (string expression in o.Rolls)
-                {
-                    rolls.Add(state.SetFieldValueByExpression(expression));
-                }
-
-                try
-                {
-                    response = string.Format(o.Text, rolls.Select(x => x.ToString()).ToArray());
-                    response = string.Format("**{0}**", response);
-                }
-                catch (FormatException)
-                {
-                    response = "**!! Number of rolls specified does not match string format. Check your config file.!!**";
-                }
-            }
-            else
-            {
-                response = o.Text;
             }
 
             return response;
@@ -154,7 +123,7 @@ namespace GameBuilderBot.Runners
 
             Outcome o = c.outcomeMap[c.PossibleOutcomes[roll]];
 
-            string outcome = GetResponseForOutcome(state, o);
+            string outcome = o.GetResponse(state);
 
             if (max <= 1)
             {

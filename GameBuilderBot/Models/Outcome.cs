@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GameBuilderBot.Models
 {
@@ -95,6 +96,36 @@ namespace GameBuilderBot.Models
                         " but \"{2}\" is not defined ****", Name, key, ChoiceAsString));
                 }
             }
+        }
+
+        public string GetResponse(GameState state)
+        {
+            string response;
+
+            if (Rolls != null && Rolls.Length > 0)
+            {
+                var rolls = new List<int>();
+                foreach (string expression in Rolls)
+                {
+                    rolls.Add(state.SetFieldValueByExpression(expression));
+                }
+
+                try
+                {
+                    response = string.Format(Text, rolls.Select(x => x.ToString()).ToArray());
+                    response = string.Format("**{0}**", response);
+                }
+                catch (FormatException)
+                {
+                    response = "**!! Number of rolls specified does not match string format. Check your config file.!!**";
+                }
+            }
+            else
+            {
+                response = Text;
+            }
+
+            return response;
         }
     }
 }
