@@ -12,8 +12,9 @@ namespace GameBuilderBot.Models
     public class Choice
     {
         /// <summary>
-        /// The name field should be short and, ideally, contain only alphabet characters. Any Choice may be
-        /// invoked by a user using e.g. `!game [Name]`. User input is treated as case insensitive.
+        /// Any Choice may be
+        /// invoked by a user using `!game [Name]` or, for multi word names, `!game "[Name"]`.
+        /// User input is treated as case insensitive.
         /// Each Choice Name should map to only one Choice member of a <seealso cref="GameDefinition"/>
         /// or <seealso cref="GameFile"/>
         /// </summary>
@@ -105,6 +106,13 @@ namespace GameBuilderBot.Models
             PossibleOutcomes = possibleOutcomes.ToArray();
         }
 
+        /// <summary>
+        /// Constructs human-readable output representing the outcome of a virtual dice roll.
+        /// </summary>
+        /// <param name="definition">The rules for the current game</param>
+        /// <param name="state">Current values for the game</param>
+        /// <param name="depth">Used to detect excessive nesting / possible infinite cycle</param>
+        /// <returns></returns>
         private StringBuilder GetResponseForWeightedChoice(GameDefinition definition, GameState state, int depth)
         {
             StringBuilder response = new StringBuilder();
@@ -137,6 +145,13 @@ namespace GameBuilderBot.Models
             return response;
         }
 
+        /// <summary>
+        /// Constructs human-readable output when Distribution = All (ie, all Outcomes are evaluated).
+        /// </summary>
+        /// <param name="definition">The rules for the current game</param>
+        /// <param name="state">Current values for the game</param>
+        /// <param name="depth">Used to detect excessive nesting / possible infinite cycle</param>
+        /// <returns></returns>
         private StringBuilder GetResponseForDistributionAllChoice(GameDefinition definition, GameState state, int depth)
         {
             StringBuilder response = new StringBuilder();
@@ -156,6 +171,13 @@ namespace GameBuilderBot.Models
             return response;
         }
 
+        /// <summary>
+        /// Constructs human-readable output representing the outcome of a virtual dice roll.
+        /// </summary>
+        /// <param name="definition">The rules for the current game</param>
+        /// <param name="state">Current values for the game</param>
+        /// <param name="depth">Used to detect excessive nesting / possible infinite cycle</param>
+        /// <returns></returns>
         public string GetResponseForEventRoll(GameDefinition definition, GameState state, int depth)
         {
             depth++;
