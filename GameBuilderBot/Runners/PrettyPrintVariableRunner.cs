@@ -7,7 +7,7 @@ namespace GameBuilderBot.Runners
     public class PrettyPrintVariableRunner : CommandRunner
     {
         protected string _helpMessage =
-            "Type `!get` or `!get all` to see all game variables. Type `!get <name> to see the value of <name>";
+            "Type `!get` or `!get all` to see all game variables. Type `!get <name>` to see the value of <name>";
 
         protected string[] _variables;
 
