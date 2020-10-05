@@ -37,14 +37,6 @@ namespace GameBuilderBot.Modules
         public Task StartGameAsync(params string[] inputs) => ReplyAsync(_responseService.StartGame(inputs, Context));
 
         /// <summary>
-        /// Restores the current Discord channel's previous values for the currently loaded game.
-        /// TODO load previous state by default 
-        /// </summary>
-        /// <returns>An async Task to deliver a response to the current Discord channel</returns>
-        [Command("Restore")]
-        public Task RestoreGameAsync() => ReplyAsync(_responseService.RestoreGameForUser(Context.Channel.Id));
-
-        /// <summary>
         /// Rolls virtual dice to determine outcomes. Possible parameter values and their behaviors
         /// are defined in GameDefinition and GameFile. This is the meat of the bot.
         /// </summary>

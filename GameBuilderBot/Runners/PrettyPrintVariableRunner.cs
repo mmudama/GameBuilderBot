@@ -21,7 +21,7 @@ namespace GameBuilderBot.Runners
             bool getAll = fieldNames.Length == 1 && fieldNames[0].ToLower().Equals("all");
             StringBuilder response = new StringBuilder();
 
-            response.AppendLine("Values:");
+            response.AppendLine("The following variables have been set:");
 
             if (fieldNames.Length == 0 || getAll)
             {

@@ -7,9 +7,6 @@ namespace GameBuilderBot.Runners
 {
     public class StartGameRunner : CommandRunner
     {
-        protected string _helpMessage =
-            "HELP";
-
         protected string[] _variables;
 
         public StartGameRunner(GameHandlingService gameHandler) : base(gameHandler)
@@ -39,6 +36,12 @@ namespace GameBuilderBot.Runners
             {
                 throw new ArgumentOutOfRangeException("Unrecognized game");
             }
+        }
+
+        public bool RestoreGame(ulong channelId)
+        {
+            _gameService.LoadGameState(channelId, out bool fileFound);
+            return fileFound;
         }
 
         public override string OneLinerHelp()

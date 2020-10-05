@@ -21,7 +21,6 @@ namespace GameBuilderBot.Services
         private readonly DeleteVariableRunner _deleteVariableRunner;
         private readonly EvaluateExpressionRunner _evaluateExpressionRunner;
         private readonly PrettyPrintVariableRunner _prettyPrintVariableRunner;
-        private readonly RestoreGameRunner _restoreGameRunner;
         private readonly RollEventRunner _rollEventRunner;
         private readonly StartGameRunner _startGameRunner;
         private readonly SetValueRunner _setValueRunner;
@@ -39,7 +38,6 @@ namespace GameBuilderBot.Services
 
             // Registration order of runners dictates order of output in the help message
             _startGameRunner = RegisterRunner(new StartGameRunner(_gameService));
-            _restoreGameRunner = RegisterRunner(new RestoreGameRunner(_gameService));
             _rollEventRunner = RegisterRunner(new RollEventRunner(_gameService));
             _deleteVariableRunner = RegisterRunner(new DeleteVariableRunner(_gameService, _exportService));
             _prettyPrintVariableRunner = RegisterRunner(new PrettyPrintVariableRunner(_gameService));
@@ -67,34 +65,6 @@ namespace GameBuilderBot.Services
             }
 
             return sbResponse.ToString();
-        }
-
-        // TODO maybe it should automatically load the game, and offer a delete all or reset all option
-        // once values no longer have expressions
-        internal string RestoreGameForUser(ulong channelId)
-        {
-            try
-            {
-                StringBuilder sbResponse = new StringBuilder();
-                if (_restoreGameRunner.RestoreGame(channelId))
-                {
-                    sbResponse.AppendLine("Your game has been restored");
-                    sbResponse.Append(GetFieldValuesForUser(channelId, new[] { "all" }));
-                }
-                else
-                {
-                    sbResponse.Append("Could not find any previously saved state");
-                }
-                return sbResponse.ToString();
-            }
-            catch (NoActiveGameException)
-            {
-                return NO_ACTIVE_GAME_RESPONSE;
-            }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
         }
 
         /// <summary>
@@ -130,12 +100,22 @@ namespace GameBuilderBot.Services
                 }
                 else
                 {
-                    string gameName = _startGameRunner.StartGame(inputs, context.Channel.Id);
+                    ulong channelId = context.Channel.Id;
 
-                    sbResponse.AppendFormat("Loaded game {0}", gameName);
-                    sbResponse.AppendLine();
-                    sbResponse.AppendLine("If you want to restore your previous game state, type `!restore`");
-                    sbResponse.AppendLine("To see what you can do next, type `!game help`");
+                    string gameName = _startGameRunner.StartGame(inputs, channelId);
+
+                    sbResponse.AppendLine($"Loaded game {gameName}");
+
+                    if (_startGameRunner.RestoreGame(channelId))
+                    {
+                        sbResponse.AppendLine("Your game settings have been restored");
+                        sbResponse.Append(GetFieldValuesForUser(channelId, new[] { "all" }));
+                    }
+                    else
+                    {
+                        sbResponse.AppendLine("No previous game settings found for this channel; using defaults");
+                    }
+                    sbResponse.AppendLine($"To see the commands for {gameName}, type `!game help`");
                 }
             }
             catch (NoActiveGameException)
