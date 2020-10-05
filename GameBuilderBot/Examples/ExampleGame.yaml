@@ -3,9 +3,9 @@ Name: Example
 Fields:
   Test: {}
 
-Choices:
+Events:
   # Choose among three equally likely options
-  #Try "!trail player"
+  #Try "!game player"
   - Name: Player
     Distribution: Weighted
     Outcomes:
@@ -18,7 +18,7 @@ Choices:
 
   # Give a pet to one of the players. Some are more likely than others.
   # You can specify a random number using the "Roll" value
-  # Try "!trail gift"
+  # Try "!game gift"
   - Name: Pet
     Distribution: Weighted
     IsPrimary: true
@@ -26,11 +26,11 @@ Choices:
     - Name: Puppy
       Weight: 30
       Text: "You get a puppy!"
-      Choice: Player
+      Event: Player
     - Name: Kitten
       Weight: 20
       Text: "You get a kitten!"
-      Choice: Player
+      Event: Player
     - Name: Fish
       Weight: 15
       Rolls: 
@@ -38,7 +38,7 @@ Choices:
       Text: "You get {0} fish!"
 
   # Call all of the following
-  # try "!trail dimensions"
+  # try "!game dimensions"
   - Name: Dimensions
     Distribution: All
     IsPrimary: true
@@ -57,7 +57,7 @@ Choices:
       Text: "Height: {0} feet"
     - Name: Thing
       Text: "Type of thing"
-      Choice: Object
+      Event: Object
 
 
   - Name: Object
@@ -70,7 +70,7 @@ Choices:
       Weight: 20
     - Name: Reroll
       Weight: 1
-      Choice: Object
+      Event: Object
 
     
 

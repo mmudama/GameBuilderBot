@@ -1,40 +1,40 @@
 ﻿namespace GameBuilderBot.Models
 {
     /// <summary>
-    /// Contains the values present in Choice sections of GameFile.
+    /// Contains the values present in GameEvent sections of GameFile.
     /// 
     /// </summary>
-    /// <seealso cref="OutcomeIngest"/> <seealso cref="GameFile"/><seealso cref="Choice"/>
+    /// <seealso cref="OutcomeIngest"/> <seealso cref="GameFile"/><seealso cref="GameEvent"/>
 
-    public class ChoiceIngest
+    public class GameEventIngest
     {
         /// <summary>
-        /// <seealso cref="Choice"/>
+        /// <seealso cref="GameEvent"/>
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// <seealso cref="Choice"/>
+        /// <seealso cref="GameEvent"/>
         /// </summary>
         public string Distribution { get; set; }
 
         /// <summary>
-        /// <seealso cref="Choice"/>
+        /// <seealso cref="GameEvent"/>
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// <seealso cref="Choice"/>
+        /// <seealso cref="GameEvent"/>
         /// </summary>
         public bool IsPrimary { get; set; }
 
         /// <summary>
-        /// <seealso cref="Choice"/>
+        /// <seealso cref="GameEvent"/>
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// <seealso cref="Choice"/>
+        /// <seealso cref="GameEvent"/>
         /// </summary>
         public OutcomeIngest[] Outcomes { get; set; }
     }

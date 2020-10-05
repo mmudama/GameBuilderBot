@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using YamlDotNet.Serialization;
 
 namespace GameBuilderBot.Models
 {
@@ -14,9 +15,10 @@ namespace GameBuilderBot.Models
         public string Name { get; set; }
 
         /// <summary>
-        /// <seealso cref="Choice"/>
+        /// <seealso cref="GameEvent"/>
         /// </summary>
-        public ChoiceIngest[] Choices { get; set; }
+        [YamlMember(Alias = "Events")]
+        public GameEventIngest[] GameEvents { get; set; }
 
         /// <summary>
         /// <seealso cref="Field"/>

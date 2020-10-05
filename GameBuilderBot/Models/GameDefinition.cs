@@ -18,18 +18,18 @@ namespace GameBuilderBot.Models
         public string Name { get; set; }
 
         /// <summary>
-        /// Contains all available <seealso cref="Choice"/> objects for this game.
+        /// Contains all available <seealso cref="GameEvent"/> objects for this game.
         /// </summary>
-        public Dictionary<string, Choice> ChoiceMap;
+        public Dictionary<string, GameEvent> GameEventMap;
 
         /// <summary>
         /// Constructor that populates all members
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="choiceMap"></param>
-        public GameDefinition(string name, Dictionary<string, Choice> choiceMap)
+        /// <param name="gameEventMap"></param>
+        public GameDefinition(string name, Dictionary<string, GameEvent> gameEventMap)
         {
-            ChoiceMap = choiceMap;
+            GameEventMap = gameEventMap;
             Name = name;
         }
     }

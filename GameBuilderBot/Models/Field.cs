@@ -50,7 +50,7 @@ namespace GameBuilderBot.Models
         /// <param name="type">The type (int, datetime, ...) of the field.  Defaults to int for backwards compatibility, change in future?</param>
         public Field(string expression, string value, string type = "int")
         {
-            Expression = expression;  //Deprecated, to be moved to choices and other locations.
+            Expression = expression;  //Deprecated, to be moved to GameEvent and other locations.
 
             switch (type.ToLower())
             {

@@ -8,7 +8,7 @@ namespace GameBuilderBot.Services
     {
         public static (GameDefinition, GameState) Ingest(string fileName, Serializer serializer)
         {
-            var choiceMap = new Dictionary<string, Choice>();
+            var gameEventMap = new Dictionary<string, GameEvent>();
             var fields = new Dictionary<string, Field>();
 
             GameFile gameFile = serializer.DeserializeFromFile<GameFile>(fileName, FileType.YAML);
@@ -23,27 +23,27 @@ namespace GameBuilderBot.Services
             defaultState.ChannelId = 0;
             defaultState.Fields = fields;
 
-            foreach (ChoiceIngest c in gameFile.Choices)
+            foreach (GameEventIngest e in gameFile.GameEvents)
             {
-                Choice choice = new Choice(c);
-                choiceMap[c.Name.ToLower()] = choice;
+                GameEvent gameEvent = new GameEvent(e);
+                gameEventMap[e.Name.ToLower()] = gameEvent;
             }
 
-            foreach (Choice c in choiceMap.Values)
+            foreach (GameEvent c in gameEventMap.Values)
             {
                 foreach (Outcome o in c.outcomeMap.Values)
                 {
-                    o.Complete(choiceMap);
+                    o.Complete(gameEventMap);
                 }
             }
 
-            //foreach (Choice c in choiceMap.Values)
+            //foreach (GameEvent c in gameEventMap.Values)
             //{
-            //    // TODO do this differently - currently GetSummary can cause a stack overflow exception with nested choices
+            //    // TODO do this differently - currently GetSummary can cause a stack overflow exception with nested events
             //    //Console.WriteLine(c.GetSummary());
             //}
 
-            return (new GameDefinition(gameFile.Name, choiceMap), defaultState);
+            return (new GameDefinition(gameFile.Name, gameEventMap), defaultState);
         }
     }
 }

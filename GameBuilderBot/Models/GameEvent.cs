@@ -5,17 +5,17 @@ using System.Text;
 namespace GameBuilderBot.Models
 {
     /// <summary>
-    /// A Choice object represents a set of possibilities ("Outcomes") available with a virtual "dice roll."
-    /// Choices can represent chained dice rolls when one or more of the associated Outcomes results in another Choice.
+    /// A GameEvent object represents a set of possibilities ("Outcomes") available with a virtual "dice roll."
+    /// GameEvents can represent chained dice rolls when one or more of the associated Outcomes results in another GameEvent.
     /// </summary>
     /// <seealso cref="Outcome"/>
-    public class Choice
+    public class GameEvent
     {
         /// <summary>
-        /// Any Choice may be
+        /// Any GameEvent may be
         /// invoked by a user using `!game [Name]` or, for multi word names, `!game "[Name"]`.
         /// User input is treated as case insensitive.
-        /// Each Choice Name should map to only one Choice member of a <seealso cref="GameDefinition"/>
+        /// Each GameEvent Name should map to only one GameEvent member of a <seealso cref="GameDefinition"/>
         /// or <seealso cref="GameFile"/>
         /// </summary>
         public string Name;
@@ -23,10 +23,10 @@ namespace GameBuilderBot.Models
         /// <summary>
         /// Currently "Weighted" or "All"
         /// If the Distribution is "Weighted", the sum of all member Outcomes will be used as the die to roll.
-        /// For example, if Outcome A has a weight of 5, B has 12, and C has 3, this Choice would use a virtual
+        /// For example, if Outcome A has a weight of 5, B has 12, and C has 3, this GameEvent would use a virtual
         /// twenty-sided die to determine the outcome. B would be the most likely outcome with a 60% chance of success.
         /// 
-        /// If the Distribution is "All", invoking this Choice will result in all Outcomes, not just one..
+        /// If the Distribution is "All", invoking this GameEvent will result in all Outcomes, not just one..
         /// </summary>
         public string Distribution; // TODO make this an enum
 
@@ -36,19 +36,19 @@ namespace GameBuilderBot.Models
         public string Text;
 
         /// <summary>
-        /// Indicates whether this Choice should be considered a top-level choice. A user can "roll" any Choice,
+        /// Indicates whether this GameEvent should be considered a top-level GameEvent. A user can "roll" any GameEvent,
         /// but those flagged IsPrimary are considered the most relevant entry points for events. Other
-        /// Choices would typically be present only as chained rolls that result from Outcomes.
+        /// GameEvents would typically be present only as chained rolls that result from Outcomes.
         /// </summary>
         public bool IsPrimary;
 
         /// <summary>
-        /// One-line description of the Choice, used in help messages etc
+        /// One-line description of the GameEvent, used in help messages etc
         /// </summary>
         public string Description;
 
         /// <summary>
-        /// All Outcomes that may result from this Choice
+        /// All Outcomes that may result from this GameEvent
         /// </summary>
         public readonly Dictionary<string, Outcome> outcomeMap = new Dictionary<string, Outcome>();
 
@@ -62,9 +62,9 @@ namespace GameBuilderBot.Models
         /// <summary>
         /// Creates an in-memory representation of a rollable event.
         /// </summary>
-        /// <param name="c"><seealso cref="ChoiceIngest"/>is the deserialized Choice field from a <seealso cref="GameFile"/></param>
+        /// <param name="c"><seealso cref="GameEventIngest"/>is the deserialized GameEvent field from a <seealso cref="GameFile"/></param>
         /// 
-        public Choice(ChoiceIngest c)
+        public GameEvent(GameEventIngest c)
         {
             Name = c.Name;
             Distribution = c.Distribution;
@@ -113,7 +113,7 @@ namespace GameBuilderBot.Models
         /// <param name="state">Current values for the game</param>
         /// <param name="depth">Used to detect excessive nesting / possible infinite cycle</param>
         /// <returns></returns>
-        private StringBuilder GetResponseForWeightedChoice(GameDefinition definition, GameState state, int depth)
+        private StringBuilder GetResponseForWeightedGameEvent(GameDefinition definition, GameState state, int depth)
         {
             StringBuilder response = new StringBuilder();
 
@@ -137,9 +137,9 @@ namespace GameBuilderBot.Models
                 response.AppendLine(string.Format("[1d{0}: {1}] {2}", max, roll + 1, outcome));
             }
 
-            if (o.ChildChoice != null)
+            if (o.ChildGameEvent != null)
             {
-                response.Append(o.ChildChoice.GetResponseForEventRoll(definition, state, depth));
+                response.Append(o.ChildGameEvent.GetResponseForEventRoll(definition, state, depth));
             }
 
             return response;
@@ -152,19 +152,19 @@ namespace GameBuilderBot.Models
         /// <param name="state">Current values for the game</param>
         /// <param name="depth">Used to detect excessive nesting / possible infinite cycle</param>
         /// <returns></returns>
-        private StringBuilder GetResponseForDistributionAllChoice(GameDefinition definition, GameState state, int depth)
+        private StringBuilder GetResponseForDistributionAllGameEvent(GameDefinition definition, GameState state, int depth)
         {
             StringBuilder response = new StringBuilder();
 
             foreach (Outcome o in outcomeMap.Values)
             {
-                if (o.ChildChoice == null)
+                if (o.ChildGameEvent == null)
                 {
                     response.AppendLine($"{o.GetResponse(state)}");
                 }
                 else
                 {
-                    response.Append(o.ChildChoice.GetResponseForEventRoll(definition, state, depth));
+                    response.Append(o.ChildGameEvent.GetResponseForEventRoll(definition, state, depth));
                 }
             }
 
@@ -192,11 +192,11 @@ namespace GameBuilderBot.Models
             switch (Distribution)
             {
                 case "Weighted":
-                    response.Append($"**{Name}**: {GetResponseForWeightedChoice(definition, state, depth)}");
+                    response.Append($"**{Name}**: {GetResponseForWeightedGameEvent(definition, state, depth)}");
                     break;
 
                 case "All":
-                    response.Append($"{GetResponseForDistributionAllChoice(definition, state, depth)}");
+                    response.Append($"{GetResponseForDistributionAllGameEvent(definition, state, depth)}");
                     break;
 
                 default:

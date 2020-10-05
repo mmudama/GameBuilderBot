@@ -5,8 +5,8 @@ using System.Linq;
 namespace GameBuilderBot.Models
 {
     /// <summary>
-    /// The Outcome object represents one of the possibilities available for a given <seealso cref="Choice"/>.
-    /// For example, the choice of Colors could contain Blue, Green, and Red Outcomes.
+    /// The Outcome object represents one of the possibilities available for a given <seealso cref="GameEvent"/>.
+    /// For example, the GameEvent of Colors could contain Blue, Green, and Red Outcomes.
     /// Each of these could be given a weight - Maybe Blue is most likely (weight = 50),
     /// Green is next (weight = 40), and Red is least likely (10).
     /// 
@@ -14,8 +14,8 @@ namespace GameBuilderBot.Models
     /// occurs. For example, Blue's Rolls could be {"1d4", "1d8'} and Text could be
     /// "There are {0} blue ribbons and {1} blue buttons in the drawer."
     /// 
-    /// If Choice is populated, this Outcome will result in another Choice being rolled, 
-    /// which will result in a further Outcome, which might result in a further Choice ...
+    /// If GameEvent is populated, this Outcome will result in another GameEvent being rolled, 
+    /// which will result in a further Outcome, which might result in a further GameEvent ...
     /// </summary>
     public class Outcome
     {
@@ -25,7 +25,7 @@ namespace GameBuilderBot.Models
         public readonly string Name;
 
         /// <summary>
-        /// Summed with the other Outcome members of a <seealso cref="Choice"/> to determine the
+        /// Summed with the other Outcome members of a <seealso cref="GameEvent"/> to determine the
         /// likelihood of this outcome
         /// </summary>
         public readonly int Weight;
@@ -49,17 +49,17 @@ namespace GameBuilderBot.Models
 
         // TODO Do I have to store the string as part of the Outcome object? Would rather not
         /// <summary>
-        /// In order to avoid a proliferation of <seealso cref="Choice"/> objects, they are initially ingested
+        /// In order to avoid a proliferation of <seealso cref="GameEvent"/> objects, they are initially ingested
         /// as string members and then populated in a second pass. These should not be referenced
         /// after file load
         /// </summary>
-        public readonly string ChoiceAsString;
+        public readonly string GameEventAsString;
 
         /// <summary>
         /// Subsequent "roll" if the current Outcome is rolled. For example, if the Outcome is "Tree", this
-        /// might be set to a <seealso cref="Choice"/> with Outcomes like "Oak", "Redwood", and "Pine"
+        /// might be set to a <seealso cref="GameEvent"/> with Outcomes like "Oak", "Redwood", and "Pine"
         /// </summary>
-        public Choice ChildChoice;
+        public GameEvent ChildGameEvent;
 
         /// <summary>
         /// Used to populate an Outcome using a <seealso cref="GameFile"/> as part of ingestion
@@ -71,29 +71,29 @@ namespace GameBuilderBot.Models
             Weight = o.Weight;
             Text = o.Text;
             Rolls = o.Rolls;
-            ChoiceAsString = o.Choice;
+            GameEventAsString = o.GameEventAsString;
         }
 
         /// <summary>
-        /// Complete() should be called only after all Choices defined in the GameFile have been loaded.
-        /// It will attempt to populate this Outcome's ChildChoice based on the value of the Choice string.
+        /// Complete() should be called only after all GameEvents defined in the GameFile have been loaded.
+        /// It will attempt to populate this Outcome's ChildGameEvent based on the value of the GameEvent string.
         /// This allows nested game responses without having to manually roll each related event.
         /// </summary>
-        /// <param name="choiceMap">A complete list of all Choices defined for the game.</param>
-        public void Complete(Dictionary<string, Choice> choiceMap)
+        /// <param name="GameEventMap">A complete list of all GameEvents defined for the game.</param>
+        public void Complete(Dictionary<string, GameEvent> GameEventMap)
         {
-            if (ChoiceAsString != null)
+            if (GameEventAsString != null)
             {
-                string key = ChoiceAsString.ToLower();
-                if (choiceMap.ContainsKey(key))
+                string key = GameEventAsString.ToLower();
+                if (GameEventMap.ContainsKey(key))
                 {
-                    ChildChoice = choiceMap[key];
+                    ChildGameEvent = GameEventMap[key];
                 }
                 else
                 {
                     Console.WriteLine(
-                        string.Format("**** WARNING: Outcome \"{0}\" of Choice \"{1}\" specifies child choice \"{2}\"," +
-                        " but \"{2}\" is not defined ****", Name, key, ChoiceAsString));
+                        string.Format("**** WARNING: Outcome \"{0}\" of GameEvent \"{1}\" specifies child GameEvent \"{2}\"," +
+                        " but \"{2}\" is not defined ****", Name, key, GameEventAsString));
                 }
             }
         }

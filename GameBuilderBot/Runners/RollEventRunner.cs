@@ -23,18 +23,18 @@ namespace GameBuilderBot.Runners
             if (objects[0].ToLower().Equals("help")) return Help(discordContext);
 
             ulong channelId = discordContext.Channel.Id;
-            string choice = objects[0];
+            string gameEventAsString = objects[0];
 
             GameState state = _gameService.GetGameStateForActiveGame(channelId);
             GameDefinition definition = _gameService.GetGameDefinitionForChannelId(channelId);
 
             string response;
 
-            if (definition.ChoiceMap.ContainsKey(choice.ToLower()))
+            if (definition.GameEventMap.ContainsKey(gameEventAsString.ToLower()))
             {
-                Choice theChoice = definition.ChoiceMap[choice];
+                GameEvent theEvent = definition.GameEventMap[gameEventAsString];
 
-                response = $"Outcome of {choice} event:\n{theChoice.GetResponseForEventRoll(definition, state, 0)}";
+                response = $"Outcome of {gameEventAsString} event:\n{theEvent.GetResponseForEventRoll(definition, state, 0)}";
             }
             else
             {
@@ -51,7 +51,7 @@ namespace GameBuilderBot.Runners
 
             sbResponse.AppendLine("Available commands:");
 
-            foreach (Choice c in definition.ChoiceMap.Values)
+            foreach (GameEvent c in definition.GameEventMap.Values)
             {
                 if (c.IsPrimary)
                 {
