@@ -64,14 +64,11 @@ namespace GameBuilderBot.Runners
                 value = "**Undefined**";
             }
 
-            response.Append("`")
-                .Append(fieldName)
-                .Append(": ")
-                .AppendFormat("{0}", value);
+            response.Append($"`{fieldName}: {value}");
 
             if (state.FieldHasExpression(fieldName))
             {
-                response.AppendFormat(" ({0})", state.Fields[fieldName].Expression);
+                response.AppendFormat($" ({state.Fields[fieldName].Expression})");
             }
 
             response.Append("`");
