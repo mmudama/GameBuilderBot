@@ -37,12 +37,6 @@ namespace GameBuilderBot.Services
                 }
             }
 
-            //foreach (GameEvent c in gameEventMap.Values)
-            //{
-            //    // TODO do this differently - currently GetSummary can cause a stack overflow exception with nested events
-            //    //Console.WriteLine(c.GetSummary());
-            //}
-
             return (new GameDefinition(gameFile.Name, gameEventMap), defaultState);
         }
     }

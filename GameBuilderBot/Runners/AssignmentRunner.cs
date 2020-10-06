@@ -6,6 +6,13 @@ using System;
 
 namespace GameBuilderBot.Runners
 {
+    internal enum Operation
+    {
+        SET,
+        ADD,
+        SUBTRACT
+    }
+
     /// <summary>
     /// For bot commands that set the value of a name/value pair.
     /// TODO can this be simplified since add and delete are really just 

@@ -1,5 +1,7 @@
-﻿using GameBuilderBot.Models;
+﻿using GameBuilderBot.ExpressionHandling;
+using GameBuilderBot.Models;
 using GameBuilderBot.Services;
+using System;
 
 namespace GameBuilderBot.Runners
 {
@@ -13,8 +15,8 @@ namespace GameBuilderBot.Runners
         {
             if (!int.TryParse(expression, out int result))
             {
-                expression = state.ReplaceVariablesWithValues(expression);
-                result = DiceRollService.Roll(expression);
+                MathExpression mathexpression = new MathExpression(expression, state.Fields);
+                result = Convert.ToInt32(mathexpression.Evaluate().ToString());
             }
 
             return result;
