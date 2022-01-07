@@ -18,10 +18,12 @@ namespace GameBuilderBot.Services
                 fields[key.ToLower()] = new Field(gameFile.Fields[key]);
             }
 
-            GameState defaultState = new GameState();
-            defaultState.Name = gameFile.Name;
-            defaultState.ChannelId = 0;
-            defaultState.Fields = fields;
+            GameState defaultState = new GameState
+            {
+                Name = gameFile.Name,
+                ChannelId = 0,
+                Fields = fields
+            };
 
             foreach (GameEventIngest e in gameFile.GameEvents)
             {
