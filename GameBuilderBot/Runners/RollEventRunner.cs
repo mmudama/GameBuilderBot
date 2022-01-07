@@ -23,14 +23,14 @@ namespace GameBuilderBot.Runners
             if (objects[0].ToLower().Equals("help")) return Help(discordContext);
 
             ulong channelId = discordContext.Channel.Id;
-            string gameEventAsString = objects[0];
+            string gameEventAsString = objects[0].ToLower();
 
             GameState state = _gameService.GetGameStateForActiveGame(channelId);
             GameDefinition definition = _gameService.GetGameDefinitionForChannelId(channelId);
 
             string response;
 
-            if (definition.GameEventMap.ContainsKey(gameEventAsString.ToLower()))
+            if (definition.GameEventMap.ContainsKey(gameEventAsString))
             {
                 GameEvent theEvent = definition.GameEventMap[gameEventAsString];
 

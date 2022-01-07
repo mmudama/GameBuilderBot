@@ -66,7 +66,7 @@ namespace GameBuilderBot.Models
         /// 
         public GameEvent(GameEventIngest c)
         {
-            Name = c.Name;
+            Name = c.Name.ToLower();
             Distribution = c.Distribution;
             Text = c.Text;
             IsPrimary = c.IsPrimary;
