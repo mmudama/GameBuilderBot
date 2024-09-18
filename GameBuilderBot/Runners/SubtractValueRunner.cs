@@ -1,7 +1,7 @@
-﻿using GameBuilderBot.ExpressionHandling;
+﻿using System;
+using GameBuilderBot.ExpressionHandling;
 using GameBuilderBot.Models;
 using GameBuilderBot.Services;
-using System;
 
 namespace GameBuilderBot.Runners
 {

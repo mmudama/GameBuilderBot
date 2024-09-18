@@ -1,8 +1,8 @@
-﻿using GameBuilderBot.Common;
+﻿using System;
+using GameBuilderBot.Common;
 using GameBuilderBot.Exceptions;
 using GameBuilderBot.Models;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace GameBuilderBot.Services
 {

@@ -1,7 +1,7 @@
-﻿using GameBuilderBot.Exceptions;
+﻿using System;
+using GameBuilderBot.Exceptions;
 using GameBuilderBot.Models;
 using GameBuilderBot.Services;
-using System;
 
 namespace GameBuilderBot.Runners
 {

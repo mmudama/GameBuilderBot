@@ -6,10 +6,10 @@ namespace GameBuilderBot.ExpressionHandling
 {
     public class MathExpression
     {
-        private string RawExpression;
-        private Dictionary<string, GameBuilderBot.Models.Field> Fields;
+        private readonly string RawExpression;
+        private readonly Dictionary<string, GameBuilderBot.Models.Field> Fields;
 
-        private static char[] SupportedOperators = { '+', '-', '*', '/' };
+        private static readonly char[] SupportedOperators = { '+', '-', '*', '/' };
 
         public MathExpression(string rawexpression, Dictionary<string, GameBuilderBot.Models.Field> fields)
         {

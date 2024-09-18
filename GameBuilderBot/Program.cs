@@ -1,12 +1,12 @@
-﻿using Discord;
+﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using GameBuilderBot.Common;
 using GameBuilderBot.Services;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace GameBuilderBot
 {
@@ -26,7 +26,7 @@ namespace GameBuilderBot
             _client = services.GetRequiredService<DiscordSocketClient>();
             _client.Log += LogAsync;
 
-            //TODO use logs instead of console writes?
+            //TODO use logs instead of console writes
             services.GetRequiredService<CommandService>().Log += LogAsync;
             GameHandlingService gameHandler = services.GetRequiredService<GameHandlingService>();
 
