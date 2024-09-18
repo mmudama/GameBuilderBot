@@ -1,18 +1,18 @@
-﻿using GameBuilderBot.Common;
-using GameBuilderBot.Exceptions;
-using GameBuilderBot.Models;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using GameBuilderBot.Common;
+using GameBuilderBot.Exceptions;
+using GameBuilderBot.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GameBuilderBot.Services
 {
     public struct StateIdentifier
     {
-        private ulong ChannelId;
-        private GameDefinition GameDefinition;
+        private readonly ulong ChannelId;
+        private readonly GameDefinition GameDefinition;
 
         public StateIdentifier(ulong channelId, GameDefinition gameDefinition)
         {
@@ -35,18 +35,18 @@ namespace GameBuilderBot.Services
     {
         private const string ENV_GBB_CONFIG_FILE = "GBB_CONFIG_FILE";
 
-        private Serializer _serializer;
+        private readonly Serializer _serializer;
 
         // _gameDefinitionMap[gameName]
-        private Dictionary<string, GameDefinition> _gameDefinitionMap;
+        private readonly Dictionary<string, GameDefinition> _gameDefinitionMap;
 
-        private List<GameDefinition> _gameDefinitionList;
+        private readonly List<GameDefinition> _gameDefinitionList;
 
         // _activeGames[channelId]
-        private Dictionary<ulong, GameDefinition> _activeGames = new Dictionary<ulong, GameDefinition>();
+        private readonly Dictionary<ulong, GameDefinition> _activeGames = new Dictionary<ulong, GameDefinition>();
 
         //_gameStateMap[new StateIdentifier(channelId, gameDefinition)]
-        private Dictionary<StateIdentifier, GameState> _gameStateMap = new Dictionary<StateIdentifier, GameState>();
+        private readonly Dictionary<StateIdentifier, GameState> _gameStateMap = new Dictionary<StateIdentifier, GameState>();
 
         public GameBuilderBotConfig Config;
 

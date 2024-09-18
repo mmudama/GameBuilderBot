@@ -1,8 +1,8 @@
-﻿using Discord.Commands;
+﻿using System;
+using Discord.Commands;
 using GameBuilderBot.Exceptions;
 using GameBuilderBot.Models;
 using GameBuilderBot.Services;
-using System;
 
 namespace GameBuilderBot.Runners
 {
@@ -20,7 +20,7 @@ namespace GameBuilderBot.Runners
     /// </summary>
     abstract public class AssignmentRunner : CommandRunner
     {
-        private ExportService _exportService;
+        private readonly ExportService _exportService;
 
         public AssignmentRunner(GameHandlingService gameHandler, ExportService exportService) : base(gameHandler)
         {

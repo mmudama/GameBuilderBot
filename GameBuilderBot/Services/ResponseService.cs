@@ -1,12 +1,12 @@
-﻿using Discord.Commands;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+using Discord.Commands;
 using GameBuilderBot.Exceptions;
 using GameBuilderBot.Models;
 using GameBuilderBot.Runners;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GameBuilderBot.Services
 {

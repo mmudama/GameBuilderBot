@@ -1,6 +1,6 @@
-﻿using GameBuilderBot.Common;
+﻿using System.Collections.Generic;
+using GameBuilderBot.Common;
 using GameBuilderBot.Models;
-using System.Collections.Generic;
 
 namespace GameBuilderBot.Services
 {

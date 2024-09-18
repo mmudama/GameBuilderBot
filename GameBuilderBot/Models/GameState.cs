@@ -1,5 +1,5 @@
-﻿using GameBuilderBot.Services;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using GameBuilderBot.Services;
 
 namespace GameBuilderBot.Models
 {

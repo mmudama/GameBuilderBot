@@ -1,12 +1,12 @@
-﻿using Discord.Commands;
+﻿using System;
+using Discord.Commands;
 using GameBuilderBot.Models;
-using System;
 
 namespace GameBuilderBot.Services
 {
     public class ExportService
     {
-        private IServiceProvider _service;
+        private readonly IServiceProvider _service;
 
         public ExportService(IServiceProvider services)
         {

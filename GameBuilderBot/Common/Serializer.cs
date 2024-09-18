@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace GameBuilderBot.Common
 {
@@ -26,8 +26,8 @@ namespace GameBuilderBot.Common
     /// </summary>
     public class Serializer
     {
-        private YamlDotNet.Serialization.Serializer YamlSerializer;
-        private YamlDotNet.Serialization.Deserializer YamlDeserializer;
+        private readonly YamlDotNet.Serialization.Serializer YamlSerializer;
+        private readonly YamlDotNet.Serialization.Deserializer YamlDeserializer;
 
         /// <summary>
         /// Convenience class to centralize common (de)serialization functionality

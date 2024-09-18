@@ -1,6 +1,6 @@
-﻿using Discord.Commands;
+﻿using System.Threading.Tasks;
+using Discord.Commands;
 using GameBuilderBot.Services;
-using System.Threading.Tasks;
 
 namespace GameBuilderBot.Modules
 {
