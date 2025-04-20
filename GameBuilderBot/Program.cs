@@ -13,6 +13,7 @@ namespace GameBuilderBot
     public class Program
     {
         private DiscordSocketClient _client;
+        
 
         public static void Main(string[] _)
         {
@@ -49,6 +50,9 @@ namespace GameBuilderBot
         private ServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
+                .AddSingleton(new DiscordSocketConfig { 
+                    GatewayIntents = GatewayIntents.DirectMessages | GatewayIntents.GuildMessages 
+                })
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
