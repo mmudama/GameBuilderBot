@@ -98,6 +98,17 @@ namespace GameBuilderBot.Services
             }
         }
 
+
+        public string RemoveGameDefinitionForChannelId(ulong channelId)
+        {
+
+            string name = GetGameDefinitionForChannelId(channelId).Name;
+            _activeGames.Remove(channelId);
+            return name;
+        }
+
+
+
         public List<GameDefinition> GetAllGameDefinitions()
         {
             return _gameDefinitionList;

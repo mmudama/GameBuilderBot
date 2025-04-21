@@ -23,6 +23,7 @@ namespace GameBuilderBot.Services
         private readonly PrettyPrintVariableRunner _prettyPrintVariableRunner;
         private readonly RollEventRunner _rollEventRunner;
         private readonly StartGameRunner _startGameRunner;
+        private readonly EndGameRunner _endGameRunner;
         private readonly SetValueRunner _setValueRunner;
         private readonly AddValueRunner _addValueRunner;
         private readonly SubtractValueRunner _subtractValueRunner;
@@ -38,6 +39,7 @@ namespace GameBuilderBot.Services
 
             // Registration order of runners dictates order of output in the help message
             _startGameRunner = RegisterRunner(new StartGameRunner(_gameService));
+            _endGameRunner = RegisterRunner(new EndGameRunner(_gameService));
             _rollEventRunner = RegisterRunner(new RollEventRunner(_gameService));
             _deleteVariableRunner = RegisterRunner(new DeleteVariableRunner(_gameService, _exportService));
             _prettyPrintVariableRunner = RegisterRunner(new PrettyPrintVariableRunner(_gameService));
@@ -127,6 +129,12 @@ namespace GameBuilderBot.Services
                 sbResponse = new StringBuilder(e.Message);
             }
             return sbResponse.ToString();
+        }
+
+        internal string EndGame(string[] inputs, SocketCommandContext context)
+        {
+            string gameName = _endGameRunner.EndGame(context.Channel.Id);
+            return string.Format("The game '{0}' has ended", gameName);
         }
 
         internal string DeleteFieldValueForUser(string[] variables, SocketCommandContext discordContext)

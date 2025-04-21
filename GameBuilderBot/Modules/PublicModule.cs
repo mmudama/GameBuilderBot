@@ -30,6 +30,10 @@ namespace GameBuilderBot.Modules
         [Command("Start")]
         public Task StartGameAsync(params string[] inputs) => ReplyAsync(_responseService.StartGame(inputs, Context));
 
+        [Command("end")]
+        [Alias("stop")]
+        public Task EndGameAsync(params string[] inputs) => ReplyAsync(_responseService.EndGame(inputs, Context));
+
         /// <summary>
         /// Rolls virtual dice to determine outcomes. Possible parameter values and their behaviors
         /// are defined in GameDefinition and GameFile. This is the meat of the bot.
