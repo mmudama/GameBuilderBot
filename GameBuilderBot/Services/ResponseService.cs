@@ -27,7 +27,7 @@ namespace GameBuilderBot.Services
         private readonly AddValueRunner _addValueRunner;
         private readonly SubtractValueRunner _subtractValueRunner;
 
-        private readonly List<CommandRunner> _runners = new List<CommandRunner>();
+        private readonly List<CommandRunner> _runners = [];
 
         private const string NO_ACTIVE_GAME_RESPONSE = "No active game found. Type `!start` to start a game.";
 

@@ -47,7 +47,7 @@ namespace GameBuilderBot
             return Task.CompletedTask;
         }
 
-        private ServiceProvider ConfigureServices()
+        private static ServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
                 .AddSingleton(new DiscordSocketConfig { 

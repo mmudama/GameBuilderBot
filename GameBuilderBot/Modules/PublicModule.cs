@@ -7,16 +7,10 @@ namespace GameBuilderBot.Modules
     /// <summary>
     /// This class handles commands received from a Discord channel
     /// </summary>
-    public class PublicModule : ModuleBase<SocketCommandContext>
+    public class PublicModule(ResponseService responseService, GameHandlingService gameHandlingService) : ModuleBase<SocketCommandContext>
     {
-        protected ResponseService _responseService;
-        protected GameHandlingService _gameHandlingService;
-
-        public PublicModule(ResponseService responseService, GameHandlingService gameHandlingService)
-        {
-            _responseService = responseService;
-            _gameHandlingService = gameHandlingService;
-        }
+        protected ResponseService _responseService = responseService;
+        protected GameHandlingService _gameHandlingService = gameHandlingService;
 
         /// <summary>
         /// General help for the user. Does not require a game to be in progress.

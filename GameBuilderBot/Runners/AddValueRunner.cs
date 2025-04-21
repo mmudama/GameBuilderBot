@@ -20,7 +20,7 @@ namespace GameBuilderBot.Runners
                 value = Convert.ToInt32(state.Fields[fieldName].Value.ToString());
             }
 
-            MathExpression mathexpression = new MathExpression(expression, state.Fields);
+            MathExpression mathexpression = new(expression, state.Fields);
             return value + Convert.ToInt32(mathexpression.Evaluate().ToString());
         }
 

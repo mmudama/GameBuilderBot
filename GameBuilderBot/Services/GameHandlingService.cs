@@ -9,16 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GameBuilderBot.Services
 {
-    public struct StateIdentifier
+    public struct StateIdentifier(ulong channelId, GameDefinition gameDefinition)
     {
-        private readonly ulong ChannelId;
-        private readonly GameDefinition GameDefinition;
-
-        public StateIdentifier(ulong channelId, GameDefinition gameDefinition)
-        {
-            ChannelId = channelId;
-            GameDefinition = gameDefinition;
-        }
+        private readonly ulong ChannelId = channelId;
+        private readonly GameDefinition GameDefinition = gameDefinition;
 
         public override bool Equals(object obj) =>
         obj is StateIdentifier stateIdentifier
@@ -43,10 +37,10 @@ namespace GameBuilderBot.Services
         private readonly List<GameDefinition> _gameDefinitionList;
 
         // _activeGames[channelId]
-        private readonly Dictionary<ulong, GameDefinition> _activeGames = new Dictionary<ulong, GameDefinition>();
+        private readonly Dictionary<ulong, GameDefinition> _activeGames = new();
 
         //_gameStateMap[new StateIdentifier(channelId, gameDefinition)]
-        private readonly Dictionary<StateIdentifier, GameState> _gameStateMap = new Dictionary<StateIdentifier, GameState>();
+        private readonly Dictionary<StateIdentifier, GameState> _gameStateMap = new();
 
         public GameBuilderBotConfig Config;
 
@@ -88,7 +82,7 @@ namespace GameBuilderBot.Services
             }
             else
             {
-                throw new NoActiveGameException(string.Format("Could not find active game for this channel", channelId));
+                throw new NoActiveGameException(message: string.Format("Could not find active game for this channel", channelId));
             }
         }
 
