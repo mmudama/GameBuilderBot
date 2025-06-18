@@ -40,8 +40,7 @@ namespace GameBuilderBot.Runners
 
         public bool RestoreGame(ulong channelId)
         {
-            _gameService.LoadGameState(channelId, out bool fileFound);
-            return fileFound;
+            return _gameService.LoadGameState(channelId);
         }
 
         public override string OneLinerHelp()
