@@ -44,23 +44,34 @@ namespace GameBuilderBot.Services
 
         public GameBuilderBotConfig Config;
 
-        public GameHandlingService(IServiceProvider services)
-        {
-            _serializer = services.GetRequiredService<Serializer>();
+        //public GameHandlingService(IServiceProvider services)
+        //{
+        //    _serializer = services.GetRequiredService<Serializer>();
 
-            string appConfigFileName = Environment.GetEnvironmentVariable(ENV_GBB_CONFIG_FILE);
+        //    string appConfigFileName = Environment.GetEnvironmentVariable(ENV_GBB_CONFIG_FILE);
 
-            Config = _serializer.DeserializeFromFile<GameBuilderBotConfig>(appConfigFileName, FileType.YAML);
-            _gameDefinitionMap = PopulateGameDefinitions(Config);
-            _gameDefinitionList = _gameDefinitionMap.Values.ToList();
-        }
+        //    Config = _serializer.DeserializeFromFile<GameBuilderBotConfig>(appConfigFileName, FileType.YAML);
+        //    _gameDefinitionMap = PopulateGameDefinitions(Config);
+        //    _gameDefinitionList = _gameDefinitionMap.Values.ToList();
+        //}
 
-        // For testing, sigh
         public GameHandlingService(Serializer serializer)
         {
             _serializer = serializer;
-            _gameDefinitionMap = [];
-            _gameDefinitionList = [];
+            string appConfigFileName = Environment.GetEnvironmentVariable(ENV_GBB_CONFIG_FILE);
+
+            if (appConfigFileName != null)
+            {
+                Config = _serializer.DeserializeFromFile<GameBuilderBotConfig>(appConfigFileName, FileType.YAML);
+                _gameDefinitionMap = PopulateGameDefinitions(Config);
+                _gameDefinitionList = _gameDefinitionMap.Values.ToList();
+
+            }
+            else
+            {
+                _gameDefinitionMap = [];
+                _gameDefinitionList = [];
+            }
         }
 
         public bool LoadGameState(ulong channelId)

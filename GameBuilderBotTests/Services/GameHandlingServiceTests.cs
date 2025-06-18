@@ -26,7 +26,7 @@ namespace GameBuilderBotTests.Services
             };
 
             MethodInfo method = typeof(GameHandlingService).GetMethod("ApplyDefaultValuesToGameState", BindingFlags.NonPublic | BindingFlags.Instance);
-            method.Invoke(service, new object[] { source, destination });
+            method.Invoke(service, [source, destination]);
 
             Assert.True(destination.ContainsKey("A"));
             Assert.True(destination.ContainsKey("B"));
