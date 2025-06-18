@@ -20,8 +20,6 @@ namespace GameBuilderBot.Common
         YAML
     }
 
-    // TODO: Should this be a static class? Why isn't it?
-
     /// <summary>
     /// Convenience class to centralize common (de)serialization functionality
     /// Supports JSON and YAML

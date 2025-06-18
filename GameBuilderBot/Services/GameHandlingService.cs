@@ -55,6 +55,14 @@ namespace GameBuilderBot.Services
             _gameDefinitionList = _gameDefinitionMap.Values.ToList();
         }
 
+        // For testing, sigh
+        public GameHandlingService(Serializer serializer)
+        {
+            _serializer = serializer;
+            _gameDefinitionMap = [];
+            _gameDefinitionList = [];
+        }
+
         public bool LoadGameState(ulong channelId)
         {
             GameDefinition definition = GetGameDefinitionForChannelId(channelId);

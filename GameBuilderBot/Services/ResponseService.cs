@@ -111,7 +111,7 @@ namespace GameBuilderBot.Services
                     if (_startGameRunner.RestoreGame(channelId))
                     {
                         sbResponse.AppendLine("Your game settings have been restored");
-                        sbResponse.Append(GetFieldValuesForUser(channelId, new[] { "all" }));
+                        sbResponse.Append(GetFieldValuesForUser(channelId, ["all"]));
                     }
                     else
                     {
