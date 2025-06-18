@@ -10,11 +10,18 @@ namespace GameBuilderBot.Models
     /// <seealso cref="GameFile"/>
     public class GameDefinition
     {
+
+        // TODO does this need a set? Do any of the fields in GameDefinition need sets?
         /// <summary>
         /// "Friendly" name to identify the game, like "The Quest for the Holy Grail" or
         /// "Robot Hijinx." This will be exposed directly in chat.
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Optional variables with default values or calculations
+        /// </summary>
+        public Dictionary<string, Field> Fields { get; }
 
         /// <summary>
         /// Contains all available <seealso cref="GameEvent"/> objects for this game.
@@ -26,10 +33,12 @@ namespace GameBuilderBot.Models
         /// </summary>
         /// <param name="name"></param>
         /// <param name="gameEventMap"></param>
-        public GameDefinition(string name, Dictionary<string, GameEvent> gameEventMap)
+        public GameDefinition(string name, Dictionary<string, GameEvent> gameEventMap,
+            Dictionary<string, Field> fields )
         {
             GameEventMap = gameEventMap;
             Name = name;
+            Fields = fields;
         }
     }
 }

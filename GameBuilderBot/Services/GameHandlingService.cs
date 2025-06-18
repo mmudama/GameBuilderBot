@@ -6,6 +6,7 @@ using GameBuilderBot.Common;
 using GameBuilderBot.Exceptions;
 using GameBuilderBot.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 
 namespace GameBuilderBot.Services
 {
@@ -55,6 +56,14 @@ namespace GameBuilderBot.Services
             _gameDefinitionList = _gameDefinitionMap.Values.ToList();
         }
 
+        // TODO this isn't the right place and should the Serializer class maybe be static anyway?
+        public Serializer GetSerializer()
+        {
+            return _serializer;
+
+        }
+
+
         public void LoadGameState(ulong channelId, out bool fileFound)
         {
             GameDefinition definition = GetGameDefinitionForChannelId(channelId);
@@ -62,15 +71,44 @@ namespace GameBuilderBot.Services
             // TODO This filename format is defined both here and in GameStateExporterJsonFile. Put it in some common place.
             string fileName = string.Format("{0}\\GameBuilderBot.{1}.{2}.json", Config.GameStateDirectory,
     channelId, StringUtils.SanitizeForFileName(definition.Name));
+
+            GameState gameState = new GameState();
+
             try
             {
-                GameState gameState = _serializer.DeserializeFromFile<GameState>(fileName, FileType.JSON);
-                _gameStateMap[new StateIdentifier(gameState.ChannelId, definition)] = gameState;
+                gameState = _serializer.DeserializeFromFile<GameState>(fileName, FileType.JSON);
+
                 fileFound = true;
             }
             catch (FileNotFoundException)
             {
                 fileFound = false;
+
+                if (!fileFound)
+                {
+                    gameState = new GameState
+                    {
+                        Name = definition.Name,
+                        Fields = new Dictionary<string, Field>(),
+                        ChannelId = channelId,
+                        FriendlyName = "default"
+                    };
+                }
+
+                foreach (var fieldName in definition.Fields.Keys)
+                {
+                    if (!gameState.Fields.ContainsKey(fieldName))
+                    {
+                        string s = _serializer.SerializeToString(definition.Fields[fieldName], FileType.JSON);
+                        Field f = _serializer.DeserializeFromString<Field>(s, FileType.JSON);
+                        gameState.Fields[fieldName] = f;
+                        //gameState.Fields[fieldName] = definition.Fields[fieldName];
+
+                    }
+                }
+
+                _gameStateMap[new StateIdentifier(channelId, definition)] = gameState;
+
             }
         }
 
@@ -124,10 +162,7 @@ namespace GameBuilderBot.Services
                 {
                     return state;
                 }
-                else if (_gameStateMap.TryGetValue(new StateIdentifier(0, game), out GameState defaultState))
-                {
-                    return defaultState;
-                }
+
             }
             else
             {
@@ -144,7 +179,7 @@ namespace GameBuilderBot.Services
 
             foreach (string fileName in definitionFiles)
             {
-                (GameDefinition current, GameState defaultState) = IngestionService.Ingest(fileName, _serializer);
+                GameDefinition current = IngestionService.Ingest(fileName, _serializer);
                 if (gameDefinitionMap.ContainsKey(current.Name))
                 {
                     Console.WriteLine("Duplicate game definition {0}; ignoring {1}", current.Name, fileName);
@@ -154,7 +189,6 @@ namespace GameBuilderBot.Services
                     gameDefinitionMap[current.Name] = current;
                 }
 
-                _gameStateMap[new StateIdentifier(0, current)] = defaultState;
             }
 
             return gameDefinitionMap;

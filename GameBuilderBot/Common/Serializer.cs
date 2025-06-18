@@ -20,6 +20,8 @@ namespace GameBuilderBot.Common
         YAML
     }
 
+    // TODO: Should this be a static class? Why isn't it?
+
     /// <summary>
     /// Convenience class to centralize common (de)serialization functionality
     /// Supports JSON and YAML
@@ -95,5 +97,28 @@ namespace GameBuilderBot.Common
             }
             else throw new InvalidEnumArgumentException(string.Format("Unsupported FileType {0}", type));
         }
+
+        /// <summary>
+        /// Takes a string and deserializes it into an object of type T
+        /// </summary>
+        /// <typeparam name="T">Object type to be serialized</typeparam>
+        /// <param name="o">The Object</param>
+        /// <param name="type">The format to use</param>
+        /// <returns>an object of type T</returns>
+        public T DeserializeFromString<T>(string s, FileType type)
+        {
+            if (type == FileType.YAML)
+            {
+                return YamlDeserializer.Deserialize<T>(s);
+            }
+            else if (type == FileType.JSON)
+            {
+                return JsonConvert.DeserializeObject<T>(s);
+            }
+            else throw new InvalidEnumArgumentException(string.Format("Unsupported FileType {0}", type));
+        }
+
+
+
     }
 }
