@@ -7,7 +7,6 @@
 # or wget:
 # wget --no-check-certificate http://gist.githubusercontent.com/kmorcinek/2710267/raw/.gitignore
 
-
 #monique#
  Properties/launchSettings.json
 #monique#
@@ -230,3 +229,4 @@ project.lock.json
 #####
 DiscordOregonTrail.csproj
 Properties/launchSettings.json
+/Problem Statement.txt

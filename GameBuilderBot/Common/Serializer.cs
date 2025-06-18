@@ -95,5 +95,52 @@ namespace GameBuilderBot.Common
             }
             else throw new InvalidEnumArgumentException(string.Format("Unsupported FileType {0}", type));
         }
+
+        /// <summary>
+        /// Takes a string and deserializes it into an object of type T
+        /// </summary>
+        /// <typeparam name="T">Object type to be serialized</typeparam>
+        /// <param name="o">The Object</param>
+        /// <param name="type">The format to use</param>
+        /// <returns>an object of type T</returns>
+        public T DeserializeFromString<T>(string s, FileType type)
+        {
+            if (type == FileType.YAML)
+            {
+                return YamlDeserializer.Deserialize<T>(s);
+            }
+            else if (type == FileType.JSON)
+            {
+                return JsonConvert.DeserializeObject<T>(s);
+            }
+            else throw new InvalidEnumArgumentException(string.Format("Unsupported FileType {0}", type));
+        }
+
+        // TODO put TryDeepCopy in a more intuitive place
+        /// <summary>
+        /// Attempts to return a deep copy of the original object. This is a simplistic implementation that is not guaranteed to work.
+        /// </summary>
+        /// <typeparam name="T">Object type to be copied</typeparam>
+        /// <param name="original">Object to be copied</param>
+        /// <returns>A copy of the parameter "original"</returns>
+        /// <exception cref="System.InvalidOperationException">
+        /// Thrown when the deep copy fails
+        /// </exception>
+
+        public T TryDeepCopy<T>(T original)
+        {
+            T copy = default;
+            try
+            {
+                string s = SerializeToString(original, FileType.JSON);
+                copy = DeserializeFromString<T>(s, FileType.JSON);
+            }
+            catch (System.Exception ex)
+            {
+                // Log the exception or handle it as needed
+                throw new System.InvalidOperationException("Failed to deep copy the object.", ex);
+            }
+            return copy;
+        }
     }
 }

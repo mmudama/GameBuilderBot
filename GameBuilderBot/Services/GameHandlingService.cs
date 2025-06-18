@@ -44,33 +44,98 @@ namespace GameBuilderBot.Services
 
         public GameBuilderBotConfig Config;
 
-        public GameHandlingService(IServiceProvider services)
-        {
-            _serializer = services.GetRequiredService<Serializer>();
+        //public GameHandlingService(IServiceProvider services)
+        //{
+        //    _serializer = services.GetRequiredService<Serializer>();
 
+        //    string appConfigFileName = Environment.GetEnvironmentVariable(ENV_GBB_CONFIG_FILE);
+
+        //    Config = _serializer.DeserializeFromFile<GameBuilderBotConfig>(appConfigFileName, FileType.YAML);
+        //    _gameDefinitionMap = PopulateGameDefinitions(Config);
+        //    _gameDefinitionList = _gameDefinitionMap.Values.ToList();
+        //}
+
+        public GameHandlingService(Serializer serializer)
+        {
+            _serializer = serializer;
             string appConfigFileName = Environment.GetEnvironmentVariable(ENV_GBB_CONFIG_FILE);
 
-            Config = _serializer.DeserializeFromFile<GameBuilderBotConfig>(appConfigFileName, FileType.YAML);
-            _gameDefinitionMap = PopulateGameDefinitions(Config);
-            _gameDefinitionList = _gameDefinitionMap.Values.ToList();
+            if (appConfigFileName != null)
+            {
+                Config = _serializer.DeserializeFromFile<GameBuilderBotConfig>(appConfigFileName, FileType.YAML);
+                _gameDefinitionMap = PopulateGameDefinitions(Config);
+                _gameDefinitionList = _gameDefinitionMap.Values.ToList();
+
+            }
+            else
+            {
+                _gameDefinitionMap = [];
+                _gameDefinitionList = [];
+            }
         }
 
-        public void LoadGameState(ulong channelId, out bool fileFound)
+        public bool LoadGameState(ulong channelId)
         {
             GameDefinition definition = GetGameDefinitionForChannelId(channelId);
+            GameState gameState = new();
+            bool fileFound = false;
 
             // TODO This filename format is defined both here and in GameStateExporterJsonFile. Put it in some common place.
             string fileName = string.Format("{0}\\GameBuilderBot.{1}.{2}.json", Config.GameStateDirectory,
     channelId, StringUtils.SanitizeForFileName(definition.Name));
+
             try
             {
-                GameState gameState = _serializer.DeserializeFromFile<GameState>(fileName, FileType.JSON);
-                _gameStateMap[new StateIdentifier(gameState.ChannelId, definition)] = gameState;
+                // Load the GameState if there's a save file for this game in this Discord channel
+                gameState = _serializer.DeserializeFromFile<GameState>(fileName, FileType.JSON);
                 fileFound = true;
             }
             catch (FileNotFoundException)
             {
-                fileFound = false;
+                // Create a GameState if we didn't find a file
+                gameState = new GameState
+                {
+                    Name = definition.Name,
+                    Fields = new Dictionary<string, Field>(),
+                    ChannelId = channelId,
+
+                    // FriendlyName will be overwritten with the correct value when the game saves a variable
+                    // Could pull it from SocketCommandContext, but is it worth adding another parameter up the call stack?
+                    FriendlyName = "default"
+                };
+            }
+
+            ApplyDefaultValuesToGameState(definition.Fields, gameState.Fields);
+            _gameStateMap[new StateIdentifier(channelId, definition)] = gameState;
+
+            return fileFound;
+        }
+
+        /// <summary>
+        /// Copies Field values from the source to the destination
+        /// For each key/value pair in the source that does not exist in the destination, attempts to copy
+        /// the field and add it to the destination.
+        /// </summary>
+        /// <param name="source">The source dictionary containing default fields.</param>
+        /// <param name="destination">The destination dictionary to populate with missing fields.</param>
+        private void ApplyDefaultValuesToGameState(Dictionary<string, Field> source, Dictionary<string, Field> destination)
+        {
+            foreach (var fieldName in source.Keys)
+            {
+                if (!destination.ContainsKey(fieldName))
+                {
+                    Field f = default;
+                    try
+                    {
+                        f = _serializer.TryDeepCopy(source[fieldName]);
+                        destination[fieldName] = f;
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine($"Could not add default variable {fieldName} to current game");
+                    }
+                    destination[fieldName] = f;
+                }
             }
         }
 
@@ -124,10 +189,7 @@ namespace GameBuilderBot.Services
                 {
                     return state;
                 }
-                else if (_gameStateMap.TryGetValue(new StateIdentifier(0, game), out GameState defaultState))
-                {
-                    return defaultState;
-                }
+
             }
             else
             {
@@ -144,7 +206,7 @@ namespace GameBuilderBot.Services
 
             foreach (string fileName in definitionFiles)
             {
-                (GameDefinition current, GameState defaultState) = IngestionService.Ingest(fileName, _serializer);
+                GameDefinition current = IngestionService.Ingest(fileName, _serializer);
                 if (gameDefinitionMap.ContainsKey(current.Name))
                 {
                     Console.WriteLine("Duplicate game definition {0}; ignoring {1}", current.Name, fileName);
@@ -154,7 +216,6 @@ namespace GameBuilderBot.Services
                     gameDefinitionMap[current.Name] = current;
                 }
 
-                _gameStateMap[new StateIdentifier(0, current)] = defaultState;
             }
 
             return gameDefinitionMap;

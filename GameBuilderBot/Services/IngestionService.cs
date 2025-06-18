@@ -6,7 +6,7 @@ namespace GameBuilderBot.Services
 {
     public class IngestionService
     {
-        public static (GameDefinition, GameState) Ingest(string fileName, Serializer serializer)
+        public static GameDefinition Ingest(string fileName, Serializer serializer)
         {
             var gameEventMap = new Dictionary<string, GameEvent>();
             var fields = new Dictionary<string, Field>();
@@ -18,12 +18,6 @@ namespace GameBuilderBot.Services
                 fields[key.ToLower()] = new Field(gameFile.Fields[key]);
             }
 
-            GameState defaultState = new GameState
-            {
-                Name = gameFile.Name,
-                ChannelId = 0,
-                Fields = fields
-            };
 
             foreach (GameEventIngest e in gameFile.GameEvents)
             {
@@ -39,7 +33,7 @@ namespace GameBuilderBot.Services
                 }
             }
 
-            return (new GameDefinition(gameFile.Name, gameEventMap), defaultState);
+            return new GameDefinition(gameFile.Name, gameEventMap, fields);
         }
     }
 }
