@@ -10,10 +10,11 @@ namespace GameBuilderBot.ExpressionHandling.Tests
         [TestMethod()]
         public void EvaluateTest()
         {
+
             Dictionary<string, Field> Fields = new();
             Fields.Add("var1_int", new Field("", "100", "int"));
             Fields.Add("var2_string", new Field("", "Jack ran up the hill.", "string"));
-            Fields.Add("var3_datetime", new Field("", "1/1/0001 12:00:00 AM", "datetime"));
+            Fields.Add("var3_datetime", new Field("", "12/12/0001 12:00:00 AM", "datetime"));
 
             MathExpression TE;
             object result;
@@ -28,7 +29,7 @@ namespace GameBuilderBot.ExpressionHandling.Tests
 
             TE = new MathExpression("var3_datetime + 00:30", Fields);
             result = TE.Evaluate(false);
-            Assert.AreEqual("1/1/0001 12:30:00 AM", result.ToString());
+            Assert.AreEqual("12/12/0001 12:30:00 AM", result.ToString());
         }
     }
 }
