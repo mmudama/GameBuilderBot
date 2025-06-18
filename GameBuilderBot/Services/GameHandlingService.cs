@@ -103,12 +103,11 @@ namespace GameBuilderBot.Services
                     // Could pull it from SocketCommandContext, but is it worth adding another parameter up the call stack?
                     FriendlyName = "default"
                 };
-
-                ApplyDefaultValuesToGameState(definition.Fields, gameState.Fields);
-
-                _gameStateMap[new StateIdentifier(channelId, definition)] = gameState;
-
             }
+
+            ApplyDefaultValuesToGameState(definition.Fields, gameState.Fields);
+            _gameStateMap[new StateIdentifier(channelId, definition)] = gameState;
+
             return fileFound;
         }
 
