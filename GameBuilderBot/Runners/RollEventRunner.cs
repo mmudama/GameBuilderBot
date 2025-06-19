@@ -8,9 +8,11 @@ namespace GameBuilderBot.Runners
     public class RollEventRunner : CommandRunner
     {
         protected string[] _variables;
+        protected ExportService _exportService;
 
-        public RollEventRunner(GameHandlingService gameHandler) : base(gameHandler)
+        public RollEventRunner(GameHandlingService gameHandler, ExportService exportService) : base(gameHandler)
         {
+            _exportService = exportService;
         }
 
         public string RollEvent(string[] objects, SocketCommandContext discordContext)
@@ -32,6 +34,7 @@ namespace GameBuilderBot.Runners
                 GameEvent theEvent = definition.GameEventMap[gameEventAsString];
 
                 response = $"Outcome of {gameEventAsString} event:\n{theEvent.GetResponseForEventRoll(definition, state, 0)}";
+                _exportService.ExportGameState(state, discordContext);
             }
             else
             {
