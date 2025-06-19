@@ -111,12 +111,12 @@ namespace GameBuilderBot.Services
                     if (_startGameRunner.RestoreGame(channelId))
                     {
                         sbResponse.AppendLine("Your game settings have been restored");
-                        sbResponse.Append(GetFieldValuesForUser(channelId, ["all"]));
                     }
                     else
                     {
                         sbResponse.AppendLine("No previous game settings found for this channel; using defaults");
                     }
+                    sbResponse.Append(GetFieldValuesForUser(channelId, ["all"]));
                     sbResponse.AppendLine($"To see the commands for {gameName}, type `!game help`");
                 }
             }
