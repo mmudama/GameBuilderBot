@@ -44,17 +44,6 @@ namespace GameBuilderBot.Services
 
         public GameBuilderBotConfig Config;
 
-        //public GameHandlingService(IServiceProvider services)
-        //{
-        //    _serializer = services.GetRequiredService<Serializer>();
-
-        //    string appConfigFileName = Environment.GetEnvironmentVariable(ENV_GBB_CONFIG_FILE);
-
-        //    Config = _serializer.DeserializeFromFile<GameBuilderBotConfig>(appConfigFileName, FileType.YAML);
-        //    _gameDefinitionMap = PopulateGameDefinitions(Config);
-        //    _gameDefinitionList = _gameDefinitionMap.Values.ToList();
-        //}
-
         public GameHandlingService(Serializer serializer)
         {
             _serializer = serializer;

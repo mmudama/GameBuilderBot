@@ -212,7 +212,7 @@ namespace GameBuilderBot.Services
         {
             try
             {
-                (object oldValue, object newValue) = _setValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext);
+                _setValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext, out object oldValue, out object newValue);
                 string response = AssignmentResponse(FieldNameAndValue[0], oldValue, newValue);
                 return discordContext.Channel.SendMessageAsync(response);
             }
@@ -250,7 +250,7 @@ namespace GameBuilderBot.Services
         {
             try
             {
-                (object oldValue, object newValue) = _subtractValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext);
+                _subtractValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext, out object oldValue, out object newValue);
                 string response = AssignmentResponse(FieldNameAndValue[0], oldValue, newValue);
                 return discordContext.Channel.SendMessageAsync(response);
             }
@@ -268,7 +268,7 @@ namespace GameBuilderBot.Services
         {
             try
             {
-                (object oldValue, object newValue) = _addValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext);
+                _addValueRunner.CalculateFieldValue(FieldNameAndValue, discordContext, out object oldValue, out object newValue);
                 string response = AssignmentResponse(FieldNameAndValue[0], oldValue, newValue);
                 return discordContext.Channel.SendMessageAsync(response);
             }

@@ -31,11 +31,6 @@ namespace GameBuilderBot.Models
         public string Distribution; // TODO make this an enum
 
         /// <summary>
-        /// TODO is this even used for anything?
-        /// </summary>
-        public string Text;
-
-        /// <summary>
         /// Indicates whether this GameEvent should be considered a top-level GameEvent. A user can "roll" any GameEvent,
         /// but those flagged IsPrimary are considered the most relevant entry points for events. Other
         /// GameEvents would typically be present only as chained rolls that result from Outcomes.
@@ -68,18 +63,12 @@ namespace GameBuilderBot.Models
         {
             Name = c.Name.ToLower();
             Distribution = c.Distribution;
-            Text = c.Text;
             IsPrimary = c.IsPrimary;
             Description = c.Description;
 
             foreach (OutcomeIngest o in c.Outcomes)
             {
                 outcomeMap[o.Name] = new Outcome(o);
-            }
-
-            if (Text == null)
-            {
-                Text = Name;
             }
 
             CreateProbabilityArray();

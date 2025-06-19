@@ -12,30 +12,44 @@ namespace GameBuilderBot
 {
     public class Program
     {
-        private DiscordSocketClient _client;
-        
+        private readonly DiscordSocketClient _client;
+        private readonly CommandService _commandService;
+        private readonly CommandHandlingService _commandHandlingService;
+        private readonly GameHandlingService _gameHandlingService;
 
         public static void Main(string[] _)
         {
-            new Program().MainAsync().GetAwaiter().GetResult();
+            var services = ConfigureServices();
+            var program = services.GetRequiredService<Program>();
+            program.MainAsync().GetAwaiter().GetResult();
+        }
+
+        public Program(
+            DiscordSocketClient client, 
+            CommandService commandService, 
+            CommandHandlingService commandHandlingService, 
+            GameHandlingService gameHandlingService)
+        {
+            _client = client;
+            _commandService = commandService;
+            _commandHandlingService = commandHandlingService;
+            _gameHandlingService = gameHandlingService;
         }
 
         public async Task MainAsync()
         {
             using var services = ConfigureServices();
-
-            _client = services.GetRequiredService<DiscordSocketClient>();
+            
             _client.Log += LogAsync;
 
             //TODO use logs instead of console writes
-            services.GetRequiredService<CommandService>().Log += LogAsync;
-            GameHandlingService gameHandler = services.GetRequiredService<GameHandlingService>();
-
-            await _client.LoginAsync(TokenType.Bot, gameHandler.Config.DiscordBotToken);
+            _commandService.Log += LogAsync;
+            
+            await _client.LoginAsync(TokenType.Bot, _gameHandlingService.Config.DiscordBotToken);
             await _client.StartAsync();
 
             // Here we initialize the logic required to register our commands.
-            await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+            await _commandHandlingService.InitializeAsync();
 
             // Block this task until the program is closed.
             await Task.Delay(-1);
@@ -53,6 +67,7 @@ namespace GameBuilderBot
                 .AddSingleton(new DiscordSocketConfig { 
                     GatewayIntents = GatewayIntents.DirectMessages | GatewayIntents.GuildMessages 
                 })
+                .AddSingleton<Program>()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
