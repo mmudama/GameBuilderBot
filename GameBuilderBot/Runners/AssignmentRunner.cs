@@ -30,12 +30,12 @@ namespace GameBuilderBot.Runners
         abstract protected int CalculateValue(GameState state, string fieldName, string expression);
 
         /// <summary>
-        /// TODO definitely rename this. Maybe also switch to using out params instead of returning a tuple?
+        /// TODO What actually is the summary?
         /// </summary>
         /// <param name="FieldNameAndValue"></param>
         /// <param name="discordContext"></param>
         /// <returns></returns>
-        public (object, object) CalculateFieldValue(string[] FieldNameAndValue, SocketCommandContext discordContext)
+        public void CalculateFieldValue(string[] FieldNameAndValue, SocketCommandContext discordContext, out object oldValue, out object newValue)
         {
             if (FieldNameAndValue.Length != 2)
             {
@@ -48,14 +48,14 @@ namespace GameBuilderBot.Runners
             string expression = FieldNameAndValue[1];
             int value = CalculateValue(state, fieldName, expression);
 
+            oldValue = null;
+
             if (int.TryParse(expression, out _))
             {
                 // The second user parameter was an explicit integer value, not an expression
                 expression = null;
             }
-
-            object oldValue = null;
-
+            
             if (state.FieldHasValue(fieldName))
             {
                 oldValue = state.Fields[fieldName].Value;
@@ -70,8 +70,8 @@ namespace GameBuilderBot.Runners
                 state.Fields[fieldName] = new Field(expression, value.ToString());
             }
 
+            newValue = state.Fields[fieldName].Value;
             _exportService.ExportGameState(state, discordContext);
-            return (oldValue, state.Fields[fieldName].Value);
         }
     }
 }
