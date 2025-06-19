@@ -40,7 +40,7 @@ namespace GameBuilderBot.Services
             // Registration order of runners dictates order of output in the help message
             _startGameRunner = RegisterRunner(new StartGameRunner(_gameService));
             _endGameRunner = RegisterRunner(new EndGameRunner(_gameService));
-            _rollEventRunner = RegisterRunner(new RollEventRunner(_gameService));
+            _rollEventRunner = RegisterRunner(new RollEventRunner(_gameService, _exportService));
             _deleteVariableRunner = RegisterRunner(new DeleteVariableRunner(_gameService, _exportService));
             _prettyPrintVariableRunner = RegisterRunner(new PrettyPrintVariableRunner(_gameService));
             _setValueRunner = RegisterRunner(new SetValueRunner(_gameService, _exportService));
