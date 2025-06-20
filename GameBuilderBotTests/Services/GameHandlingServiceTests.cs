@@ -16,12 +16,12 @@ namespace GameBuilderBotTests.Services
 
             var source = new Dictionary<string, Field>
             {
-                { "A", new Field("exprA", "1", typeof(int)) },
-                { "B", new Field("exprB", "2", typeof(string)) }
+                { "A", new Field("exprA", "1") },
+                { "B", new Field("exprB", "2") }
             };
             var destination = new Dictionary<string, Field>
             {
-                { "A", new Field("exprA", "1", typeof(int)) }
+                { "A", new Field("exprA", "1") }
             };
 
             MethodInfo method = typeof(GameHandlingService).GetMethod("ApplyDefaultValuesToGameState", BindingFlags.NonPublic | BindingFlags.Instance);

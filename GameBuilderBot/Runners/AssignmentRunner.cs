@@ -72,7 +72,7 @@ namespace GameBuilderBot.Runners
             }
             else
             {
-                state.Fields[fieldName] = new Field(expression, value.ToString(), value.GetType());
+                state.Fields[fieldName] = new Field(expression, value.ToString());
             }
 
 

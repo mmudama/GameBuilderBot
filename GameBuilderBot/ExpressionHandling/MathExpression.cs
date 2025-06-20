@@ -38,10 +38,8 @@ namespace GameBuilderBot.ExpressionHandling
             return GameBuilderBot.Services.DiceRollService.Roll(expression);
         }
 
-        public object Evaluate(Boolean UseLegacy = true)
+        public object Evaluate()
         {
-            if (UseLegacy) return LegacyEvaluate();
-
             return RecursiveEval(RawExpression);
         }
 

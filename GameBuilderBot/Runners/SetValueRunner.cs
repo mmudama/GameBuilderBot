@@ -13,35 +13,41 @@ namespace GameBuilderBot.Runners
 
         override protected object CalculateValue(GameState state, string fieldName, string expression)
         {
-            // First try to treat it as an integer
-            // If it's not an integer, try to treat it as a dice roll / mathematical expression
-            // Then try a datetime
-            // If that fails, just return the expression (string)
+
+
+            // Return the value based on the expression:
+            // First try the expression as a dice roll (or integer)
+            // Then as a DateTime
+            // Then as a "math expression," which can also add dates and concatenate strings
+            // If all else fails, return the expression as a string
+
 
             object value;
-            if (!int.TryParse(expression, out int number))
+
+            try
+            {
+            // DiceRollService will also handle integers
+                value = DiceRollService.Roll(expression);
+            }
+            catch (Dice.DiceException) // It wasn't a dice roll
             {
                 try
                 {
-                    MathExpression mathexpression = new MathExpression(expression, state.Fields);
-                    value = Convert.ToInt32(mathexpression.Evaluate().ToString());
+                    value = DateTime.Parse(expression);
                 }
-                catch (Dice.DiceException) // It wasn't a dice roll
+                catch (FormatException)
                 {
                     try
                     {
-                        value = DateTime.Parse(expression);
+                        // It's "math" but it's not numeric, so can't assume int
+                        MathExpression mathexpression = new MathExpression(expression, state.Fields);
+                        value = mathexpression.Evaluate();
                     }
-                    catch (FormatException) // It wasn't a DateTime
+                    catch (Exception)
                     {
                         value = expression;
                     }
                 }
-
-            }
-            else
-            {
-                value = number;
             }
 
             return value;
@@ -49,6 +55,7 @@ namespace GameBuilderBot.Runners
 
         public override string OneLinerHelp()
         {
+            // TODO this should be more descriptive
             return "`!set foo 1` sets the variable named foo to the value 1 in the current game";
         }
     }

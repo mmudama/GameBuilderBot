@@ -21,10 +21,6 @@ namespace GameBuilderBot.Models
         /// </summary>
         public object Value { get; set; }
 
-        /// <summary>
-        /// The Type of the Value object
-        /// </summary>
-        public Type Type { get; set; }
 
         /// <summary>
         /// Default constructor required for deserialization
@@ -43,64 +39,21 @@ namespace GameBuilderBot.Models
         }
 
         /// <summary>
-        /// Constructore for the Field class.
+        /// Constructor for the Field class.
         /// </summary>
-        /// <param name="expression">Deprecated, to be removed.</param>
+        /// <param name="expression">Source of the value</param>
         /// <param name="value">String value of the field (read from JSON/YAML when loading from configuration).</param>
-        /// <param name="type">The type (int, datetime, ...) of the field.</param>
-        public Field(string expression, string value, Type type)
+
+        public Field(string expression, object value)
         {
             Expression = expression;
-
-            Type = type;
-
-            // apparently you can't do a switch statement on Type, grrrr
-
-            if (type == typeof(int))
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    Value = Convert.ToInt32(1);
-                }
-                else
-                {
-                    Value = Convert.ToInt32(value);
-                }
-            }
-            else if (type == typeof(string))
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    Value = "";
-                }
-                else
-                {
-                    Value = value;
-                }
-
-            }
-            else if (type == typeof(DateTime))
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    Value = new DateTime(0);
-                }
-                else if (value.ToLower().Equals("now"))
-                {
-                    Value = DateTime.Now;
-                }
-                else
-                {
-                    Value = Convert.ToDateTime(value);
-                }
-
-            }
-            else
-            {
-                string msg = "Type " + type + " not implemented in Fields.";
-                throw new System.InvalidOperationException(msg);
-            }
+            Value = value;
         }
+
+
+
+
+
 
         public void AddTo(object valueToAdd)
         {
