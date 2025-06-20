@@ -12,11 +12,11 @@ namespace GameBuilderBot.ExpressionHandling.Tests
         public void EvaluateTest()
         {
             Dictionary<string, Field> Fields = new();
-            Fields.Add("var1_int", new Field("", "100", "int"));
-            Fields.Add("var2_string", new Field("", "Jack ran up the hill.", "string"));
+            Fields.Add("var1_int", new Field("", "100", typeof(int)));
+            Fields.Add("var2_string", new Field("", "Jack ran up the hill.", typeof(string)));
 
             string dateTimeInput = "1/1/0001 11:00:00 AM";
-            Fields.Add("var3_datetime", new Field("", dateTimeInput, "datetime"));
+            Fields.Add("var3_datetime", new Field("", dateTimeInput, typeof(DateTime)));
 
             MathExpression TE;
             object result;

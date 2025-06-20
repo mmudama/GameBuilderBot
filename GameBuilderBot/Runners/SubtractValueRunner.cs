@@ -11,7 +11,7 @@ namespace GameBuilderBot.Runners
         {
         }
 
-        override protected int CalculateValue(GameState state, string fieldName, string expression)
+        override protected object CalculateValue(GameState state, string fieldName, string expression)
         {
             int value = 0;
 

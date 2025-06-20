@@ -11,15 +11,40 @@ namespace GameBuilderBot.Runners
         {
         }
 
-        override protected int CalculateValue(GameState state, string fieldName, string expression)
+        override protected object CalculateValue(GameState state, string fieldName, string expression)
         {
-            if (!int.TryParse(expression, out int result))
+            // First try to treat it as an integer
+            // If it's not an integer, try to treat it as a dice roll / mathematical expression
+            // Then try a datetime
+            // If that fails, just return the expression (string)
+
+            object value;
+            if (!int.TryParse(expression, out int number))
             {
-                MathExpression mathexpression = new MathExpression(expression, state.Fields);
-                result = Convert.ToInt32(mathexpression.Evaluate().ToString());
+                try
+                {
+                    MathExpression mathexpression = new MathExpression(expression, state.Fields);
+                    value = Convert.ToInt32(mathexpression.Evaluate().ToString());
+                }
+                catch (Dice.DiceException) // It wasn't a dice roll
+                {
+                    try
+                    {
+                        value = DateTime.Parse(expression);
+                    }
+                    catch (FormatException) // It wasn't a DateTime
+                    {
+                        value = expression;
+                    }
+                }
+
+            }
+            else
+            {
+                value = number;
             }
 
-            return result;
+            return value;
         }
 
         public override string OneLinerHelp()

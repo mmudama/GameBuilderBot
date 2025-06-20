@@ -13,9 +13,9 @@ namespace GameBuilderBot.Models.Tests
             Field stringTestField;
             Field datetimeTestField;
 
-            intTestField = new Field("", "100", "int");
-            stringTestField = new Field("", "Jack ran up the hill.", "string");
-            datetimeTestField = new Field("", "", "DaTeTime");
+            intTestField = new Field("", "100", typeof(int));
+            stringTestField = new Field("", "Jack ran up the hill.", typeof(string));
+            datetimeTestField = new Field("", "", typeof(DateTime));
         }
 
         [TestMethod()]
@@ -28,7 +28,7 @@ namespace GameBuilderBot.Models.Tests
         {
             Field datetimeTestField;
             DateTime testvalue;
-            datetimeTestField = new Field("", "", "DateTime");
+            datetimeTestField = new Field("", "", typeof(DateTime));
 
             testvalue = (DateTime)datetimeTestField.Value;
             Assert.AreEqual(testvalue.Ticks, Convert.ToDateTime("1/1/0001 00:00:00 AM").Ticks);

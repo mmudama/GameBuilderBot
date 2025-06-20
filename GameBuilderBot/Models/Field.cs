@@ -47,57 +47,58 @@ namespace GameBuilderBot.Models
         /// </summary>
         /// <param name="expression">Deprecated, to be removed.</param>
         /// <param name="value">String value of the field (read from JSON/YAML when loading from configuration).</param>
-        /// <param name="type">The type (int, datetime, ...) of the field.  Defaults to int for backwards compatibility, change in future?</param>
-        public Field(string expression, string value, string type = "int")
+        /// <param name="type">The type (int, datetime, ...) of the field.</param>
+        public Field(string expression, string value, Type type)
         {
-            Expression = expression;  //Deprecated, to be moved to GameEvent and other locations.
+            Expression = expression;
 
-            switch (type.ToLower())
+            Type = type;
+
+            // apparently you can't do a switch statement on Type, grrrr
+
+            if (type == typeof(int))
             {
-                case "int":
-                case "integer":
-                    Type = typeof(int);
-                    if (string.IsNullOrWhiteSpace(value))
-                    {
-                        Value = Convert.ToInt32(1);
-                    }
-                    else
-                    {
-                        Value = Convert.ToInt32(value);
-                    }
-                    break;
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    Value = Convert.ToInt32(1);
+                }
+                else
+                {
+                    Value = Convert.ToInt32(value);
+                }
+            }
+            else if (type == typeof(string))
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    Value = "";
+                }
+                else
+                {
+                    Value = value;
+                }
 
-                case "string":
-                    Type = typeof(string);
-                    if (string.IsNullOrWhiteSpace(value))
-                    {
-                        Value = "";
-                    }
-                    else
-                    {
-                        Value = value;
-                    }
-                    break;
+            }
+            else if (type == typeof(DateTime))
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    Value = new DateTime(0);
+                }
+                else if (value.ToLower().Equals("now"))
+                {
+                    Value = DateTime.Now;
+                }
+                else
+                {
+                    Value = Convert.ToDateTime(value);
+                }
 
-                case "datetime":
-                    Type = typeof(DateTime);
-                    if (string.IsNullOrWhiteSpace(value))
-                    {
-                        Value = new DateTime(0);
-                    }
-                    else if (value.ToLower().Equals("now"))
-                    {
-                        Value = DateTime.Now;
-                    }
-                    else
-                    {
-                        Value = Convert.ToDateTime(value);
-                    }
-                    break;
-
-                default:
-                    string msg = "Type " + type + " not implemented in Fields.";
-                    throw new System.InvalidOperationException(msg);
+            }
+            else
+            {
+                string msg = "Type " + type + " not implemented in Fields.";
+                throw new System.InvalidOperationException(msg);
             }
         }
 

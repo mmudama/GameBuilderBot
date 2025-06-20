@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using GameBuilderBot.Common;
 using GameBuilderBot.Models;
 using GameBuilderBot.Services;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using System.Reflection;
 
@@ -17,12 +16,12 @@ namespace GameBuilderBotTests.Services
 
             var source = new Dictionary<string, Field>
             {
-                { "A", new Field("exprA", "1") },
-                { "B", new Field("exprB", "2") }
+                { "A", new Field("exprA", "1", typeof(int)) },
+                { "B", new Field("exprB", "2", typeof(string)) }
             };
             var destination = new Dictionary<string, Field>
             {
-                { "A", new Field("exprA", "1") }
+                { "A", new Field("exprA", "1", typeof(int)) }
             };
 
             MethodInfo method = typeof(GameHandlingService).GetMethod("ApplyDefaultValuesToGameState", BindingFlags.NonPublic | BindingFlags.Instance);

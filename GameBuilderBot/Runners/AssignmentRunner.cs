@@ -27,7 +27,7 @@ namespace GameBuilderBot.Runners
             _exportService = exportService;
         }
 
-        abstract protected int CalculateValue(GameState state, string fieldName, string expression);
+        abstract protected object CalculateValue(GameState state, string fieldName, string expression);
 
         /// <summary>
         /// TODO What actually is the summary?
@@ -46,29 +46,35 @@ namespace GameBuilderBot.Runners
 
             string fieldName = FieldNameAndValue[0].ToLower();
             string expression = FieldNameAndValue[1];
-            int value = CalculateValue(state, fieldName, expression);
+            object value = CalculateValue(state, fieldName, expression);
 
-            oldValue = null;
 
-            if (int.TryParse(expression, out _))
+            if (value.ToString() == expression)
             {
-                // The second user parameter was an explicit integer value, not an expression
+                // dates will likely still get in here
                 expression = null;
             }
-            
+
+            oldValue = null;
             if (state.FieldHasValue(fieldName))
             {
                 oldValue = state.Fields[fieldName].Value;
             }
 
+
             if (state.Fields.ContainsKey(fieldName))
             {
                 state.Fields[fieldName].Value = value;
+
+                // this doesn't work for the add / subtract commands. 
+                state.Fields[fieldName].Expression = expression;
+
             }
             else
             {
-                state.Fields[fieldName] = new Field(expression, value.ToString());
+                state.Fields[fieldName] = new Field(expression, value.ToString(), value.GetType());
             }
+
 
             newValue = state.Fields[fieldName].Value;
             _exportService.ExportGameState(state, discordContext);
