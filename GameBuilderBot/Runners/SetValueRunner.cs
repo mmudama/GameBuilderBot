@@ -13,8 +13,6 @@ namespace GameBuilderBot.Runners
 
         override protected object CalculateValue(GameState state, string fieldName, string expression)
         {
-
-
             // Return the value based on the expression:
             // First try the expression as a dice roll (or integer)
             // Then as a DateTime
@@ -23,31 +21,22 @@ namespace GameBuilderBot.Runners
 
 
             object value;
+            MathExpression mathexpression = new(expression, state.Fields);
 
-            try
+            if (DiceRollService.TryRoll(expression, out int roll))
             {
-            // DiceRollService will also handle integers
-                value = DiceRollService.Roll(expression);
-            }
-            catch (Dice.DiceException) // It wasn't a dice roll
+                value = roll;
+            } 
+            else if (DateTime.TryParse(expression, out DateTime dateTimeValue))
             {
-                try
-                {
-                    value = DateTime.Parse(expression);
-                }
-                catch (FormatException)
-                {
-                    try
-                    {
-                        // It's "math" but it's not numeric, so can't assume int
-                        MathExpression mathexpression = new MathExpression(expression, state.Fields);
-                        value = mathexpression.Evaluate();
-                    }
-                    catch (Exception)
-                    {
-                        value = expression;
-                    }
-                }
+                value = dateTimeValue;
+            } 
+            else if (mathexpression.TryEvaluate(out object result))
+            {
+                value = result;
+            } else
+            {
+                value = expression;
             }
 
             return value;

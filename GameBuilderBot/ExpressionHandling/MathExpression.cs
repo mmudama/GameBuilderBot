@@ -1,3 +1,4 @@
+using GameBuilderBot.Services;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -17,25 +18,19 @@ namespace GameBuilderBot.ExpressionHandling
             Fields = fields;
         }
 
-        protected object LegacyEvaluate()
+
+        public bool TryEvaluate(out object result)
         {
-            //Placeholder logic to get code working with new fields and old int only logic
-
-            string expression = RawExpression;
-
-            string[] parts = expression.Split('#');
-
-            for (int i = 0; i < parts.Length; i++)
+            try
             {
-                if (Fields.ContainsKey(parts[i]))
-                {
-                    parts[i] = Fields[parts[i]].Value.ToString();
-                }
+                result = Evaluate();
+                return true;
             }
-
-            expression = string.Join(" ", parts);
-
-            return GameBuilderBot.Services.DiceRollService.Roll(expression);
+            catch (Exception)
+            {
+                result = null;
+                return false;
+            }
         }
 
         public object Evaluate()
@@ -75,8 +70,8 @@ namespace GameBuilderBot.ExpressionHandling
             //Split apart based on operators and then perform each operation in order.
             string[] operands = Regex.Split(Expression, @"([*()\^\/]|(?<!E)[\+\-])");
 
-            object IntermediateValue = null;
-            object CurrentOperand;
+            object intermediateValue = null;
+            object currentOperand;
             string operation = "";
 
             for (int currentoperandindex = 0; currentoperandindex < operands.Length; currentoperandindex++)
@@ -106,33 +101,29 @@ namespace GameBuilderBot.ExpressionHandling
                 {
                     operands[currentoperandindex] = Fields[operands[currentoperandindex].Trim()].Value.ToString();
                 }
+                else if (DiceRollService.TryRoll(operands[currentoperandindex], out int roll))
+                {
+                    operands[currentoperandindex] = roll.ToString();
+                }
 
-                //Convert the operand from a string to a type if possible
-                if (int.TryParse(operands[currentoperandindex], out int CurrentOperand_int))
-                {
-                    CurrentOperand = CurrentOperand_int;
-                }
-                else if (TryStringToDateTime(operands[currentoperandindex], out DateTime CurrentOperand_datetime))
-                {
-                    CurrentOperand = CurrentOperand_datetime;
-                }
-                else
-                {
-                    CurrentOperand = operands[currentoperandindex];
-                }
+
+
+
+
+                currentOperand = FindOperandType(operands, currentoperandindex);
 
                 if (currentoperandindex == 0)
                 {
-                    IntermediateValue = CurrentOperand;
+                    intermediateValue = currentOperand;
                 }
                 else
                 {
                     switch (operation)
                     {
-                        case "add": IntermediateValue = ValueAdd(IntermediateValue, CurrentOperand); break;
-                        case "subtract": IntermediateValue = ValueSubtract(IntermediateValue, CurrentOperand); break;
-                        case "divide": IntermediateValue = ValueDivide(IntermediateValue, CurrentOperand); break;
-                        case "multiply": IntermediateValue = ValueMultiply(IntermediateValue, CurrentOperand); break;
+                        case "add": intermediateValue = ValueAdd(intermediateValue, currentOperand); break;
+                        case "subtract": intermediateValue = ValueSubtract(intermediateValue, currentOperand); break;
+                        case "divide": intermediateValue = ValueDivide(intermediateValue, currentOperand); break;
+                        case "multiply": intermediateValue = ValueMultiply(intermediateValue, currentOperand); break;
                         default:
                             string msg = "Invalid operation " + operation + " processing expression: " + Expression;
                             throw new System.Exception(msg);
@@ -140,7 +131,27 @@ namespace GameBuilderBot.ExpressionHandling
                 }
             }
 
-            return IntermediateValue; //Placeholder
+            return intermediateValue; //Placeholder
+        }
+
+        private object FindOperandType(string[] operands, int currentoperandindex)
+        {
+            object currentOperand;
+            //Convert the operand from a string to a type if possible
+            if (int.TryParse(operands[currentoperandindex], out int CurrentOperand_int))
+            {
+                currentOperand = CurrentOperand_int;
+            }
+            else if (TryStringToDateTime(operands[currentoperandindex], out DateTime CurrentOperand_datetime))
+            {
+                currentOperand = CurrentOperand_datetime;
+            }
+            else
+            {
+                currentOperand = operands[currentoperandindex];
+            }
+
+            return currentOperand;
         }
 
         protected bool TryStringToDateTime(string input, out DateTime output)
