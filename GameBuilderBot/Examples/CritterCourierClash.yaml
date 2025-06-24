@@ -1,0 +1,232 @@
+---
+Name: "Critter Courier Clash"
+
+# defaults
+Fields:
+  LegsNeeded: { Value: 5 }      # Number of legs to finish
+  PlayerLegs: { Value: 0 }      # How many legs the player has completed
+  RivalLegs:  { Value: 0 }      # How many legs the rival has completed
+
+# Per-game config
+Events:
+
+  # 1) Entry point
+  - Name: Init
+    Distribution: All
+    IsPrimary: True
+    Description: "Start the courier race"
+    Outcomes:
+      - Name: Setup
+        Event: Setup
+
+  - Name: Setup
+    Distribution: All
+    Description: "Choose your critter courier"
+    Outcomes:
+      - Name: AssignCourier
+        Event: ChooseCourier
+      - Name: RivalCourier
+        Event: RivalChooseCourier
+
+
+  - Name: ChooseCourier
+    Distribution: Weighted
+    Outcomes:
+      - Name: Squirrel
+        Weight: 1
+        Text: "You are a spry squirrel with a tiny satchel."
+      - Name: Raccoon
+        Weight: 1
+        Text: "You are a nimble raccoon with a glitter-lined pouch."
+      - Name: Badger
+        Weight: 1
+        Text: "You are a determined badger hauling an egg crate."
+
+  - Name: RivalChooseCourier   # new event to roll the rival’s courier
+    Distribution: Weighted
+    Description: "Your rival’s courier is chosen."
+    Outcomes:
+      - Name: Squirrel
+        Weight: 1
+        Text: "Your rival is a spry squirrel with a tiny satchel."
+        # you can also store this in a field if you want to reference it later
+      - Name: Raccoon
+        Weight: 1
+        Text: "Your rival is a crafty raccoon with a glitter-lined pouch."
+      - Name: Badger
+        Weight: 1
+        Text: "Your rival is a determined badger hauling an egg crate."
+
+
+
+  # 2) Race loop
+  - Name: RaceRound
+    Distribution: All
+    IsPrimary: True
+    Description: "One round of moves: you and your rival each run one leg."
+    Outcomes:
+      - Name: PlayerMove
+        Event: PlayerMove
+      - Name: RivalMove
+        Event: RivalMove
+
+  - Name: PlayerMove
+    Distribution: All
+    Description: "Your turn on the road"
+    Outcomes:
+      - Name: RoadEvent
+        Event: RoadEvent
+
+  - Name: RivalMove
+    Distribution: Weighted
+    Description: "Rival courier’s turn"
+    Outcomes:
+      - Name: RivalAdvance
+        Weight: 70
+        Text: "Your rival completes a leg swiftly."
+      - Name: RivalDelayed
+        Weight: 30
+        Rolls:
+          - 1d4
+        Text: "Your rival is delayed {0} minutes by mishap."
+
+  # 3) Road hazards & shenanigans
+  - Name: RoadEvent
+    Distribution: Weighted
+    IsPrimary: True
+    Outcomes:
+      - Name: Nothing
+        Weight: 40
+        Text: "You scamper along, no delays."
+      - Name: BananaPeel
+        Weight: 15
+        Text: "Oops—banana peel!"
+        Rolls:
+          - 1d3
+        Event: DelayEvent
+      - Name: BardChallenge
+        Weight: 15
+        Event: BardDuel
+      - Name: MagicalHiccup
+        Weight: 10
+        Rolls:
+          - 1d4
+        Event: HiccupEvent
+      - Name: RivalTrap
+        Weight: 20
+        Event: RivalTrapEvent
+
+  - Name: DelayEvent
+    Distribution: All
+    Outcomes:
+      - Name: Slip
+        Rolls:
+          - 1d6
+        Text: "You slip and lose {0} minutes."
+
+  - Name: HiccupEvent
+    Distribution: All
+    Outcomes:
+      - Name: Hiccups
+        Rolls:
+          - 1d4
+        Text: "Your magical hiccups cost you {0} minutes."
+
+  - Name: BardDuel
+    Distribution: Weighted
+    Outcomes:
+      - Name: YouWin
+        Weight: 50
+        Text: "Your rhyme outshines the bard—no delay!"
+      - Name: YouLose
+        Weight: 50
+        Rolls:
+          - 1d6
+        Text: "The bard bests you—delay of {0} minutes."
+
+  - Name: RivalTrapEvent
+    Distribution: Weighted
+    Outcomes:
+      - Name: GlitterCloud
+        Weight: 50
+        Rolls:
+          - 1d8
+        Text: "Glitter explosion bogs you down {0} minutes."
+      - Name: StickyGlue
+        Weight: 50
+        Rolls:
+          - 1d6
+        Text: "Sticky trap delays you {0} minutes."
+
+  # 4) Check for finish or continue
+  - Name: CheckFinish
+    Distribution: All
+    IsPrimary: True
+    Description: "Have either courier reached the finish?"
+    Outcomes:
+      - Name: Continue
+        Weight: 1
+        Text: "Neither critter is at {LegsNeeded} legs yet—onward!"
+        Event: RaceRound
+      - Name: Finish
+        Weight: 1
+        Event: Finish
+
+  # 5) Endgame
+  - Name: Finish
+    Distribution: Weighted
+    IsPrimary: True
+    Description: "Decide who wins"
+    Outcomes:
+      - Name: YouWin
+        Weight: 50
+        Text: "You delivered the parcel first! Victory!"
+      - Name: YouLose
+        Weight: 50
+        Text: "Your rival beats you to the finish. Better luck next time!"
+
+
+  - Name: AdvanceLeg
+    Distribution: All
+    IsPrimary: True
+    Description: Advance both couriers through one race round
+    Outcomes:
+      - Name: Narration
+        Event: NarrateRoundStart
+      - Name: PlayerGoes
+        Event: PlayerMove
+      - Name: RivalGoes
+        Event: RivalMove
+      - Name: CheckIfDone
+        Event: CheckFinish
+
+
+  - Name: NarrateRoundStart
+    Distribution: Weighted
+    IsPrimary: False
+    Description: "Adds whimsical narration before each race leg"
+    Outcomes:
+      - Name: BreezeTwitch
+        Weight: 15
+        Text: "A competitive breeze ruffles your fur as the race resumes..."
+      - Name: MossyWhispers
+        Weight: 15
+        Text: "The moss beneath your paws hums with anticipation."
+      - Name: AcornAlert
+        Weight: 10
+        Text: "Somewhere, an acorn falls. It’s go time."
+      - Name: GlitterDramatics
+        Weight: 10
+        Text: "A leftover cloud of glitter drifts past, sparkling with suspense."
+      - Name: TailTwitch
+        Weight: 15
+        Text: "Your tail twitches—the courier instincts kick in!"
+      - Name: DistantCheer
+        Weight: 10
+        Text: "You hear faint woodland cheers. The crowd demands drama."
+      - Name: LeafyRustle
+        Weight: 10
+        Text: "A rustle in the leaves... Is that a rival? Or just nerves?"
+      - Name: StretchAndFlex
+        Weight: 15
+        Text: "You stretch your paws dramatically. Time to dash."

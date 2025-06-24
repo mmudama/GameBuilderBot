@@ -29,13 +29,16 @@ namespace GameBuilderBot.Runners
 
         abstract protected object CalculateValue(GameState state, string fieldName, string expression);
 
+
         /// <summary>
-        /// TODO What actually is the summary?
+        /// Using the inputs from a Discord message, outputs both the previous and new values for the field
         /// </summary>
-        /// <param name="FieldNameAndValue"></param>
+        /// <param name="FieldNameAndValue">Inputs from Discord message</param>
         /// <param name="discordContext"></param>
+        /// <param name="previousValue"></param>
+        /// <param name="newValue"></param>
         /// <returns></returns>
-        public void CalculateFieldValue(string[] FieldNameAndValue, SocketCommandContext discordContext, out object oldValue, out object newValue)
+        public void CalculateFieldValue(string[] FieldNameAndValue, SocketCommandContext discordContext, out object previousValue, out object newValue)
         {
             if (FieldNameAndValue.Length != 2)
             {
@@ -55,10 +58,10 @@ namespace GameBuilderBot.Runners
                 expression = null;
             }
 
-            oldValue = null;
+            previousValue = null;
             if (state.FieldHasValue(fieldName))
             {
-                oldValue = state.Fields[fieldName].Value;
+                previousValue = state.Fields[fieldName].Value;
             }
 
 
