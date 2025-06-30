@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Discord.Commands;
 using GameBuilderBot.Exceptions;
 using GameBuilderBot.Models;
@@ -49,38 +50,44 @@ namespace GameBuilderBot.Runners
 
             string fieldName = FieldNameAndValue[0].ToLower();
             string expression = FieldNameAndValue[1];
-            object value = CalculateValue(state, fieldName, expression);
+            newValue = CalculateValue(state, fieldName, expression);
+            
+            PopulateField(state, fieldName, in newValue, expression, out previousValue);
 
+            _exportService.ExportGameState(state, discordContext);
+        }
 
-            if (value.ToString() == expression)
-            {
-                // dates will likely still get in here
-                expression = null;
-            }
-
+        /// create or populate a Field object within a GameState
+        /// 
+        /// <returns>true if there was a previous value; else false</returns>
+        /// 
+        protected bool PopulateField(GameState state, string fieldName, in object newValue, string expression, out object previousValue)
+        {
             previousValue = null;
+
             if (state.FieldHasValue(fieldName))
             {
                 previousValue = state.Fields[fieldName].Value;
-            }
-
-
-            if (state.Fields.ContainsKey(fieldName))
-            {
-                state.Fields[fieldName].Value = value;
+                state.Fields[fieldName].Value = newValue;
 
                 // this doesn't work for the add / subtract commands. 
                 state.Fields[fieldName].Expression = expression;
-
             }
             else
             {
-                state.Fields[fieldName] = new Field(expression, value.ToString());
+                state.Fields[fieldName] = new Field(expression, newValue.ToString());
+            }
+
+            if (previousValue == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
             }
 
 
-            newValue = state.Fields[fieldName].Value;
-            _exportService.ExportGameState(state, discordContext);
         }
     }
 }
