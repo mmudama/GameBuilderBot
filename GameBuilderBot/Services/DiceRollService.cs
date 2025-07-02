@@ -9,6 +9,20 @@ namespace GameBuilderBot.Services
         {
         }
 
+        public static bool TryRoll(string expression, out int value)
+        {
+            try
+            {
+                value = (int)Roller.Roll(expression).Value;
+                return true;
+            }
+            catch (DiceException)
+            {
+                value = int.MinValue;
+                return false;
+            }
+        }
+
         public static int Roll(string expression)
         {
             RollResult result = Roller.Roll(expression);

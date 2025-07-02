@@ -1,3 +1,4 @@
+using GameBuilderBot.Services;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -8,6 +9,7 @@ namespace GameBuilderBot.ExpressionHandling
     {
         private readonly string RawExpression;
         private readonly Dictionary<string, GameBuilderBot.Models.Field> Fields;
+        private static readonly Regex OperandRegex = new Regex(@"(\+|\-|\*|\/)", RegexOptions.Compiled);
 
         private static readonly char[] SupportedOperators = { '+', '-', '*', '/' };
 
@@ -17,68 +19,78 @@ namespace GameBuilderBot.ExpressionHandling
             Fields = fields;
         }
 
-        protected object LegacyEvaluate()
-        {
-            //Placeholder logic to get code working with new fields and old int only logic
 
+        /// <summary>
+        /// Supports integer expressions, including variable substitutions (from Fields) and dice rolls.
+        /// Non-integer results will be converted to integers (floor)
+        /// </summary>
+        /// <returns>The result as an object (which will always be type int)</returns>
+        protected object IntegerEvaluate()
+        {
             string expression = RawExpression;
 
-            string[] parts = expression.Split('#');
-
-            for (int i = 0; i < parts.Length; i++)
+            foreach (var field in Fields)
             {
-                if (Fields.ContainsKey(parts[i]))
+                if (expression.Contains(field.Key))
                 {
-                    parts[i] = Fields[parts[i]].Value.ToString();
+                    expression = expression.Replace(field.Key, field.Value.Value.ToString());
                 }
             }
 
+
+            // Discord will send multiple terms in this way
+            // But currently !set doesn't recognize this anyway
+            string[] parts = expression.Split('#');
             expression = string.Join(" ", parts);
 
             return GameBuilderBot.Services.DiceRollService.Roll(expression);
         }
 
-        public object Evaluate(Boolean UseLegacy = true)
-        {
-            if (UseLegacy) return LegacyEvaluate();
 
-            return RecursiveEval(RawExpression);
+        public bool TryEvaluate(out object result)
+        {
+            try
+            {
+                result = Evaluate();
+                return true;
+            }
+            catch (Exception)
+            {
+                result = null;
+                return false;
+            }
         }
 
-        protected object RecursiveEval(string Expression)
+        public object Evaluate()
         {
-            //If there are parenthesis make a recursive call to evaluate.
-            while (Expression.Contains('('))
+            object result = null;
+            try
             {
-                int start = Expression.IndexOf('(') + 1;
-                int current = start;
-                int sublevel = 0;
-                int end = 0;
-                while (current <= Expression.Length && end <= 0)
-                {
-                    if (Expression[current].Equals('('))
-                    {
-                        sublevel++;
-                    }
-                    else if (Expression[current].Equals(')'))
-                    {
-                        if (sublevel > 0) sublevel--;
-                        else end = current;
-                    }
-                }
-                if (end <= 0)
-                {
-                    string msg = "Failed to find closing parenthesis in expression: " + Expression;
-                    throw new System.Exception(msg);
-                }
-                Expression = $"{Expression.Substring(0, start - 1)}{RecursiveEval(Expression[start..end])}{Expression.Substring(end + 1, Expression.Length - end)}";
+                result = IntegerEvaluate();
             }
+            catch (Exception)
+            {
+                result = ComplexEvaluate(RawExpression);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Supports adding and subtracting ints, strings, and datetimes
+        /// Handles die rolls (e.g. 1d6) and variable substitutions (from Fields).
+        /// </summary>
+        /// <param name="Expression"></param>
+        /// <returns></returns>
+        /// <exception cref="System.Exception"></exception>
+        protected object ComplexEvaluate(string Expression)
+        {
+
 
             //Split apart based on operators and then perform each operation in order.
-            string[] operands = Regex.Split(Expression, @"([*()\^\/]|(?<!E)[\+\-])");
+            string[] operands = OperandRegex.Split(Expression);
 
-            object IntermediateValue = null;
-            object CurrentOperand;
+            object intermediateValue = null;
+            object currentOperand;
             string operation = "";
 
             for (int currentoperandindex = 0; currentoperandindex < operands.Length; currentoperandindex++)
@@ -89,8 +101,6 @@ namespace GameBuilderBot.ExpressionHandling
                     {
                         case "+": operation = "add"; break;
                         case "-": operation = "subtract"; break;
-                        case "/": operation = "divide"; break;
-                        case "*": operation = "multiple"; break;
                         default:
                             string msg = "Invalid operand " + operands[currentoperandindex] + " in expression: " + Expression;
                             throw new System.Exception(msg);
@@ -108,33 +118,23 @@ namespace GameBuilderBot.ExpressionHandling
                 {
                     operands[currentoperandindex] = Fields[operands[currentoperandindex].Trim()].Value.ToString();
                 }
+                else if (DiceRollService.TryRoll(operands[currentoperandindex], out int roll))
+                {
+                    operands[currentoperandindex] = roll.ToString();
+                }
 
-                //Convert the operand from a string to a type if possible
-                if (int.TryParse(operands[currentoperandindex], out int CurrentOperand_int))
-                {
-                    CurrentOperand = CurrentOperand_int;
-                }
-                else if (TryStringToDateTime(operands[currentoperandindex], out DateTime CurrentOperand_datetime))
-                {
-                    CurrentOperand = CurrentOperand_datetime;
-                }
-                else
-                {
-                    CurrentOperand = operands[currentoperandindex];
-                }
+                currentOperand = FindOperandType(operands, currentoperandindex);
 
                 if (currentoperandindex == 0)
                 {
-                    IntermediateValue = CurrentOperand;
+                    intermediateValue = currentOperand;
                 }
                 else
                 {
                     switch (operation)
                     {
-                        case "add": IntermediateValue = ValueAdd(IntermediateValue, CurrentOperand); break;
-                        case "subtract": IntermediateValue = ValueSubtract(IntermediateValue, CurrentOperand); break;
-                        case "divide": IntermediateValue = ValueDivide(IntermediateValue, CurrentOperand); break;
-                        case "multiply": IntermediateValue = ValueMultiply(IntermediateValue, CurrentOperand); break;
+                        case "add": intermediateValue = ValueAdd(intermediateValue, currentOperand); break;
+                        case "subtract": intermediateValue = ValueSubtract(intermediateValue, currentOperand); break;
                         default:
                             string msg = "Invalid operation " + operation + " processing expression: " + Expression;
                             throw new System.Exception(msg);
@@ -142,7 +142,27 @@ namespace GameBuilderBot.ExpressionHandling
                 }
             }
 
-            return IntermediateValue; //Placeholder
+            return intermediateValue; //Placeholder
+        }
+
+        private object FindOperandType(string[] operands, int currentoperandindex)
+        {
+            object currentOperand;
+            //Convert the operand from a string to a type if possible
+            if (int.TryParse(operands[currentoperandindex], out int CurrentOperand_int))
+            {
+                currentOperand = CurrentOperand_int;
+            }
+            else if (TryStringToDateTime(operands[currentoperandindex], out DateTime CurrentOperand_datetime))
+            {
+                currentOperand = CurrentOperand_datetime;
+            }
+            else
+            {
+                currentOperand = operands[currentoperandindex];
+            }
+
+            return currentOperand;
         }
 
         protected bool TryStringToDateTime(string input, out DateTime output)
@@ -196,46 +216,6 @@ namespace GameBuilderBot.ExpressionHandling
 
             //Try as integer
             return Convert.ToInt32(first) - Convert.ToInt32(second);
-        }
-
-        protected object ValueMultiply(object first, object second)
-        {
-            //If either is a string treat as string.
-            if ((first.GetType().Equals(typeof(string))) || (second.GetType().Equals(typeof(string))))
-            {
-                string msg = "Invalid operation, cannot perform multiplication on a string.";
-                throw new System.Exception(msg);
-            }
-
-            //If either is a datetime treat as datetime.
-            if ((first.GetType().Equals(typeof(DateTime))) || (second.GetType().Equals(typeof(DateTime))))
-            {
-                string msg = "Invalid operation, cannot perform multiplication on a DateTime.";
-                throw new System.Exception(msg);
-            }
-
-            //Try as integer
-            return Convert.ToInt32(first) * Convert.ToInt32(second);
-        }
-
-        protected object ValueDivide(object first, object second)
-        {
-            //If either is a string treat as string.
-            if ((first.GetType().Equals(typeof(string))) || (second.GetType().Equals(typeof(string))))
-            {
-                string msg = "Invalid operation, cannot perform division on a string.";
-                throw new System.Exception(msg);
-            }
-
-            //If either is a datetime treat as datetime.
-            if ((first.GetType().Equals(typeof(DateTime))) || (second.GetType().Equals(typeof(DateTime))))
-            {
-                string msg = "Invalid operation, cannot perform division on a DateTime.";
-                throw new System.Exception(msg);
-            }
-
-            //Try as integer
-            return Convert.ToInt32(first) / Convert.ToInt32(second);
         }
     }
 }

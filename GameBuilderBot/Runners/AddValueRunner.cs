@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Numerics;
+using GameBuilderBot.Exceptions;
 using GameBuilderBot.ExpressionHandling;
 using GameBuilderBot.Models;
 using GameBuilderBot.Services;
@@ -11,13 +13,17 @@ namespace GameBuilderBot.Runners
         {
         }
 
-        override protected int CalculateValue(GameState state, string fieldName, string expression)
+        override public object CalculateValue(GameState state, string fieldName, string expression)
         {
             int value = 0;
 
             if (state.FieldHasValue(fieldName))
             {
-                value = Convert.ToInt32(state.Fields[fieldName].Value.ToString());
+                if (!Int32.TryParse(state.Fields[fieldName].Value.ToString(), out value))
+                {
+                    throw new GameBuilderBotException($"The `add` command only supports integers");
+                }
+
             }
 
             MathExpression mathexpression = new(expression, state.Fields);

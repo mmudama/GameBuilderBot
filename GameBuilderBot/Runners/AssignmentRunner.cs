@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Discord.Commands;
 using GameBuilderBot.Exceptions;
 using GameBuilderBot.Models;
@@ -27,15 +28,18 @@ namespace GameBuilderBot.Runners
             _exportService = exportService;
         }
 
-        abstract protected int CalculateValue(GameState state, string fieldName, string expression);
+        abstract public object CalculateValue(GameState state, string fieldName, string expression);
+
 
         /// <summary>
-        /// TODO What actually is the summary?
+        /// Using the inputs from a Discord message, outputs both the previous and new values for the field
         /// </summary>
-        /// <param name="FieldNameAndValue"></param>
+        /// <param name="FieldNameAndValue">Inputs from Discord message</param>
         /// <param name="discordContext"></param>
+        /// <param name="previousValue"></param>
+        /// <param name="newValue"></param>
         /// <returns></returns>
-        public void CalculateFieldValue(string[] FieldNameAndValue, SocketCommandContext discordContext, out object oldValue, out object newValue)
+        public void CalculateFieldValue(string[] FieldNameAndValue, SocketCommandContext discordContext, out object previousValue, out object newValue)
         {
             if (FieldNameAndValue.Length != 2)
             {
@@ -46,32 +50,43 @@ namespace GameBuilderBot.Runners
 
             string fieldName = FieldNameAndValue[0].ToLower();
             string expression = FieldNameAndValue[1];
-            int value = CalculateValue(state, fieldName, expression);
-
-            oldValue = null;
-
-            if (int.TryParse(expression, out _))
-            {
-                // The second user parameter was an explicit integer value, not an expression
-                expression = null;
-            }
+            newValue = CalculateValue(state, fieldName, expression);
             
+            PopulateField(state, fieldName, in newValue, expression, out previousValue);
+
+            _exportService.ExportGameState(state, discordContext);
+        }
+
+        /// create or populate a Field object within a GameState
+        /// 
+        /// <returns>true if there was a previous value; else false</returns>
+        /// 
+        protected bool PopulateField(GameState state, string fieldName, in object newValue, string expression, out object previousValue)
+        {
+            previousValue = null;
+
             if (state.FieldHasValue(fieldName))
             {
-                oldValue = state.Fields[fieldName].Value;
-            }
+                previousValue = state.Fields[fieldName].Value;
+                state.Fields[fieldName].Value = newValue;
 
-            if (state.Fields.ContainsKey(fieldName))
-            {
-                state.Fields[fieldName].Value = value;
+                // keep the expression, otherwise events get messed up
             }
             else
             {
-                state.Fields[fieldName] = new Field(expression, value.ToString());
+                state.Fields[fieldName] = new Field(expression, newValue.ToString());
             }
 
-            newValue = state.Fields[fieldName].Value;
-            _exportService.ExportGameState(state, discordContext);
+            if (previousValue == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+
+
         }
     }
 }

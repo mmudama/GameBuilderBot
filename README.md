@@ -33,6 +33,6 @@ https://www.writebots.com/discord-bot-token/
 ## Game Definition Format
 TODO: better example that demonstrates all capabilities
 
-Example file: https://github.com/mmudama/GameBuilderBot/blob/master/GameBuilderBot/Examples/ExampleGame.yaml
+Example file: https://github.com/mmudama/GameBuilderBot/blob/master/GameBuilderBot/Examples/CritterCourierClash.yaml
 
 
