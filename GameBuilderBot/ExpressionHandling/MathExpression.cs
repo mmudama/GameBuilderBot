@@ -19,6 +19,12 @@ namespace GameBuilderBot.ExpressionHandling
             Fields = fields;
         }
 
+
+        /// <summary>
+        /// Supports integer expressions, including variable substitutions (from Fields) and dice rolls.
+        /// Non-integer results will be converted to integers (floor)
+        /// </summary>
+        /// <returns>The result as an object (which will always be type int)</returns>
         protected object IntegerEvaluate()
         {
             string expression = RawExpression;
@@ -69,6 +75,13 @@ namespace GameBuilderBot.ExpressionHandling
             return result;
         }
 
+        /// <summary>
+        /// Supports adding and subtracting ints, strings, and datetimes
+        /// Handles die rolls (e.g. 1d6) and variable substitutions (from Fields).
+        /// </summary>
+        /// <param name="Expression"></param>
+        /// <returns></returns>
+        /// <exception cref="System.Exception"></exception>
         protected object ComplexEvaluate(string Expression)
         {
 
@@ -88,8 +101,6 @@ namespace GameBuilderBot.ExpressionHandling
                     {
                         case "+": operation = "add"; break;
                         case "-": operation = "subtract"; break;
-                        case "/": operation = "divide"; break;
-                        case "*": operation = "multiple"; break;
                         default:
                             string msg = "Invalid operand " + operands[currentoperandindex] + " in expression: " + Expression;
                             throw new System.Exception(msg);
@@ -124,8 +135,6 @@ namespace GameBuilderBot.ExpressionHandling
                     {
                         case "add": intermediateValue = ValueAdd(intermediateValue, currentOperand); break;
                         case "subtract": intermediateValue = ValueSubtract(intermediateValue, currentOperand); break;
-                        case "divide": intermediateValue = ValueDivide(intermediateValue, currentOperand); break;
-                        case "multiply": intermediateValue = ValueMultiply(intermediateValue, currentOperand); break;
                         default:
                             string msg = "Invalid operation " + operation + " processing expression: " + Expression;
                             throw new System.Exception(msg);
@@ -207,46 +216,6 @@ namespace GameBuilderBot.ExpressionHandling
 
             //Try as integer
             return Convert.ToInt32(first) - Convert.ToInt32(second);
-        }
-
-        protected object ValueMultiply(object first, object second)
-        {
-            //If either is a string treat as string.
-            if ((first.GetType().Equals(typeof(string))) || (second.GetType().Equals(typeof(string))))
-            {
-                string msg = "Invalid operation, cannot perform multiplication on a string.";
-                throw new System.Exception(msg);
-            }
-
-            //If either is a datetime treat as datetime.
-            if ((first.GetType().Equals(typeof(DateTime))) || (second.GetType().Equals(typeof(DateTime))))
-            {
-                string msg = "Invalid operation, cannot perform multiplication on a DateTime.";
-                throw new System.Exception(msg);
-            }
-
-            //Try as integer
-            return Convert.ToInt32(first) * Convert.ToInt32(second);
-        }
-
-        protected object ValueDivide(object first, object second)
-        {
-            //If either is a string treat as string.
-            if ((first.GetType().Equals(typeof(string))) || (second.GetType().Equals(typeof(string))))
-            {
-                string msg = "Invalid operation, cannot perform division on a string.";
-                throw new System.Exception(msg);
-            }
-
-            //If either is a datetime treat as datetime.
-            if ((first.GetType().Equals(typeof(DateTime))) || (second.GetType().Equals(typeof(DateTime))))
-            {
-                string msg = "Invalid operation, cannot perform division on a DateTime.";
-                throw new System.Exception(msg);
-            }
-
-            //Try as integer
-            return Convert.ToInt32(first) / Convert.ToInt32(second);
         }
     }
 }

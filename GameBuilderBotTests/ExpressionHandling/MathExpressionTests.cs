@@ -78,14 +78,26 @@ namespace GameBuilderBot.ExpressionHandling.Tests
             object result;
 
             DateTime dateTimeOriginal = DateTime.Parse(var3_datetime);
-            DateTime dateTimeCompare = DateTime.Parse(var3_datetime).AddMinutes(30);
+            DateTime dateTimeCompareSingle = DateTime.Parse(var3_datetime).AddMinutes(30);
+            DateTime dateTimeCompareMulti = DateTime.Parse(var3_datetime).AddMinutes(30).AddHours(1);
 
             // Different runtime environments, causing the comparison test to fail -
             // So, using DateTime functionality to force the same format in comparison
             TE = new MathExpression("var3_datetime + 00:30", Fields);
             result = TE.Evaluate();
-            Assert.AreEqual(dateTimeCompare, DateTime.Parse(result.ToString()));
+            Assert.AreEqual(dateTimeCompareSingle, DateTime.Parse(result.ToString()));
 
+
+            TE = new MathExpression("var3_datetime + 00:30 + 1:00", Fields);
+            result = TE.Evaluate();
+            Assert.AreEqual(dateTimeCompareMulti, DateTime.Parse(result.ToString()));
+
+
+        }
+
+        [TestMethod()]
+        public void MultipleTermsTest()
+        {
 
         }
 

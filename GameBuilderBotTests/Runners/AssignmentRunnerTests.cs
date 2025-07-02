@@ -76,14 +76,11 @@ namespace GameBuilderBotTests.Runners
             var runner = new TestAssignmentRunner();
             var state = new GameState
             {
-                Fields = new Dictionary<string, Field>
-                {
-                    { "test", new Field(null, 24) }
-                }
-
+                Fields = new Dictionary<string, Field>()
             };
+
             string fieldName = "test";
-            string expression = "42";
+            string expression = "1d100";
             object newValue = 42;
             // Act
             var result = runner.TestPopulateField(state, fieldName, in newValue, expression, out var previousValue);
@@ -100,17 +97,17 @@ namespace GameBuilderBotTests.Runners
             var state = new GameState
             {
                 Fields = new Dictionary<string, Field>
-                {{ "test", new Field("I was ", 24) } }
+                {{ "test", new Field(null, 24) } }
 
             };
             string fieldName = "test";
-            string expression = "I am ";
+            string expression = "1d4";
             object newValue = 42;
             // Act
             var result = runner.TestPopulateField(state, fieldName, in newValue, expression, out var previousValue);
             // Assert
             Assert.True(result);
-            Assert.NotNull(previousValue);
+            Assert.Equal(24, previousValue);
         }
     }
 }
