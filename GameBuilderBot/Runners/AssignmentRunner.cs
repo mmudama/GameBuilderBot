@@ -70,8 +70,7 @@ namespace GameBuilderBot.Runners
                 previousValue = state.Fields[fieldName].Value;
                 state.Fields[fieldName].Value = newValue;
 
-                // this doesn't work for the add / subtract commands. 
-                state.Fields[fieldName].Expression = expression;
+                // keep the expression, otherwise events get messed up
             }
             else
             {
