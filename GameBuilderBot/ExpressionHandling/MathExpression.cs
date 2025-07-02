@@ -9,6 +9,7 @@ namespace GameBuilderBot.ExpressionHandling
     {
         private readonly string RawExpression;
         private readonly Dictionary<string, GameBuilderBot.Models.Field> Fields;
+        private static readonly Regex OperandRegex = new Regex(@"(\+|\-|\*|\/)", RegexOptions.Compiled);
 
         private static readonly char[] SupportedOperators = { '+', '-', '*', '/' };
 
@@ -16,6 +17,27 @@ namespace GameBuilderBot.ExpressionHandling
         {
             RawExpression = rawexpression;
             Fields = fields;
+        }
+
+        protected object IntegerEvaluate()
+        {
+            string expression = RawExpression;
+
+            foreach (var field in Fields)
+            {
+                if (expression.Contains(field.Key))
+                {
+                    expression = expression.Replace(field.Key, field.Value.Value.ToString());
+                }
+            }
+
+
+            // Discord will send multiple terms in this way
+            // But currently !set doesn't recognize this anyway
+            string[] parts = expression.Split('#');
+            expression = string.Join(" ", parts);
+
+            return GameBuilderBot.Services.DiceRollService.Roll(expression);
         }
 
 
@@ -35,40 +57,24 @@ namespace GameBuilderBot.ExpressionHandling
 
         public object Evaluate()
         {
-            return RecursiveEval(RawExpression);
+            object result = null;
+            try
+            {
+                result = IntegerEvaluate();
+            }
+            catch (Exception)
+            {
+                result = ComplexEvaluate(RawExpression);
+            }
+            return result;
         }
 
-        protected object RecursiveEval(string Expression)
+        protected object ComplexEvaluate(string Expression)
         {
-            //If there are parenthesis make a recursive call to evaluate.
-            while (Expression.Contains('('))
-            {
-                int start = Expression.IndexOf('(') + 1;
-                int current = start;
-                int sublevel = 0;
-                int end = 0;
-                while (current <= Expression.Length && end <= 0)
-                {
-                    if (Expression[current].Equals('('))
-                    {
-                        sublevel++;
-                    }
-                    else if (Expression[current].Equals(')'))
-                    {
-                        if (sublevel > 0) sublevel--;
-                        else end = current;
-                    }
-                }
-                if (end <= 0)
-                {
-                    string msg = "Failed to find closing parenthesis in expression: " + Expression;
-                    throw new System.Exception(msg);
-                }
-                Expression = $"{Expression.Substring(0, start - 1)}{RecursiveEval(Expression[start..end])}{Expression.Substring(end + 1, Expression.Length - end)}";
-            }
+
 
             //Split apart based on operators and then perform each operation in order.
-            string[] operands = Regex.Split(Expression, @"([*()\^\/]|(?<!E)[\+\-])");
+            string[] operands = OperandRegex.Split(Expression);
 
             object intermediateValue = null;
             object currentOperand;
@@ -105,10 +111,6 @@ namespace GameBuilderBot.ExpressionHandling
                 {
                     operands[currentoperandindex] = roll.ToString();
                 }
-
-
-
-
 
                 currentOperand = FindOperandType(operands, currentoperandindex);
 

@@ -11,7 +11,7 @@ namespace GameBuilderBot.Runners
         {
         }
 
-        override protected object CalculateValue(GameState state, string fieldName, string expression)
+        override public object CalculateValue(GameState state, string fieldName, string expression)
         {
             // Return the value based on the expression:
             // First try the expression as a dice roll (or integer)

@@ -28,7 +28,7 @@ namespace GameBuilderBot.Runners
             _exportService = exportService;
         }
 
-        abstract protected object CalculateValue(GameState state, string fieldName, string expression);
+        abstract public object CalculateValue(GameState state, string fieldName, string expression);
 
 
         /// <summary>

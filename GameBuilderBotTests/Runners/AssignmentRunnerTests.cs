@@ -9,7 +9,7 @@ namespace GameBuilderBotTests.Runners
     public class TestAssignmentRunner : AssignmentRunner
     {
         public TestAssignmentRunner() : base(null, null) { }
-        protected override object CalculateValue(GameState state, string fieldName, string expression) => null;
+        public override object CalculateValue(GameState state, string fieldName, string expression) => null;
         public override string OneLinerHelp() => null;
 
         // Expose PopulateField for testing
@@ -91,6 +91,8 @@ namespace GameBuilderBotTests.Runners
             Assert.False(result);
             Assert.Null(previousValue);
         }
+
+        [Fact]
         public void PopulateField_ReturnsTrueIfPreviousValueExists()
         {
             // Arrange
