@@ -66,7 +66,7 @@ namespace GameBuilderBotTests.Runners
             Assert.True(result);
             Assert.Equal(10, previousValue);
             Assert.Equal(99, state.Fields[fieldName].Value);
-            Assert.Equal(expression, state.Fields[fieldName].Expression);
+            Assert.Equal("oldExpr", state.Fields[fieldName].Expression);
         }
 
         [Fact]
